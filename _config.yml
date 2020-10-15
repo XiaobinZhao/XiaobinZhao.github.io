@@ -106,4 +106,4 @@ theme: next
 deploy:
   type: git
   repo: git@github.com:XiaobinZhao/blog.git
-  branch: master
+  branch: gh-page
