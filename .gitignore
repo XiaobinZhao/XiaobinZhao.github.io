@@ -128,4 +128,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/
 .idea
