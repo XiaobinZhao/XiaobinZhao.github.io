@@ -100,8 +100,8 @@ creative_commons:
 # Schemes
 #scheme: Muse
 #scheme: Mist
-scheme: Pisces
-#scheme: Gemini
+#scheme: Pisces
+scheme: Gemini
 
 # Dark Mode
 darkmode: false
@@ -118,7 +118,7 @@ darkmode: false
 # External url should start with http:// or https://
 menu:
   home: / || home
-  about: /about/ || user
+#  about: /about/ || user
   tags: /tags/ || tags
   categories: /categories/ || th
   archives: /archives/ || archive
@@ -166,7 +166,7 @@ avatar:
   # Replace the default image and set the url here.
   url: /images/my-avatar.jpg
   # If true, the avatar will be dispalyed in circle.
-  rounded: false
+  rounded: true
   # If true, the avatar will be rotated with the cursor.
   rotated: false
 

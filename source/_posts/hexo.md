@@ -7,14 +7,15 @@ tag:
 categories:
 - hexo
 ---
+
 # github page
 1. 在github上创建仓库
 2. 仓库命名为：`{github用户名}.github.io`, 比如 `XiaobinZhao.github.io`
 3. 仓库新建分支gh-page
 3. 在仓库的settings --> options --> github pages 设置仓库的gh-page分支为发布分支，并save
 4. 打开`https://{github用户名}.github.io`即可享用， 比如`https://xiaobinzhao.github.io/`
-# hexo-Next 主题使用记录
 
+# hexo-Next 主题使用记录
 1. 修改内容自动重载并启动server
 
    安装 `hexo-browsersync`即可：`npm install hexo-browsersync`
