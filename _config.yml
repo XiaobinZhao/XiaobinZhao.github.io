@@ -105,7 +105,7 @@ theme: next
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: git@github.com:XiaobinZhao/blog.git
+  repo: git@github.com:XiaobinZhao/XiaobinZhao.github.io.git
   branch: gh-page
 
 search:
