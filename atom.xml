@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>琢灵的笔记</title>
+  
+  <subtitle>灵自天生，细心雕琢</subtitle>
+  <link href="http://example.com/atom.xml" rel="self"/>
+  
+  <link href="http://example.com/"/>
+  <updated>2020-10-16T09:49:11.433Z</updated>
+  <id>http://example.com/</id>
+  
+  <author>
+    <name>琢灵</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>hexo-Next + Github Page制作个人网站使用记录</title>
+    <link href="http://example.com/2020/10/15/hexo/"/>
+    <id>http://example.com/2020/10/15/hexo/</id>
+    <published>2020-10-15T08:51:43.417Z</published>
+    <updated>2020-10-16T09:49:11.433Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol><li>在github上创建仓库</li><li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li><li>仓库新建分支gh-page</li><li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li><li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li></ol><h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol><li><p>修改内容自动重载并启动server</p><p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p><p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p><p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p></li></ol><a id="more"></a><ol start="2"><li><p>背景动画</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span></span><br></pre></td></tr></table></figure></li><li><p>其他可以参考</p><ul><li>[ NexT主题进阶配置 ]:  <a href="https://wylu.me/posts/e0424f3f/">https://wylu.me/posts/e0424f3f/</a></li><li>[ hexo文档 ]: <a href="https://hexo.io/zh-cn/docs/front-matterh">https://hexo.io/zh-cn/docs/front-matterh</a></li><li>[ next  IIssNan文档 ]: <a href="http://theme-next.iissnan.com/">http://theme-next.iissnan.com/</a></li></ul></li></ol>]]></content>
+    
+    
+    <summary type="html">记录使用github page发布个人网站的方法和调整hexo-Next主题的步骤</summary>
+    
+    
+    
+    <category term="hexo" scheme="http://example.com/categories/hexo/"/>
+    
+    
+    <category term="hexo" scheme="http://example.com/tags/hexo/"/>
+    
+    <category term="Next" scheme="http://example.com/tags/Next/"/>
+    
+  </entry>
+  
+</feed>
