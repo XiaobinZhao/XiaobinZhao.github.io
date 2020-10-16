@@ -3,12 +3,12 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 我的博客
+title: 琢灵的笔记
 subtitle: '灵自天生，细心雕琢'
 description: '技术笔记，生活点滴'
 keywords:
 author: 琢灵
-language: zh-Hans
+language: zh-CN
 timezone: ''
 
 # URL
@@ -107,3 +107,9 @@ deploy:
   type: git
   repo: git@github.com:XiaobinZhao/blog.git
   branch: gh-page
+
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000
