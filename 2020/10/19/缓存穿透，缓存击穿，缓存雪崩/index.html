@@ -22,15 +22,15 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"Valine","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="前言设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。 缓存穿透 描述缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。  解决方案有很多种方">
+  <meta name="description" content="前言设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="缓存穿透，缓存击穿，缓存雪崩">
 <meta property="og:url" content="http://example.com/2020/10/19/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%EF%BC%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/index.html">
 <meta property="og:site_name" content="琢灵的笔记">
-<meta property="og:description" content="前言设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。 缓存穿透 描述缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。  解决方案有很多种方">
+<meta property="og:description" content="前言设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-10-19T01:49:01.000Z">
-<meta property="article:modified_time" content="2020-10-19T10:32:21.686Z">
+<meta property="article:modified_time" content="2020-10-19T10:34:40.899Z">
 <meta property="article:author" content="琢灵">
 <meta property="article:tag" content="缓存穿透">
 <meta property="article:tag" content="缓存击穿">
@@ -219,7 +219,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-10-19 09:49:01 / 修改时间：18:32:21" itemprop="dateCreated datePublished" datetime="2020-10-19T09:49:01+08:00">2020-10-19</time>
+              <time title="创建时间：2020-10-19 09:49:01 / 修改时间：18:34:40" itemprop="dateCreated datePublished" datetime="2020-10-19T09:49:01+08:00">2020-10-19</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -264,6 +264,8 @@
 
       
         <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。</p>
+<a id="more"></a>
+
 <h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><ul>
 <li><p>描述<br>缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。</p>
 </li>
