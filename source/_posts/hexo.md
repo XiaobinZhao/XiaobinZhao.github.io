@@ -1,6 +1,7 @@
 ---
 title: hexo-Next + Github Page制作个人网站使用记录
 description: 记录使用github page发布个人网站的方法和调整hexo-Next主题的步骤
+date: 2020-10-20 09:49:01
 tag: 
 - hexo
 - Next
