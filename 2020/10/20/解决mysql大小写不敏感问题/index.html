@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/pace-js@1/themes/blue/pace-theme-minimal.css">
+  <script src="//cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"Valine","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言Mysql&#x2F;MariaDB 默认是大小写不敏感的，有时会比较影响业务，我们期望能够大小写敏感。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql大小写敏感问题">
+<meta property="og:url" content="http://example.com/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="琢灵的笔记">
+<meta property="og:description" content="前言Mysql&#x2F;MariaDB 默认是大小写不敏感的，有时会比较影响业务，我们期望能够大小写敏感。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-20T01:49:01.000Z">
+<meta property="article:modified_time" content="2020-10-20T03:46:18.825Z">
+<meta property="article:author" content="琢灵">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="大小写敏感">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mysql大小写敏感问题 | 琢灵的笔记</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="琢灵的笔记" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">琢灵的笔记</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">灵自天生，用心雕琢</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my-avatar.jpg">
+      <meta itemprop="name" content="琢灵">
+      <meta itemprop="description" content="技术笔记，生活点滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="琢灵的笔记">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql大小写敏感问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-10-20 09:49:01 / 修改时间：11:46:18" itemprop="dateCreated datePublished" datetime="2020-10-20T09:49:01+08:00">2020-10-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index"><span itemprop="name">技术积累</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Mysql/MariaDB 默认是大小写不敏感的，有时会比较影响业务，我们期望能够大小写敏感。</p>
+<a id="more"></a>
+
+<h1 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h1><p>python开发过程中会使用sqlalchemy 来做 ORM，但是发现常规做法会出现查询语句对查询条件大小写不敏感问题，比如：</p>
+<blockquote>
+<p><code>session.query(desktop_pool)filter_by(name=&#39;b3&#39;).one_or_none()</code><br><code>session.query(desktop_pool)filter_by(name=&#39;B3&#39;).one_or_none()</code></p>
+</blockquote>
+<p>查询的结果是一样的。这样对有些业务就会造成困扰， 那么怎么做到查询时能够 <strong>大小写敏感</strong> 呢</p>
+<h1 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a>排查过程</h1><ol>
+<li>首先想到是不是sqlalchemy本身的问题对大小写不敏感，查询sqlalchemy 中对字段的定义，比如name字段：</li>
+</ol>
+<blockquote>
+<p>name = Column(“name”, String(20), nullable=False,doc=”桌面池的名称”)</p>
+</blockquote>
+<p>查看sqlalchemy对String()方法定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">class String(Concatenable, TypeEngine):</span><br><span class="line"></span><br><span class="line">    &quot;&quot;&quot;The base for all string and character types.</span><br><span class="line"></span><br><span class="line">    In SQL, corresponds to VARCHAR.  Can also take Python unicode objects</span><br><span class="line">    and encode to the database&#39;s encoding in bind params (and the reverse for</span><br><span class="line">    result sets.)</span><br><span class="line"></span><br><span class="line">    The &#96;length&#96; field is usually required when the &#96;String&#96; type is</span><br><span class="line">    used within a CREATE TABLE statement, as VARCHAR requires a length</span><br><span class="line">    on most databases.</span><br><span class="line"></span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line"></span><br><span class="line">    __visit_name__ &#x3D; &#39;string&#39;</span><br><span class="line"></span><br><span class="line">    def __init__(self, length&#x3D;None, collation&#x3D;None,</span><br><span class="line">                 convert_unicode&#x3D;False,</span><br><span class="line">                 unicode_error&#x3D;None,</span><br><span class="line">                 _warn_on_bytestring&#x3D;False</span><br><span class="line">                 ):</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        Create a string-holding type.</span><br><span class="line"></span><br><span class="line">        :param length: optional, a length for the column for use in</span><br><span class="line">          DDL and CAST expressions.  May be safely omitted if no &#96;&#96;CREATE</span><br><span class="line">          TABLE&#96;&#96; will be issued.  Certain databases may require a</span><br><span class="line">          &#96;&#96;length&#96;&#96; for use in DDL, and will raise an exception when</span><br><span class="line">          the &#96;&#96;CREATE TABLE&#96;&#96; DDL is issued if a &#96;&#96;VARCHAR&#96;&#96;</span><br><span class="line">          with no length is included.  Whether the value is</span><br><span class="line">          interpreted as bytes or characters is database specific.</span><br><span class="line"></span><br><span class="line">        :param collation: Optional, a column-level collation for</span><br><span class="line">          use in DDL and CAST expressions.  Renders using the</span><br><span class="line">          COLLATE keyword supported by SQLite, MySQL, and PostgreSQL.</span><br><span class="line">          E.g.::</span><br><span class="line"></span><br><span class="line">            &gt;&gt;&gt; from sqlalchemy import cast, select, String</span><br><span class="line">            &gt;&gt;&gt; print select([cast(&#39;some string&#39;, String(collation&#x3D;&#39;utf8&#39;))])</span><br><span class="line">            SELECT CAST(:param_1 AS VARCHAR COLLATE utf8) AS anon_1</span><br><span class="line"></span><br><span class="line">          .. versionadded:: 0.8 Added support for COLLATE to all</span><br><span class="line">             string types.</span><br><span class="line"></span><br><span class="line">        ...其他代码...</span><br></pre></td></tr></table></figure>
+<p>发现有一个collation属性可以设置，并且可以修改字段的DDL定义，也许可以试一下。<br>2. 在搜索引擎搜索<code>sqlalchemy 大小写敏感</code>问题，发现几个关键字：collation、binary<br>3. 查找<a target="_blank" rel="noopener" href="https://www.osgeo.cn/sqlalchemy/core/type_basics.html">官方文档</a>，用关键字collation、binary搜索，在最后发现这样一段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">from sqlalchemy.dialects.mysql import VARCHAR, TEXT</span><br><span class="line"></span><br><span class="line">table &#x3D; Table(&#39;foo&#39;, meta,</span><br><span class="line">    Column(&#39;col1&#39;, VARCHAR(200, collation&#x3D;&#39;binary&#39;)),</span><br><span class="line">    Column(&#39;col2&#39;, TEXT(charset&#x3D;&#39;latin1&#39;))</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这样设置本质上是修改mysql属性，可能意味着 大小写敏感的问题不在 sqlalchemy， 而在mysql<br>4. 搜索引擎搜索<code>mysql大小写敏感</code>, 有以下结果：</p>
+<ol>
+<li>设置mysql大小写敏感参数<br><code>lower_case_table_names=0</code> 表名存储为给定的大小和比较是区分大小写的<br><code>lower_case_table_names = 1</code> 表名存储在磁盘是小写的，但是比较的时候是不区分大小写<br><code>lower_case_table_names=2</code> 表名存储为给定的大小写但是比较的时候是小写的<br><code>unix,linux下lower_case_table_names</code>默认值为 0 .Windows下默认值是 1 .Mac OS X下默认值是<br>查看mysql配置发现<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; show variables like &#39;lower_case%&#39;;</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| Variable_name          | Value |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| lower_case_file_system | OFF   |</span><br><span class="line">| lower_case_table_names | 0     |</span><br><span class="line">+------------------------+-------+</span><br></pre></td></tr></table></figure>
+我们的mysql 配置是对的，无需修改<ol start="2">
+<li>设置表或行的collation，使其为binary或case sensitive<br>collate规则：   </li>
+</ol>
+*_bin: 表示的是binary case sensitive collation，也就是说是区分大小写的<br>*_cs: case sensitive collation，区分大小写<br>*_ci: case insensitive collation，不区分大小写<br>查看mysql的默认collation   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select * from information_schema.collations where IS_DEFAULT&#x3D;&#39;Yes&#39; and COLLATION_NAME like &#39;utf8%&#39;;</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br><span class="line">| COLLATION_NAME     | CHARACTER_SET_NAME | ID | IS_DEFAULT | IS_COMPILED | SORTLEN |</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br><span class="line">| utf8_general_ci    | utf8               | 33 | Yes        | Yes         |       1 |</span><br><span class="line">| utf8mb4_general_ci | utf8mb4            | 45 | Yes        | Yes         |       1 |</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br></pre></td></tr></table></figure>
+我们一般使用utf8编码的数据库，所以只关注utf8、utf8mb4编码的排序规则（collation）<br>按照collate规则分析<code>utf8_general_ci</code>是ci结尾，所以是不区分大小写的。<br>然后查看我们自己的数据库：   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select * from information_schema.SCHEMATA where SCHEMA_NAME&#x3D;&#39;xview&#39;;</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br><span class="line">| CATALOG_NAME | SCHEMA_NAME | DEFAULT_CHARACTER_SET_NAME | DEFAULT_COLLATION_NAME | SQL_PATH |</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br><span class="line">| def          | xview       | utf8                       | utf8_general_ci               | NULL     |</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br></pre></td></tr></table></figure>
+查看表：   <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select TABLE_SCHEMA, TABLE_NAME, TABLE_COLLATION from information_schema.tables where TABLE_NAME&#x3D;&#39;desktop_pool&#39;;</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| TABLE_SCHEMA | TABLE_NAME   | TABLE_COLLATION |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| xview        | desktop_pool | utf8_general_ci |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+查看字段： <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select TABLE_SCHEMA, TABLE_NAME, COLLATION_NAME  from information_schema.columns where TABLE_NAME&#x3D;&#39;desktop_pool&#39; and COLUMN_NAME&#x3D;&#39;name&#39;;</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| TABLE_SCHEMA | TABLE_NAME   | COLLATION_NAME  |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| xview        | desktop_pool | utf8_general_ci |</span><br><span class="line">+--------------+--------------+-----------------+</span><br></pre></td></tr></table></figure>
+<strong>至此，我们已经找到根本原因是：字段设置的排序规则utf8_general_ci不区分大小写。</strong></li>
+</ol>
+<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>查询<a target="_blank" rel="noopener" href="https://mariadb.com/kb/zh-cn/setting-character-sets-and-collations/">mariadb文档</a>中有关排序规则设置可以知道:   </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">在MariaDB中，默认的字符集character set为latin1，默认的排序规则为latin1_swedish_ci(但不同的发行版可能会不同，例如Differences in MariaDB in Debian)。</span><br><span class="line">字符集和排序规则都可以**从server端一直指定到字段级别**，client到server连接时也可以指定。**</span><br><span class="line">当修改字符集但却没有指定排序规则时，将总是使用字符集的默认排序规则**。</span><br><span class="line"></span><br><span class="line">**字符集和排序规则总是级联向下的，所以当没有为字段指定排序规则时，将查找表的排序规则，同样对于表来说会上查到数据库，对数据库来说会上查到server级**。</span><br><span class="line">因此，可以使用极细粒度的字符集和排序规则来控制控制你的数据。</span><br></pre></td></tr></table></figure>
+<p>所以，为了能够区分大小写，请做以下配置：</p>
+<ol>
+<li>修改mysql/MariaDB的配置文件：<code>/etc/mysql/mariadb.conf.d/50-server.cnf</code>修改配置项：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">character-set-server  &#x3D; utf8</span><br><span class="line">collation-server      &#x3D; utf8_bin</span><br></pre></td></tr></table></figure></li>
+<li>创建数据库的时候最好指定排序规则：<code>create database xview character set utf8 collate utf8_bin;</code></li>
+<li>如果数据库已经存在，可以使用<code>alert</code>命令进行修改，参看<a target="_blank" rel="noopener" href="https://mariadb.com/kb/zh-cn/setting-character-sets-and-collations/">mariadb文档</a></li>
+<li>你可以试试sqlalchemy用法，设置字段：<code>name = Column(&quot;name&quot;, String(20, collation=&#39;binary&#39;), nullable=False, doc=&quot;桌面池的名称&quot;)</code></li>
+</ol>
+<p><strong>以上</strong><br><strong>至此MySQL大小写问题搞定！</strong></p>
+<h1 id="遗留问题"><a href="#遗留问题" class="headerlink" title="遗留问题"></a>遗留问题</h1><p>查看mysql的可用的utf8编码的排序规则，其中区分大小写的只有utf8_bin/utf8mb4_bin/utf8mb4_nopad_bin/utf8_nopad_bin 没有 utf8_xxx_cs 很是神奇！</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="琢灵 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>琢灵
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/" title="mysql大小写敏感问题">http://example.com/2020/10/20/解决mysql大小写不敏感问题/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+              <a href="/tags/%E5%A4%A7%E5%B0%8F%E5%86%99%E6%95%8F%E6%84%9F/" rel="tag"># 大小写敏感</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/20/FastAPI/" rel="prev" title="FastAPI">
+      <i class="fa fa-chevron-left"></i> FastAPI
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/20/yiled/" rel="next" title="yield">
+      yield <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%9D%A5%E6%BA%90"><span class="nav-number">2.</span> <span class="nav-text">问题来源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">排查过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">4.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">遗留问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="琢灵"
+      src="/images/my-avatar.jpg">
+  <p class="site-author-name" itemprop="name">琢灵</p>
+  <div class="site-description" itemprop="description">技术笔记，生活点滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/XiaobinZhao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;XiaobinZhao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">琢灵</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js"></script>
+    <script defer src="//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'IhFe1C45bDBFTjSxcahEd1Lv-gzGzoHsz',
+      appKey     : 'Ljdc8IPrTgT76N2glnDMs90o',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/pace-js@1/themes/blue/pace-theme-minimal.css">
+  <script src="//cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"Valine","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：  自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FastAPI">
+<meta property="og:url" content="http://example.com/2020/10/20/FastAPI/index.html">
+<meta property="og:site_name" content="琢灵的笔记">
+<meta property="og:description" content="前言学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：  自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-20T01:49:01.000Z">
+<meta property="article:modified_time" content="2020-10-20T03:46:46.331Z">
+<meta property="article:author" content="琢灵">
+<meta property="article:tag" content="FastAPI">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2020/10/20/FastAPI/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>FastAPI | 琢灵的笔记</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="琢灵的笔记" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">琢灵的笔记</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">灵自天生，用心雕琢</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/20/FastAPI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my-avatar.jpg">
+      <meta itemprop="name" content="琢灵">
+      <meta itemprop="description" content="技术笔记，生活点滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="琢灵的笔记">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FastAPI
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-10-20 09:49:01 / 修改时间：11:46:46" itemprop="dateCreated datePublished" datetime="2020-10-20T09:49:01+08:00">2020-10-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/FastAPI/" itemprop="url" rel="index"><span itemprop="name">FastAPI</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/20/FastAPI/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/20/FastAPI/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：</p>
+<ol>
+<li>自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。</li>
+</ol>
+<a id="more"></a>
+
+<ol start="2">
+<li><p>支持websock。目前xView项目需要单独开启socket服务</p>
+</li>
+<li><p>支持ORM。支持集成sqlAlchemy+alembic</p>
+</li>
+<li><p>支持plugin方式拦截请求。在FastAPI叫MiddleWare</p>
+</li>
+<li><p>异步io</p>
+</li>
+</ol>
+<p>让我惊喜的是：</p>
+<ol>
+<li>可以同时支持FastAPI+Django[Flask/bottle等]并存</li>
+<li>可以支持root-url设置代理，这样文档生成就不会需要特别修改</li>
+<li>可以设置API CallBack 文档，这样我们的API文档就会非常友好</li>
+<li>集成很多MiddleWare，比如<ul>
+<li>SentryMiddleware，做日志重定向并管理</li>
+<li>TimingMiddleware，统计每一个API请求耗时</li>
+</ul>
+</li>
+</ol>
+<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="type-hints-类型提示"><a href="#type-hints-类型提示" class="headerlink" title="type hints(类型提示)"></a>type hints(类型提示)</h2><ul>
+<li>python3.0 引入 <strong>函数注释</strong> <a target="_blank" rel="noopener" href="http://www.python.org/dev/peps/pep-3107">PEP 3107</a>.这提供了注释函数参数和返回值的标准化方法。除了可以在运行时使用 <code>__annotations__</code>属性对它们进行自省外，这些注释没有附加任何语义。目的是鼓励通过元类，装饰器或框架进行实验。</li>
+<li>Python3.5.0 开始支持 <strong>类型提示</strong>，见<a target="_blank" rel="noopener" href="https://docs.python.org/3.5/whatsnew/3.5.html#whatsnew-pep-484">PEP 484</a>。<br>python3.0支持函数注释，但是对注释的语义没有做定义。经验表明，大多数函数注释用法都是为函数参数和返回值提供<strong>类型提示</strong>。显而易见的是，如果标准库包含基本定义和用于类型注释的工具，则对Python用户将是有益的。它的主要作用<strong>是方便开发，供IDE和各种开发工具使用</strong>，对代码运行不产生影响，运行时会过滤类型信息。<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span>(<span class="params">x: int, y:int</span>) -&gt; int:</span></span><br><span class="line">    <span class="keyword">return</span> x+y</span><br></pre></td></tr></table></figure>
+运行如下命令：<br><code>print(add(1,2))</code> 和 <code>print(add(1,2))</code> 结果分别是：<code>3</code> 和 <code>helloworld</code>。<br>也就是说，python3.5版本的type hint就是一个文档标识作用，便于IDE编辑和代码维护，不能进行代码层面的自动校验。</li>
+<li>python3.6 开始支持<strong>变量注释</strong>语法，见 <a target="_blank" rel="noopener" href="https://www.python.org/dev/peps/pep-0484">PEP 484</a>.与3.0/3.5不同之处是：添加了变量注释，之前版本是方法返回值注释和方法参数注释。<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">primes: List[int] = []</span><br><span class="line"></span><br><span class="line">captain: str  <span class="comment"># Note: no initial value!</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Starship</span>:</span></span><br><span class="line">    stats: Dict[str, int] = &#123;&#125;</span><br></pre></td></tr></table></figure>
+就像函数注释一样，Python解释器不会在变量注释中附加任何特殊含义，而仅将它们存储在__annotations__类或模块的属性中。</li>
+<li>3.7 支持优化类型提示。因为引入类型提示带来了一些问题：<ul>
+<li>批注只能使用当前范围内已经可用的名称，换句话说，它们不支持任何形式的正向引用；和</li>
+<li>注释源代码会对Python程序的启动时间产生不利影响。<br>所以，3.7版本进行优化，使用方式是：<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations  <span class="comment"># 在模块中导入，Python 4.0中的默认设置</span></span><br></pre></td></tr></table></figure>
+所以想要实现fastAPI的功能，需要支持python3.6+，如果需要优化类型提示需要python3.7+<br>想了解有关类型的更多信息，来自 <a target="_blank" rel="noopener" href="https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html">mypy 的”速查表”</a>是不错的资源。</li>
+</ul>
+</li>
+</ul>
+<h1 id="OpenAPI与FastAPI"><a href="#OpenAPI与FastAPI" class="headerlink" title="OpenAPI与FastAPI"></a>OpenAPI与FastAPI</h1><h2 id="Request"><a href="#Request" class="headerlink" title="Request"></a>Request</h2><p>Request参数校验主要包含三种情况：</p>
+<ol>
+<li>请求url中的path包含的参数，比如： <code>/users/&#123;user_id&#125;</code>这样的url,user_id就是path param; </li>
+<li>而形如：<code>/users?name=aaa</code>这样的url, name是query param;</li>
+<li>以上2中情况多出现于GET请求，而PUT/PATCH/POST这样的请求会包含request body,body内的参数为就是第三种情况<h3 id="path-param"><a href="#path-param" class="headerlink" title="path param"></a>path param</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.get(&quot;/items/&#123;item_id&#125;&quot;)</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">read_item</span>(<span class="params">item_id: int</span>):</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;item_id&quot;</span>: item_id&#125;</span><br></pre></td></tr></table></figure>
+代码如上。</li>
+<li>使用pydantic声明式命名</li>
+<li>数据转换，fastAPI 通过上面的类型声明,自动转换item_id为int型</li>
+<li>数据校验，如果item_id不是整形数字，比如字符串或者浮点型，都将报错</li>
+<li>API 标注和自动生成的文档<h3 id="query-param"><a href="#query-param" class="headerlink" title="query param"></a>query param</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line">fake_items_db = [&#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Foo&quot;</span>&#125;, &#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Bar&quot;</span>&#125;, &#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Baz&quot;</span>&#125;]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.get(&quot;/items/&quot;)</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">read_item</span>(<span class="params">skip: int = <span class="number">0</span>, limit: int = <span class="number">10</span></span>):</span></span><br><span class="line">    <span class="keyword">return</span> fake_items_db[skip : skip + limit]</span><br></pre></td></tr></table></figure>
+代码如上，如果请求的url如：<code>http://127.0.0.1:8000/items/?skip=0&amp;limit=10</code>,那么skip：对应的值为 0，limit：对应的值为 10。<br>和path param 一样，你可以得到：</li>
+</ol>
+<ul>
+<li>数据”解析”</li>
+<li>数据校验</li>
+<li>自动生成文档</li>
+</ul>
+<h3 id="path-param-query-param"><a href="#path-param-query-param" class="headerlink" title="path param + query param"></a>path param + query param</h3><p>你可以同时声明多个路径参数和查询参数，FastAPI 能够识别它们。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;users&#x2F;&#123;user_id&#125;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def read_user_item(</span><br><span class="line">    user_id: int, item_id: str, q: Optional[str] &#x3D; None, short: bool &#x3D; False</span><br><span class="line">):</span><br><span class="line">    item &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;owner_id&quot;: user_id&#125;</span><br><span class="line">    if q:</span><br><span class="line">        item.update(&#123;&quot;q&quot;: q&#125;)</span><br><span class="line">    if not short:</span><br><span class="line">        item.update(</span><br><span class="line">            &#123;&quot;description&quot;: &quot;This is an amazing item that has a long description&quot;&#125;</span><br><span class="line">        )</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
+<p>以上无论是 path param， 还是query param，还是2者并存，都可以设置参数为：</p>
+<ul>
+<li>可选/必填</li>
+<li>默认值</li>
+<li>参数的一些额外校验<ul>
+<li>字符串参数长度(最长/最短)，比如  <code>q: Optional[str] = Query(None, max_length=50)</code></li>
+<li>字符串参数正则<code>q: Optional[str] = Query(None, regex=&quot;^fixedquery$&quot;)</code> </li>
+<li>数字参数范围控制，比如：大于，小于，大于等于等</li>
+<li>查询参数是一个列表， 比如：<code>http://localhost:8000/items/?q=foo&amp;q=bar</code></li>
+</ul>
+</li>
+<li>设置更多参数，可以用为OpenAPI文档，比如：<ul>
+<li>title</li>
+<li>description</li>
+</ul>
+</li>
+<li>别名参数</li>
+<li>弃用设置</li>
+</ul>
+<h3 id="Request-body"><a href="#Request-body" class="headerlink" title="Request body"></a>Request body</h3><p>需要先创建数据模型，这里的数据模型就是request的body的数据声明，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def create_item(item: Item):</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
+<p>按照以上方式，你将得到：</p>
+<ul>
+<li>将请求体作为 JSON 读取。</li>
+<li>转换为相应的类型（在需要时）。</li>
+<li>校验数据。<br>如果数据无效，将返回一条清晰易读的错误信息，指出不正确数据的确切位置和内容。</li>
+<li>将接收的数据赋值到参数 item 中。<br>由于你已经在函数中将它声明为 Item 类型，你还将获得对于所有属性及其类型的一切编辑器支持（代码补全等）。</li>
+<li>为你的模型生成 JSON 模式 定义，你还可以在其他任何对你的项目有意义的地方使用它们。</li>
+<li>这些模式将成为生成的 OpenAPI 模式的一部分，并且被自动化文档 UI 所使用。</li>
+</ul>
+<p>当然你可以随意组合query parm、path param、request body.FastAPI能够正确的识别他们。</p>
+<p>如果request body是一个复杂类型，比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;item&quot;: &#123;</span><br><span class="line">        &quot;name&quot;: &quot;Foo&quot;,</span><br><span class="line">        &quot;description&quot;: &quot;The pretender&quot;,</span><br><span class="line">        &quot;price&quot;: 42.0,</span><br><span class="line">        &quot;tax&quot;: 3.2</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;user&quot;: &#123;</span><br><span class="line">        &quot;username&quot;: &quot;dave&quot;,</span><br><span class="line">        &quot;full_name&quot;: &quot;Dave Grohl&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>你可以这么写：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class User(BaseModel):</span><br><span class="line">    username: str</span><br><span class="line">    full_name: Optional[str] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.put(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def update_item(item_id: int, item: Item, user: User):</span><br><span class="line">    results &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;item&quot;: item, &quot;user&quot;: user&#125;</span><br><span class="line">    return results</span><br></pre></td></tr></table></figure>
+<p>在以上示例中，所有的属性或者变量的声明类型都是简单类型：int/str/bool/float, 还可以有复杂类型比如：List/Set/嵌套类型，或者直接使用Optional。pydantic还提供了一些特殊领域的声明，比如：HttpUrl。</p>
+<h2 id="Request-Filed"><a href="#Request-Filed" class="headerlink" title="Request Filed"></a>Request Filed</h2><p>以上request path param/query param/requet  body其实都是Pydantic 的 Field的字段的实例。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import Body, FastAPI</span><br><span class="line">from pydantic import BaseModel, Field</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; Field(</span><br><span class="line">        None, title&#x3D;&quot;The description of the item&quot;, max_length&#x3D;300</span><br><span class="line">    )</span><br><span class="line">    price: float &#x3D; Field(..., gt&#x3D;0, description&#x3D;&quot;The price must be greater than zero&quot;)</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.put(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def update_item(item_id: int, item: Item &#x3D; Body(..., embed&#x3D;True)):</span><br><span class="line">    results &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;item&quot;: item&#125;</span><br><span class="line">    return results</span><br></pre></td></tr></table></figure>
+<p>实际上，Query、Path 和其他你将在之后看到的类，创建的是由一个共同的 Params 类派生的子类的对象，该共同类本身又是 Pydantic 的 FieldInfo 类的子类。<br>Pydantic 的 Field 也会返回一个 FieldInfo 的实例。<br>Body 也直接返回 FieldInfo 的一个子类的对象。还有其他一些你之后会看到的类是 Body 类的子类。<br>请记住当你从 fastapi 导入 Query、Path 等对象时，他们实际上是返回特殊类的函数。</p>
+<p>除了通过字段声明来控制一个属性的校验规则之外，还可以显式的指定。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line">    class Config:</span><br><span class="line">        schema_extra &#x3D; &#123;</span><br><span class="line">            &quot;example&quot;: &#123;</span><br><span class="line">                &quot;name&quot;: &quot;Foo&quot;,</span><br><span class="line">                &quot;description&quot;: &quot;A very nice Item&quot;,</span><br><span class="line">                &quot;price&quot;: 35.4,</span><br><span class="line">                &quot;tax&quot;: 3.2,</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>这里是增加了example属性，可以在openAPI 文档中看到。</p>
+<h2 id="Response"><a href="#Response" class="headerlink" title="Response"></a>Response</h2><p>与request不同的是，response的参数声明式在路径装饰器.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">from typing import List, Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line">    tags: List[str] &#x3D; []</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;items&#x2F;&quot;, response_model&#x3D;Item)</span><br><span class="line">async def create_item(item: Item):</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
+<p>你将得到：</p>
+<ul>
+<li>转换输出数据为声明类型。这里之所以把<code>response_model</code>声明放在路径装饰器上，是因为路径方法(比如上边示例的<code>create_item</code>)的返回值可能是字典/对象甚至没有返回值。使用装饰器来控制和序列化路径方法的返回值。</li>
+<li>验证数据</li>
+<li>响应api路径</li>
+<li>自动文档</li>
+</ul>
+<p>fastAPI可以自动转换SqlAlchemy ORM Model 到Schema Model。这样API就可以直接返回SqlAlchemy对象，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">def get_db():</span><br><span class="line">    db &#x3D; SessionLocal()</span><br><span class="line">    try:</span><br><span class="line">        yield db</span><br><span class="line">    finally:</span><br><span class="line">        db.close()</span><br><span class="line"></span><br><span class="line">class Item(ItemBase):</span><br><span class="line">    id: int</span><br><span class="line">    owner_id: int</span><br><span class="line"></span><br><span class="line">    class Config:</span><br><span class="line">        orm_mode &#x3D; True</span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;users&#x2F;&#123;user_id&#125;&#x2F;items&#x2F;&quot;, response_model&#x3D;Item)</span><br><span class="line">def create_item_for_user(</span><br><span class="line">    user_id: int, item: Item, db: Session &#x3D; Depends(get_db)</span><br><span class="line">):</span><br><span class="line">    db_item &#x3D; models.Item(**item.dict(), owner_id&#x3D;user_id)</span><br><span class="line">    db.add(db_item)</span><br><span class="line">    db.commit()</span><br><span class="line">    db.refresh(db_item)</span><br><span class="line">    return db_item</span><br></pre></td></tr></table></figure>
+<p>上例子中， <code>db_item</code>是SqlAlchemy ORM对象，response_model是schema对象。这里会自动进行转化，前提是需要schema class 定义<code>orm_mode</code>为true</p>
+<h2 id="Header"><a href="#Header" class="headerlink" title="Header"></a>Header</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI, Header</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def read_items(user_agent: Optional[str] &#x3D; Header(None)):</span><br><span class="line">    return &#123;&quot;User-Agent&quot;: user_agent&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是：</p>
+<ul>
+<li>不区分大小写</li>
+<li>header中的连字符<code>-</code>会自动换成下划线<code>_</code><h2 id="Cookie等"><a href="#Cookie等" class="headerlink" title="Cookie等"></a>Cookie等</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import Cookie, FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def read_items(ads_id: Optional[str] &#x3D; Cookie(None)):</span><br><span class="line">    return &#123;&quot;ads_id&quot;: ads_id&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h1>FastAPi的Dependency类似于提取公共方法，然后被多处调用，原理跟装饰器差不多。比如你有如下需求：</li>
+</ul>
+<ol>
+<li>具有共享逻辑（一次又一次地使用相同的代码逻辑）。</li>
+<li>共享数据库连接。</li>
+<li>强制执行安全性，身份验证，角色要求等。<br>所有这些，同时最大程度地减少了代码重复。</li>
+</ol>
+<p>依赖可以互相嵌套，即：子依赖</p>
+<h1 id="中间件"><a href="#中间件" class="headerlink" title="中间件"></a>中间件</h1><p>中间件（MiddleWare）可以拦截每一个request，处理请求前和response前的一些行为。</p>
+<ul>
+<li>它接受应用程序中的每个请求。</li>
+<li>然后，它可以对该请求执行某些操作或运行任何需要的代码。</li>
+<li>然后，它传递要由应用程序其余部分（通过某些路径操作）处理的请求。</li>
+<li>然后，它将获取应用程序生成的响应（通过某些路径操作）。</li>
+<li>它可以对响应做出响应或运行任何需要的代码。</li>
+<li>然后返回响应。<br>类似于xView bottle中的plugin。</li>
+</ul>
+<h1 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h1><p>可以使用SqlAlchemy或者peewee(peewee是一个微型的ORM框架)。并且FastAPi支持自动转化SqlAlchemy对象和schema对象。</p>
+<h1 id="后台任务和Celery"><a href="#后台任务和Celery" class="headerlink" title="后台任务和Celery"></a>后台任务和Celery</h1><p>如果返回response之后要运行一些操作，可以使用后台任务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">from fastapi import BackgroundTasks, FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def write_notification(email: str, message&#x3D;&quot;&quot;):</span><br><span class="line">    with open(&quot;log.txt&quot;, mode&#x3D;&quot;w&quot;) as email_file:</span><br><span class="line">        content &#x3D; f&quot;notification for &#123;email&#125;: &#123;message&#125;&quot;</span><br><span class="line">        email_file.write(content)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;send-notification&#x2F;&#123;email&#125;&quot;)</span><br><span class="line">async def send_notification(email: str, background_tasks: BackgroundTasks):</span><br><span class="line">    background_tasks.add_task(write_notification, email, message&#x3D;&quot;some notification&quot;)</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Notification sent in the background&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>response也可以返回202，然后任务继续在后台执行。<br>与之类似的是Celery:一个分布式多任务处理队列。</p>
+<h1 id="静态资源"><a href="#静态资源" class="headerlink" title="静态资源"></a>静态资源</h1><p>FastAPi也可以返回静态资源，比如：图片/文件。需要 单独安装<code>aiofiles</code>.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line">from fastapi.staticfiles import StaticFiles</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;static&quot;, StaticFiles(directory&#x3D;&quot;static&quot;), name&#x3D;&quot;static&quot;)</span><br></pre></td></tr></table></figure>
+<p>mount 是指在特定路径中添加完整的“独立”应用程序，然后负责处理所有子路径。<br>这与使用APIRouter完全独立的已安装应用程序不同。主应用程序中的OpenAPI和文档不会包含mount应用程序等中的任何内容。</p>
+<h1 id="子应用"><a href="#子应用" class="headerlink" title="子应用"></a>子应用</h1><p>如果需要两个独立的FastAPI应用程序，以及它们各自的独立OpenAPI和文档ui，则可以拥有一个主应用程序并“装载”一个（或多个）子应用程序。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;app&quot;)</span><br><span class="line">def read_main():</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Hello World from main app&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">subapi &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@subapi.get(&quot;&#x2F;sub&quot;)</span><br><span class="line">def read_sub():</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Hello World from sub API&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;subapi&quot;, subapi)</span><br></pre></td></tr></table></figure>
+<p>子应用是以mount方式挂载到主应用中的。子应用与主应用区别之处就是文档是分开的，其他都一样。文档访问的时候，主应用默认地址： <code>http://127.0.0.1:8000/docs</code>, 子应用默认地址: <code>http://127.0.0.1:8000/subapi/docs</code></p>
+<h1 id="websocket"><a href="#websocket" class="headerlink" title="websocket"></a>websocket</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">from fastapi import FastAPI, WebSocket</span><br><span class="line">from fastapi.responses import HTMLResponse</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">html &#x3D; &quot;&quot;&quot;</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;title&gt;Chat&lt;&#x2F;title&gt;</span><br><span class="line">    &lt;&#x2F;head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">        &lt;h1&gt;WebSocket Chat&lt;&#x2F;h1&gt;</span><br><span class="line">        &lt;form action&#x3D;&quot;&quot; onsubmit&#x3D;&quot;sendMessage(event)&quot;&gt;</span><br><span class="line">            &lt;input type&#x3D;&quot;text&quot; id&#x3D;&quot;messageText&quot; autocomplete&#x3D;&quot;off&quot;&#x2F;&gt;</span><br><span class="line">            &lt;button&gt;Send&lt;&#x2F;button&gt;</span><br><span class="line">        &lt;&#x2F;form&gt;</span><br><span class="line">        &lt;ul id&#x3D;&#39;messages&#39;&gt;</span><br><span class="line">        &lt;&#x2F;ul&gt;</span><br><span class="line">        &lt;script&gt;</span><br><span class="line">            var ws &#x3D; new WebSocket(&quot;ws:&#x2F;&#x2F;localhost:8000&#x2F;ws&quot;);</span><br><span class="line">            ws.onmessage &#x3D; function(event) &#123;</span><br><span class="line">                var messages &#x3D; document.getElementById(&#39;messages&#39;)</span><br><span class="line">                var message &#x3D; document.createElement(&#39;li&#39;)</span><br><span class="line">                var content &#x3D; document.createTextNode(event.data)</span><br><span class="line">                message.appendChild(content)</span><br><span class="line">                messages.appendChild(message)</span><br><span class="line">            &#125;;</span><br><span class="line">            function sendMessage(event) &#123;</span><br><span class="line">                var input &#x3D; document.getElementById(&quot;messageText&quot;)</span><br><span class="line">                ws.send(input.value)</span><br><span class="line">                input.value &#x3D; &#39;&#39;</span><br><span class="line">                event.preventDefault()</span><br><span class="line">            &#125;</span><br><span class="line">        &lt;&#x2F;script&gt;</span><br><span class="line">    &lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&quot;&quot;&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">async def get():</span><br><span class="line">    return HTMLResponse(html)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.websocket(&quot;&#x2F;ws&quot;)</span><br><span class="line">async def websocket_endpoint(websocket: WebSocket):</span><br><span class="line">    await websocket.accept()</span><br><span class="line">    while True:</span><br><span class="line">        data &#x3D; await websocket.receive_text()</span><br><span class="line">        await websocket.send_text(f&quot;Message text was: &#123;data&#125;&quot;)</span><br></pre></td></tr></table></figure>
+
+<h1 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h1><p>您可以定义在应用程序启动之前或关闭应用程序时需要执行的事件处理程序（函数）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">items &#x3D; &#123;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.on_event(&quot;startup&quot;)</span><br><span class="line">async def startup_event():</span><br><span class="line">    items[&quot;foo&quot;] &#x3D; &#123;&quot;name&quot;: &quot;Fighters&quot;&#125;</span><br><span class="line">    items[&quot;bar&quot;] &#x3D; &#123;&quot;name&quot;: &quot;Tenders&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.on_event(&quot;shutdown&quot;)</span><br><span class="line">def shutdown_event():</span><br><span class="line">    with open(&quot;log.txt&quot;, mode&#x3D;&quot;a&quot;) as log:</span><br><span class="line">        log.write(&quot;Application shutdown&quot;)</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def read_items(item_id: str):</span><br><span class="line">    return items[item_id]</span><br></pre></td></tr></table></figure>
+<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><p>fastAPI测试基于pytest. fastAPi继承了starlette的testClient, testClient又包装了requests.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line">from fastapi.testclient import TestClient</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">async def read_main():</span><br><span class="line">    return &#123;&quot;msg&quot;: &quot;Hello World&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">client &#x3D; TestClient(app)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def test_read_main():</span><br><span class="line">    response &#x3D; client.get(&quot;&#x2F;&quot;)</span><br><span class="line">    assert response.status_code &#x3D;&#x3D; 200</span><br><span class="line">    assert response.json() &#x3D;&#x3D; &#123;&quot;msg&quot;: &quot;Hello World&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>另外，testClient还可以用于：</p>
+<ul>
+<li>测试websocket。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def test_websocket():</span><br><span class="line">    client &#x3D; TestClient(app)</span><br><span class="line">    with client.websocket_connect(&quot;&#x2F;ws&quot;) as websocket:</span><br><span class="line">        data &#x3D; websocket.receive_json()</span><br><span class="line">        assert data &#x3D;&#x3D; &#123;&quot;msg&quot;: &quot;Hello WebSocket&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+<li>测试事件：启动和关闭</li>
+<li>override 依赖</li>
+<li>单独出测试数据库</li>
+</ul>
+<h1 id="模板"><a href="#模板" class="headerlink" title="模板"></a>模板</h1><p>fastAPI没有提供template，如果要用需要可以使用：jinja2。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">from fastapi import FastAPI, Request</span><br><span class="line">from fastapi.responses import HTMLResponse</span><br><span class="line">from fastapi.staticfiles import StaticFiles</span><br><span class="line">from fastapi.templating import Jinja2Templates</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;static&quot;, StaticFiles(directory&#x3D;&quot;static&quot;), name&#x3D;&quot;static&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">templates &#x3D; Jinja2Templates(directory&#x3D;&quot;templates&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&#123;id&#125;&quot;, response_class&#x3D;HTMLResponse)</span><br><span class="line">async def read_item(request: Request, id: str):</span><br><span class="line">    return templates.TemplateResponse(&quot;item.html&quot;, &#123;&quot;request&quot;: request, &quot;id&quot;: id&#125;)</span><br></pre></td></tr></table></figure>
+<h1 id="部署-Server"><a href="#部署-Server" class="headerlink" title="部署/Server"></a>部署/Server</h1><p>一般情况下，fastAPi只作为应用的载体，需要一个server容器来部署应用，这个server我们建议使用uvicorn, 比如：<br><code>uvicorn main:app --reload</code><br>这样的命令行方式适合部署时使用，如果要进行debug,可以使用以下方式部署：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">import uvicorn</span><br><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">def root():</span><br><span class="line">    a &#x3D; &quot;a&quot;</span><br><span class="line">    b &#x3D; &quot;b&quot; + a</span><br><span class="line">    return &#123;&quot;hello world&quot;: b&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &quot;__main__&quot;:</span><br><span class="line">    uvicorn.run(app, host&#x3D;&quot;0.0.0.0&quot;, port&#x3D;8000)</span><br></pre></td></tr></table></figure>
+<h1 id="项目生成器"><a href="#项目生成器" class="headerlink" title="项目生成器"></a>项目生成器</h1><p>可以使用项目生成器来进行一键初始化：<br>GitHub：https : //github.com/tiangolo/full-stack-fastapi-postgresql</p>
+<p>全栈FastAPI PostgreSQL-功能</p>
+<ol>
+<li>完全Docker集成（基于Docker）。</li>
+<li>Docker Swarm模式部署。</li>
+<li>Docker用于本地开发的集成和优化。</li>
+<li>使用Uvicorn和Gunicorn的可投入生产的 Python Web服务器。</li>
+<li>Python FastAPI后端：<ul>
+<li>快速：非常高的性能，看齐的NodeJS和围棋（感谢Starlette和Pydantic）。</li>
+<li>直观：强大的编辑器支持。完成无处不在。调试时间更少。</li>
+<li>简易：旨在易于使用和学习。减少阅读文档的时间。</li>
+<li>短：最小化代码重复。每个参数声明中的多个功能。</li>
+<li>健壮：获取可用于生产的代码。具有自动交互式文档。</li>
+<li>基于标准：基于（并完全兼容）API的开放标准：OpenAPI和JSON Schema。</li>
+<li>许多其他功能包括自动验证，序列化，交互式文档，使用OAuth2 JWT令牌进行身份验证等。</li>
+<li>默认情况下，安全密码哈希。</li>
+</ul>
+</li>
+<li>JWT令牌认证。</li>
+<li>SQLAlchemy模型（独立于Flask扩展，因此可以直接与Celery工作者一起使用）。</li>
+<li>用户的基本启动模型（根据需要修改和删除）。</li>
+<li>alembic迁移。</li>
+<li>CORS（跨源资源共享）。</li>
+<li>可以选择性地从后端的其余部分导入和使用模型和代码的celery。</li>
+<li>基于Pytest的 REST后端测试，与Docker集成在一起，因此您可以独立于数据库测试完整的API交互。由于它在Docker中运行，因此每次都可以从头开始构建新的数据存储（因此您可以使用ElasticSearch，MongoDB，CouchDB或任何您想要的东西，只需测试API是否有效）。</li>
+<li>与Jupyter Kernels轻松实现Python集成，可通过 Atom Hydrogen或Visual Studio Code Jupyter之类的扩展来进行远程或Docker内部开发。</li>
+<li>Vue前端：<ul>
+<li>用Vue CLI生成。</li>
+<li>JWT认证处理。</li>
+<li>登录视图。</li>
+<li>登录后，进入主仪表板视图。</li>
+<li>具有用户创建和版本的主仪表板。</li>
+<li>自我用户版。</li>
+<li>Vuex。</li>
+<li>Vue路由器。</li>
+<li>Vuetify提供精美的材料设计组件。</li>
+<li>TypeScript。</li>
+<li>基于Nginx的 Docker服务器（配置为与Vue-router完美配合）。</li>
+<li>Docker多阶段构建，因此您无需保存或提交已编译的代码。</li>
+<li>前端测试在构建时运行（也可以禁用）。</li>
+<li>尽可能采用模块化设计，因此可以立即使用，但是您可以使用Vue - CLI重新生成或根据需要创建它，然后重新使用所需的内容。</li>
+</ul>
+</li>
+<li>PGAdmin for PostgreSQL数据库，您可以对其进行修改以轻松使用PHPMyAdmin和MySQL。</li>
+<li>Flower为celery工作监视。</li>
+<li>使用Traefik可以在前端和后端之间实现负载平衡，因此您可以将两者都放在同一个域中，以路径分隔，但可以通过不同的容器进行服务。</li>
+<li>Traefik集成，包括让我们加密HTTPS证书自动生成。</li>
+<li>GitLab CI（连续集成），包括前端和后端测试。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="琢灵 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>琢灵
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2020/10/20/FastAPI/" title="FastAPI">http://example.com/2020/10/20/FastAPI/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/FastAPI/" rel="tag"># FastAPI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/20/%E5%B9%B6%E5%8F%91%E5%92%8C%E9%94%81/" rel="prev" title="并发和锁">
+      <i class="fa fa-chevron-left"></i> 并发和锁
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/" rel="next" title="mysql大小写敏感问题">
+      mysql大小写敏感问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">2.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#type-hints-%E7%B1%BB%E5%9E%8B%E6%8F%90%E7%A4%BA"><span class="nav-number">2.1.</span> <span class="nav-text">type hints(类型提示)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#OpenAPI%E4%B8%8EFastAPI"><span class="nav-number">3.</span> <span class="nav-text">OpenAPI与FastAPI</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Request"><span class="nav-number">3.1.</span> <span class="nav-text">Request</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#path-param"><span class="nav-number">3.1.1.</span> <span class="nav-text">path param</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#query-param"><span class="nav-number">3.1.2.</span> <span class="nav-text">query param</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#path-param-query-param"><span class="nav-number">3.1.3.</span> <span class="nav-text">path param + query param</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Request-body"><span class="nav-number">3.1.4.</span> <span class="nav-text">Request body</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Request-Filed"><span class="nav-number">3.2.</span> <span class="nav-text">Request Filed</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Response"><span class="nav-number">3.3.</span> <span class="nav-text">Response</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Header"><span class="nav-number">3.4.</span> <span class="nav-text">Header</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cookie%E7%AD%89"><span class="nav-number">3.5.</span> <span class="nav-text">Cookie等</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96"><span class="nav-number">4.</span> <span class="nav-text">依赖</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%B6"><span class="nav-number">5.</span> <span class="nav-text">中间件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ORM"><span class="nav-number">6.</span> <span class="nav-text">ORM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E5%8F%B0%E4%BB%BB%E5%8A%A1%E5%92%8CCelery"><span class="nav-number">7.</span> <span class="nav-text">后台任务和Celery</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90"><span class="nav-number">8.</span> <span class="nav-text">静态资源</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%90%E5%BA%94%E7%94%A8"><span class="nav-number">9.</span> <span class="nav-text">子应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#websocket"><span class="nav-number">10.</span> <span class="nav-text">websocket</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6"><span class="nav-number">11.</span> <span class="nav-text">事件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">12.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF"><span class="nav-number">13.</span> <span class="nav-text">模板</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2-Server"><span class="nav-number">14.</span> <span class="nav-text">部署&#x2F;Server</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%94%9F%E6%88%90%E5%99%A8"><span class="nav-number">15.</span> <span class="nav-text">项目生成器</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="琢灵"
+      src="/images/my-avatar.jpg">
+  <p class="site-author-name" itemprop="name">琢灵</p>
+  <div class="site-description" itemprop="description">技术笔记，生活点滴</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/XiaobinZhao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;XiaobinZhao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">琢灵</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js"></script>
+    <script defer src="//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'IhFe1C45bDBFTjSxcahEd1Lv-gzGzoHsz',
+      appKey     : 'Ljdc8IPrTgT76N2glnDMs90o',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
