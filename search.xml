@@ -41,64 +41,6 @@
       </tags>
   </entry>
   <entry>
-    <title>IO模型</title>
-    <url>/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</url>
-    <content><![CDATA[<h1 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h1><p>在Linux(UNIX)操作系统中，共有五种IO模型，分别是：阻塞IO模型、非阻塞IO模型、IO复用模型、信号驱动IO模型以及异步IO模型。</p>
-<a id="more"></a>
-
-<ul>
-<li>参看：<img src="/images/io%E6%A8%A1%E5%9E%8B.png" alt="io模型"></li>
-</ul>
-<p>在处理 IO 的时候，阻塞和非阻塞都是同步 IO。只有使用了特殊的 API 才是异步 IO。<img src="https://pic3.zhimg.com/50/7d3eb389b7724878bd7e12ebc6dbcdb5_hd.jpg?source=1940ef5c" data-rawwidth="415" data-rawheight="150" class="content_image" width="415"/></p>
-<h1 id="同步-异步和阻塞-非阻塞"><a href="#同步-异步和阻塞-非阻塞" class="headerlink" title="同步/异步和阻塞/非阻塞"></a>同步/异步和阻塞/非阻塞</h1><p>阻塞/非阻塞 与 同步/异步不能简单的从字面理解，提供一个从分布式系统角度的回答。</p>
-<ol>
-<li><p><strong>同步与异步</strong>. 同步和异步关注的是消息通信机制 (synchronous communication/ asynchronous communication).所谓同步，就是在发出一个<em>调用</em>时，在没有得到结果之前，该<em>调用</em>就不返回。但是一旦调用返回，就得到返回值了。换句话说，就是由<em>调用者</em>主动等待这个<em>调用</em>的结果。而异步则是相反，<em>调用</em>在发出之后，这个调用就直接返回了，所以没有返回结果。换句话说，当一个异步过程调用发出后，调用者不会立刻得到结果。而是在<em>调用</em>发出后，<em>被调用者</em>通过状态、通知来通知调用者，或通过回调函数处理这个调用。</p>
-</li>
-<li><p>阻塞与非阻塞<br>阻塞和非阻塞关注的是程序在等待调用结果（消息，返回值）时的状态: <strong>阻塞调用</strong>是指调用结果返回之前，当前线程会被挂起。调用线程只有在得到结果之后才会返回。<strong>非阻塞调用</strong>指在不能立刻得到结果之前，该调用不会阻塞当前线程。</p>
-</li>
-<li><p>打一个通俗的比方</p>
-</li>
-</ol>
-<ul>
-<li>老张爱喝茶，废话不说，煮开水。</li>
-<li>出场人物：老张，水壶两把（普通水壶，简称水壶；会响的水壶，简称响水壶）。<ol>
-<li>老张把水壶放到火上，立等水开。（同步阻塞）老张觉得自己有点傻</li>
-<li>老张把水壶放到火上，去客厅看电视，时不时去厨房看看水开没有。（同步非阻塞）</li>
-<li>老张还是觉得自己有点傻，于是变高端了，买了把会响笛的那种水壶。水开之后，能大声发出嘀<del>~</del>的噪音。老张把响水壶放到火上，立等水开。（异步阻塞）</li>
-<li>老张觉得这样傻等意义不大,老张把响水壶放到火上，去客厅看电视，水壶响之前不再去看它了，响了再去拿壶。（异步非阻塞）老张觉得自己聪明了。</li>
-</ol>
-</li>
-</ul>
-<blockquote>
-<p>所谓同步异步，只是对于水壶而言。普通水壶，同步；响水壶，异步。虽然都能干活，但响水壶可以在自己完工之后，提示老张水开了。这是普通水壶所不能及的。同步只能让调用者去轮询自己（情况2中），造成老张效率的低下。所谓阻塞非阻塞，仅仅对于老张而言。立等的老张，阻塞；看电视的老张，非阻塞。情况1和情况3中老张就是阻塞的，媳妇喊他都不知道。虽然3中响水壶是异步的，可对于立等的老张没有太大的意义。所以一般异步是配合非阻塞使用的，这样才能发挥异步的效用。</p>
-</blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>阻塞、非阻塞、多路IO复用，都是同步IO，异步必定是非阻塞的，所以不存在异步阻塞和异步非阻塞的说法。真正的异步IO需要CPU的深度参与。换句话说，只有用户线程在操作IO的时候根本不去考虑IO的执行全部都交给CPU去完成，而自己只等待一个完成信号的时候，才是真正的异步IO。所以，拉一个子线程去轮询、去死循环，或者使用select、poll、epool，都不是异步。</p>
-<ul>
-<li>异步就是异步</li>
-</ul>
-<p>有许多io模型的相关文章主要涉及四个概念同步( synchronous).异步( asynchronous).阻塞(plocking)和non- blocking).有些文章将这四个作了两两组合,于是有了<strong>异步阳塞和异步非阳塞</strong>,可以很明确地说完全是是羍强之理解。无论是&lt;Uⅸ网络编程&gt;一书中所列的○io模式,还是POSIX标准都没有提这两个概念。异步就是异步!只有同步时才有阻塞和非阻塞之说。</p>
-<ul>
-<li>阻塞和非阻塞</li>
-</ul>
-<p>非阻塞时,要区分场合范围.比如linux中说的非阻塞iO和Java的NIO1.0中的非阻塞I/O不是相同的概念。从最根本来说,阻塞就是进程“被”休息,CPU处理其它进程去了,非阻塞可以理解成将大的整片时间的阻塞分成N多的小的阻塞,所以进程不断地有机会 被”CPU光顾,理论上可以做点其它事,看上去 Linux非阻塞I/O 要比阻塞好，但CPU会很大机率因socket没数据而空转 虽然这个进程是爽了，但是从整个机器的效率来说,浪费更大了！Java NIO1.0中的非阻塞I/O中的 Selector select()函数还是阻塞的,所以不会有无谓的CPU浪费Java NIO1.0,与其说是非阻塞I/O, 还不如说是,多路复用I/O,更好让人理解！</p>
-<ul>
-<li>异步</li>
-</ul>
-<p>异步可以说是I/O最理想的模型:CPU的原则是,有必要的时候才会参与,既不浪费,也不怠慢。理想中的异步I/O, Application无需等待socket数据(也正是因此进程而被”休息”).也无需 copy socket data,将由其它的同学(理想状态,不是CPU)负责将socket data copy到Appliation事先指定的内存后,通知一声Appliation(一般是回调函数)<br>copy socket data, Application是不用做了，但事情总是需要做，不管是谁做，CPU是否还是要花费精力去参与呢?可以用”内存映射”以及DMA等方式来达到“不用CPU去参与繁重的工作”的目的. “内存映射”是不用copy,而DMA是有其它芯片来代替CPU处理.</p>
-<p>同步和异步针对应用程序来，关注的是程序中间的协作关系；阻塞与非阻塞更关注的是单个进程的执行状态。</p>
-]]></content>
-      <categories>
-        <category>架构</category>
-      </categories>
-      <tags>
-        <tag>IO模型</tag>
-        <tag>阻塞</tag>
-        <tag>非阻塞</tag>
-        <tag>同步</tag>
-        <tag>异步</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>yield</title>
     <url>/2020/10/20/yiled/</url>
     <content><![CDATA[<h1 id="yield"><a href="#yield" class="headerlink" title="yield"></a>yield</h1><p>为了解释yiled需要理解几个概念：</p>
@@ -171,6 +113,64 @@
       <tags>
         <tag>python</tag>
         <tag>yield</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>IO模型</title>
+    <url>/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</url>
+    <content><![CDATA[<h1 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h1><p>在Linux(UNIX)操作系统中，共有五种IO模型，分别是：阻塞IO模型、非阻塞IO模型、IO复用模型、信号驱动IO模型以及异步IO模型。</p>
+<a id="more"></a>
+
+<ul>
+<li>参看：<img src="/images/io%E6%A8%A1%E5%9E%8B.png" alt="io模型"></li>
+</ul>
+<p>在处理 IO 的时候，阻塞和非阻塞都是同步 IO。只有使用了特殊的 API 才是异步 IO。<img src="https://pic3.zhimg.com/50/7d3eb389b7724878bd7e12ebc6dbcdb5_hd.jpg?source=1940ef5c" data-rawwidth="415" data-rawheight="150" class="content_image" width="415"/></p>
+<h1 id="同步-异步和阻塞-非阻塞"><a href="#同步-异步和阻塞-非阻塞" class="headerlink" title="同步/异步和阻塞/非阻塞"></a>同步/异步和阻塞/非阻塞</h1><p>阻塞/非阻塞 与 同步/异步不能简单的从字面理解，提供一个从分布式系统角度的回答。</p>
+<ol>
+<li><p><strong>同步与异步</strong>. 同步和异步关注的是消息通信机制 (synchronous communication/ asynchronous communication).所谓同步，就是在发出一个<em>调用</em>时，在没有得到结果之前，该<em>调用</em>就不返回。但是一旦调用返回，就得到返回值了。换句话说，就是由<em>调用者</em>主动等待这个<em>调用</em>的结果。而异步则是相反，<em>调用</em>在发出之后，这个调用就直接返回了，所以没有返回结果。换句话说，当一个异步过程调用发出后，调用者不会立刻得到结果。而是在<em>调用</em>发出后，<em>被调用者</em>通过状态、通知来通知调用者，或通过回调函数处理这个调用。</p>
+</li>
+<li><p>阻塞与非阻塞<br>阻塞和非阻塞关注的是程序在等待调用结果（消息，返回值）时的状态: <strong>阻塞调用</strong>是指调用结果返回之前，当前线程会被挂起。调用线程只有在得到结果之后才会返回。<strong>非阻塞调用</strong>指在不能立刻得到结果之前，该调用不会阻塞当前线程。</p>
+</li>
+<li><p>打一个通俗的比方</p>
+</li>
+</ol>
+<ul>
+<li>老张爱喝茶，废话不说，煮开水。</li>
+<li>出场人物：老张，水壶两把（普通水壶，简称水壶；会响的水壶，简称响水壶）。<ol>
+<li>老张把水壶放到火上，立等水开。（同步阻塞）老张觉得自己有点傻</li>
+<li>老张把水壶放到火上，去客厅看电视，时不时去厨房看看水开没有。（同步非阻塞）</li>
+<li>老张还是觉得自己有点傻，于是变高端了，买了把会响笛的那种水壶。水开之后，能大声发出嘀<del>~</del>的噪音。老张把响水壶放到火上，立等水开。（异步阻塞）</li>
+<li>老张觉得这样傻等意义不大,老张把响水壶放到火上，去客厅看电视，水壶响之前不再去看它了，响了再去拿壶。（异步非阻塞）老张觉得自己聪明了。</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p>所谓同步异步，只是对于水壶而言。普通水壶，同步；响水壶，异步。虽然都能干活，但响水壶可以在自己完工之后，提示老张水开了。这是普通水壶所不能及的。同步只能让调用者去轮询自己（情况2中），造成老张效率的低下。所谓阻塞非阻塞，仅仅对于老张而言。立等的老张，阻塞；看电视的老张，非阻塞。情况1和情况3中老张就是阻塞的，媳妇喊他都不知道。虽然3中响水壶是异步的，可对于立等的老张没有太大的意义。所以一般异步是配合非阻塞使用的，这样才能发挥异步的效用。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>阻塞、非阻塞、多路IO复用，都是同步IO，异步必定是非阻塞的，所以不存在异步阻塞和异步非阻塞的说法。真正的异步IO需要CPU的深度参与。换句话说，只有用户线程在操作IO的时候根本不去考虑IO的执行全部都交给CPU去完成，而自己只等待一个完成信号的时候，才是真正的异步IO。所以，拉一个子线程去轮询、去死循环，或者使用select、poll、epool，都不是异步。</p>
+<ul>
+<li>异步就是异步</li>
+</ul>
+<p>有许多io模型的相关文章主要涉及四个概念同步( synchronous).异步( asynchronous).阻塞(plocking)和non- blocking).有些文章将这四个作了两两组合,于是有了<strong>异步阳塞和异步非阳塞</strong>,可以很明确地说完全是是羍强之理解。无论是&lt;Uⅸ网络编程&gt;一书中所列的○io模式,还是POSIX标准都没有提这两个概念。异步就是异步!只有同步时才有阻塞和非阻塞之说。</p>
+<ul>
+<li>阻塞和非阻塞</li>
+</ul>
+<p>非阻塞时,要区分场合范围.比如linux中说的非阻塞iO和Java的NIO1.0中的非阻塞I/O不是相同的概念。从最根本来说,阻塞就是进程“被”休息,CPU处理其它进程去了,非阻塞可以理解成将大的整片时间的阻塞分成N多的小的阻塞,所以进程不断地有机会 被”CPU光顾,理论上可以做点其它事,看上去 Linux非阻塞I/O 要比阻塞好，但CPU会很大机率因socket没数据而空转 虽然这个进程是爽了，但是从整个机器的效率来说,浪费更大了！Java NIO1.0中的非阻塞I/O中的 Selector select()函数还是阻塞的,所以不会有无谓的CPU浪费Java NIO1.0,与其说是非阻塞I/O, 还不如说是,多路复用I/O,更好让人理解！</p>
+<ul>
+<li>异步</li>
+</ul>
+<p>异步可以说是I/O最理想的模型:CPU的原则是,有必要的时候才会参与,既不浪费,也不怠慢。理想中的异步I/O, Application无需等待socket数据(也正是因此进程而被”休息”).也无需 copy socket data,将由其它的同学(理想状态,不是CPU)负责将socket data copy到Appliation事先指定的内存后,通知一声Appliation(一般是回调函数)<br>copy socket data, Application是不用做了，但事情总是需要做，不管是谁做，CPU是否还是要花费精力去参与呢?可以用”内存映射”以及DMA等方式来达到“不用CPU去参与繁重的工作”的目的. “内存映射”是不用copy,而DMA是有其它芯片来代替CPU处理.</p>
+<p>同步和异步针对应用程序来，关注的是程序中间的协作关系；阻塞与非阻塞更关注的是单个进程的执行状态。</p>
+]]></content>
+      <categories>
+        <category>架构</category>
+      </categories>
+      <tags>
+        <tag>IO模型</tag>
+        <tag>阻塞</tag>
+        <tag>非阻塞</tag>
+        <tag>同步</tag>
+        <tag>异步</tag>
       </tags>
   </entry>
   <entry>
@@ -1158,12 +1158,93 @@ memcache代码：<figure class="highlight java"><table><tr><td class="code"><pre
 </blockquote>
 ]]></content>
       <categories>
-        <category>架构</category>
         <category>python</category>
+        <category>架构</category>
       </categories>
       <tags>
         <tag>python</tag>
         <tag>异步编程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>协程</title>
+    <url>/2020/10/21/%E5%8D%8F%E7%A8%8B/</url>
+    <content><![CDATA[<h1 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h1><p>协程，又称微线程，纤程。英文名Coroutine。</p>
+<p>那么为什么需要协程？</p>
+<h2 id="引出问题"><a href="#引出问题" class="headerlink" title="引出问题"></a>引出问题</h2><ul>
+<li>同步编程的并发性不高</li>
+<li>多进程编程效率受CPU核数限制，当任务数量远大于CPU核数时，执行效率会降低。</li>
+<li>多线程编程需要线程之间的通信，而且需要锁机制来防止共享变量被不同线程乱改，而且由于Python中的GIL(全局解释器锁)，所以实际上也无法做到真正的并行。</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="产生需求"><a href="#产生需求" class="headerlink" title="产生需求"></a>产生需求</h2><ul>
+<li>可不可以采用同步的方式来编写异步功能代码？</li>
+<li>能不能只用一个单线程就能做到不同任务间的切换？这样就没有了线程切换的时间消耗，也不用使用锁机制来削弱多任务并发效率！</li>
+<li>对于IO密集型任务，可否有更高的处理方式来节省CPU等待时间？</li>
+</ul>
+<p>所以协程应运而生。此外，多进程和多线程是内核级别的程序，而协程是函数级别的程序，是可以通过程序员进行调用的。</p>
+<p>以下是协程特性的总结：<br>协程 | 属性<br>—|—<br>所需线程 | 单线程(因为仅定义一个loop，所有event均在一个loop中)<br>编程方式 |同步<br>实现效果 | 异步<br>是否需要锁机制 | 否<br>程序级别 | 函数级<br>实现机制 | 事件循环＋协程<br>总耗时 | 最耗时事件的时间<br>应用场 | IO密集型任务等</p>
+<h1 id="协程与子程序"><a href="#协程与子程序" class="headerlink" title="协程与子程序"></a>协程与子程序</h1><p>协程的概念很早就提出来了，但直到最近几年才在某些语言（如Lua）中得到广泛应用。</p>
+<p>子程序，或者称为函数，在所有语言中都是层级调用，比如A调用B，B在执行过程中又调用了C，C执行完毕返回，B执行完毕返回，最后是A执行完毕。</p>
+<p>所以子程序调用是通过栈实现的，一个线程就是执行一个子程序。</p>
+<p>子程序调用总是一个入口，一次返回，调用顺序是明确的。而协程的调用和子程序不同。</p>
+<p>协程看上去也是子程序，但执行过程中，在子程序内部可中断，然后转而执行别的子程序，在适当的时候再返回来接着执行。<br>注意，在一个子程序中中断，去执行其他子程序，不是函数调用，有点类似CPU的中断。比如子程序A、B：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def A():</span><br><span class="line">    print(&#39;1&#39;)</span><br><span class="line">    print(&#39;2&#39;)</span><br><span class="line">    print(&#39;3&#39;)</span><br><span class="line"></span><br><span class="line">def B():</span><br><span class="line">    print(&#39;x&#39;)</span><br><span class="line">    print(&#39;y&#39;)</span><br><span class="line">    print(&#39;z&#39;)</span><br></pre></td></tr></table></figure>
+<p>假设由协程执行，在执行A的过程中，可以随时中断，去执行B，B也可能在执行过程中中断再去执行A，结果可能是：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">x</span><br><span class="line">y</span><br><span class="line">3</span><br><span class="line">z</span><br></pre></td></tr></table></figure>
+
+<p>但是在A中是没有调用B的，所以协程的调用比函数调用理解起来要难一些。</p>
+<p>看起来A、B的执行有点像多线程，但协程的特点在于是一个线程执行，那和多线程比，协程有何优势？</p>
+<h2 id="协程的优势"><a href="#协程的优势" class="headerlink" title="协程的优势"></a>协程的优势</h2><ul>
+<li><p>最大的优势就是协程极<strong>高的执行效率</strong>。因为子程序切换不是线程切换，而是由程序自身控制，因此，没有线程切换的开销，和多线程比，线程数量越多，协程的性能优势就越明显。</p>
+</li>
+<li><p>第二大优势就是<strong>不需要多线程的锁机制</strong>，因为只有一个线程，也不存在同时写变量冲突，在协程中控制共享资源不加锁，只需要判断状态就好了，所以执行效率比多线程高很多。</p>
+</li>
+</ul>
+<p>因为协程是一个线程执行，那怎么利用多核CPU呢？最简单的方法是多进程+协程，既充分利用多核，又充分发挥协程的高效率，可获得极高的性能。</p>
+<h2 id="协程的劣势"><a href="#协程的劣势" class="headerlink" title="协程的劣势"></a>协程的劣势</h2><ul>
+<li>无法利用多核资源：协程的本质是个单线程,它不能同时将 单个CPU 的多个核用上,协程需要和进程配合才能运行在多CPU上.最简单的方法是多进程+协程，既充分利用多核，又充分发挥协程的高效率，可获得极高的性能。当然我们日常所编写的绝大部分应用都没有这个必要，除非是cpu密集型应用。</li>
+<li>进行阻塞（Blocking）操作（如IO时）会阻塞掉整个程序</li>
+</ul>
+<h2 id="协程与generator"><a href="#协程与generator" class="headerlink" title="协程与generator"></a>协程与generator</h2><p>Python对协程的支持是通过generator实现的。有关generator请参看yield一节相关记录。</p>
+<p>在generator中，我们不但可以通过for循环来迭代，还可以不断调用next()函数获取由yield语句返回的下一个值。</p>
+<p>但是Python的yield不但可以返回一个值，它还可以接收调用者发出的参数。</p>
+<p>来看例子：</p>
+<p>传统的生产者-消费者模型是一个线程写消息，一个线程取消息，通过锁机制控制队列和等待，但一不小心就可能死锁。</p>
+<p>如果改用协程，生产者生产消息后，直接通过yield跳转到消费者开始执行，待消费者执行完毕后，切换回生产者继续生产，效率极高：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def consumer():</span><br><span class="line">    r &#x3D; &#39;&#39;</span><br><span class="line">    while True:</span><br><span class="line">        n &#x3D; yield r</span><br><span class="line">        if not n:</span><br><span class="line">            return</span><br><span class="line">        print(&#39;[CONSUMER] Consuming %s...&#39; % n)</span><br><span class="line">        r &#x3D; &#39;200 OK&#39;</span><br><span class="line"></span><br><span class="line">def produce(c):</span><br><span class="line">    c.send(None)</span><br><span class="line">    n &#x3D; 0</span><br><span class="line">    while n &lt; 5:</span><br><span class="line">        n &#x3D; n + 1</span><br><span class="line">        print(&#39;[PRODUCER] Producing %s...&#39; % n)</span><br><span class="line">        r &#x3D; c.send(n)</span><br><span class="line">        print(&#39;[PRODUCER] Consumer return: %s&#39; % r)</span><br><span class="line">    c.close()</span><br><span class="line"></span><br><span class="line">c &#x3D; consumer()</span><br><span class="line">produce(c)</span><br></pre></td></tr></table></figure>
+
+<p>执行结果：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[PRODUCER] Producing 1...</span><br><span class="line">[CONSUMER] Consuming 1...</span><br><span class="line">[PRODUCER] Consumer return: 200 OK</span><br><span class="line">[PRODUCER] Producing 2...</span><br><span class="line">[CONSUMER] Consuming 2...</span><br><span class="line">[PRODUCER] Consumer return: 200 OK</span><br><span class="line">[PRODUCER] Producing 3...</span><br><span class="line">[CONSUMER] Consuming 3...</span><br><span class="line">[PRODUCER] Consumer return: 200 OK</span><br><span class="line">[PRODUCER] Producing 4...</span><br><span class="line">[CONSUMER] Consuming 4...</span><br><span class="line">[PRODUCER] Consumer return: 200 OK</span><br><span class="line">[PRODUCER] Producing 5...</span><br><span class="line">[CONSUMER] Consuming 5...</span><br><span class="line">[PRODUCER] Consumer return: 200 OK</span><br></pre></td></tr></table></figure>
+
+<p>注意到consumer函数是一个generator，把一个consumer传入produce后：</p>
+<ul>
+<li>首先调用c.send(None)启动生成器；</li>
+<li>然后，一旦生产了东西，通过c.send(n)切换到consumer执行；</li>
+<li>consumer通过yield拿到消息，处理，又通过yield把结果传回；</li>
+<li>produce拿到consumer处理的结果，继续生产下一条消息；</li>
+<li>produce决定不生产了，通过c.close()关闭consumer，整个过程结束。</li>
+</ul>
+<p>整个流程无锁，由一个线程执行，produce和consumer协作完成任务，所以称为“协程”，而非线程的抢占式多任务。</p>
+<p>最后套用Donald Knuth的一句话总结协程的特点：</p>
+<blockquote>
+<p>“子程序就是协程的一种特例。”</p>
+</blockquote>
+<h1 id="发展历程"><a href="#发展历程" class="headerlink" title="发展历程"></a>发展历程</h1><p>Python中的协程经历了很长的一段发展历程。</p>
+<ul>
+<li>最初的生成器yield和send()语法</li>
+<li>然后在Python3.4中加入了asyncio模块，引入@asyncio.coroutine装饰器和yield from语法</li>
+<li>在Python3.5上又提供了async/await语法</li>
+<li>的Python3.6中asynico也由临时版改为了稳定版</li>
+</ul>
+]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>协程</tag>
+        <tag>Coroutine</tag>
       </tags>
   </entry>
 </search>
