@@ -1,285 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>python异步编程</title>
-    <url>/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/</url>
-    <content><![CDATA[<h1 id="什么是异步编程"><a href="#什么是异步编程" class="headerlink" title="什么是异步编程"></a>什么是异步编程</h1><p>提到异步，那么就有同步。需要了解一下几个名词：同步/异步、阻塞/非阻塞。</p>
-<a id="more"></a>
-
-<p>具体解释参看 io模型与阻塞相关章节。</p>
-<h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><ul>
-<li>并发描述的是程序的组织结构。指程序要被设计成多个可独立执行的子任务。</li>
-<li>以利用有限的计算机资源使多个任务可以被实时或近实时执行为目的。</li>
-</ul>
-<h2 id="并行"><a href="#并行" class="headerlink" title="并行"></a>并行</h2><ul>
-<li>并行描述的是程序的执行状态。指多个任务同时被执行。</li>
-<li>以利用富余计算资源（多核CPU）加速完成多个任务为目的。</li>
-<li>并发提供了一种程序组织结构方式，让问题的解决方案可以并行执行，但并行执行不是必须的。</li>
-</ul>
-<h2 id="概念总结"><a href="#概念总结" class="headerlink" title="概念总结"></a>概念总结</h2><ul>
-<li>并行是为了利用多核加速多任务完成的进度</li>
-<li>并发是为了让独立的子任务都有机会被尽快执行，但不一定能加速整体进度</li>
-<li>非阻塞是为了提高程序整体执行效率</li>
-<li>异步是高效地组织非阻塞任务的方式</li>
-</ul>
-<p>要支持并发，必须拆分为多任务，不同任务相对而言才有阻塞/非阻塞、同步/异步。所以，并发、异步、非阻塞三个词总是如影随形。</p>
-<h2 id="异步编程"><a href="#异步编程" class="headerlink" title="异步编程"></a>异步编程</h2><p>以进程、线程、协程、函数/方法作为执行任务程序的基本单位，结合回调、事件循环、信号量等机制，以提高程序整体执行效率和并发能力的编程方式。</p>
-<p>如果在某程序的运行时，能根据已经执行的指令准确判断它接下来要进行哪个具体操作，那它是同步程序，反之则为异步程序。（无序与有序的区别）</p>
-<p>同步/异步、阻塞/非阻塞并非水火不容，要看讨论的程序所处的封装级别。例如购物程序在处理多个用户的浏览请求可以是异步的，而更新库存时必须是同步的。</p>
-<h2 id="异步之难-nan"><a href="#异步之难-nan" class="headerlink" title="异步之难(nán)"></a>异步之难(nán)</h2><p>控制不住“计几”写的程序，因为其执行顺序不可预料，当下正要发生什么事件不可预料。在并行情况下更为复杂和艰难。</p>
-<p>所以，几乎所有的异步框架都将异步编程模型简化：一次只允许处理一个事件。故而有关异步的讨论几乎都集中在了单线程内。</p>
-<p>如果某事件处理程序需要长时间执行，所有其他部分都会被阻塞。</p>
-<p>所以，一旦采取异步编程，每个异步调用必须“足够小”，不能耗时太久。如何拆分异步任务成了难题。</p>
-<p>程序下一步行为往往依赖上一步执行结果，如何知晓上次异步调用已完成并获取结果？</p>
-<p><strong>回调（Callback）成了必然选择</strong>。那又需要面临“回调地狱”的折磨。</p>
-<p>同步代码改为异步代码，必然破坏代码结构。</p>
-<p>解决问题的逻辑也要转变，不再是一条路走到黑，需要精心安排异步任务。</p>
-<h1 id="为什么要异步编程"><a href="#为什么要异步编程" class="headerlink" title="为什么要异步编程"></a>为什么要异步编程</h1><p>如上文所述，异步编程面临诸多难点，Python 之父亲自上阵打磨4年才使 asyncio 模块在Python 3.6中“转正”，如此苦心为什么？答案只有一个：它值得！下面我们看看为何而值得。</p>
-<h2 id="CPU的时间观"><a href="#CPU的时间观" class="headerlink" title="CPU的时间观"></a>CPU的时间观</h2><p><img src="/images/cpu%E6%97%B6%E9%97%B4%E8%A7%82.png" alt="cpu时间观"></p>
-<p>我们将一个 2.6GHz 的 CPU 拟人化，假设它执行一条命令的时间，他它感觉上过了一秒钟。CPU是计算机的处理核心，也是最宝贵的资源，如果有浪费CPU的运行时间，导致其利用率不足，那程序效率必然低下（因为实际上有资源可以使效率更高）。</p>
-<p>如上图所示，在千兆网上传输2KB数据，CPU感觉过了14个小时，如果是在10M的公网上呢？那效率会低百倍！如果在这么长的一段时间内，CPU只是傻等结果而不能去干其他事情，是不是在浪费CPU的青春？</p>
-<p>鲁迅说，浪费“CPU”的时间等于谋财害命。而凶手就是程序猿。</p>
-<h2 id="面临的问题"><a href="#面临的问题" class="headerlink" title="面临的问题"></a>面临的问题</h2><ul>
-<li>成本问题</li>
-</ul>
-<blockquote>
-<p>如果一个程序不能有效利用一台计算机资源，那必然需要更多的计算机通过运行更多的程序实例来弥补需求缺口。例如我前不久主导重写的项目，使用Python异步编程，改版后由原来的7台服务器削减至3台，成本骤降57%。一台AWS m4.xlarge 型通用服务器按需付费实例一年价格约 1.2 万人民币。</p>
-</blockquote>
-<ul>
-<li><p>效率问题</p>
-<blockquote>
-<p>如果不在乎钱的消耗，那也会在意效率问题。当服务器数量堆叠到一定规模后，如果不改进软件架构和实现，加机器是徒劳，而且运维成本会骤然增加。比如别人家的电商平台支持6000单/秒支付，而自家在下单量才支撑2000单/秒，在双十一这种活动的时候，钱送上门也赚不到。</p>
-</blockquote>
-</li>
-<li><p>C10k/C10M挑战</p>
-<blockquote>
-<p>C10k（concurrently handling 10k connections）是一个在1999年被提出来的技术挑战，如何在一颗1GHz CPU，2G内存，1gbps网络环境下，让单台服务器同时为1万个客户端提供FTP服务。而到了2010年后，随着硬件技术的发展，这个问题被延伸为C10M，即如何利用8核心CPU，64G内存，在10gbps的网络上保持1000万并发连接，或是每秒钟处理100万的连接。（两种类型的计算机资源在各自的时代都约为1200美元）</p>
-</blockquote>
-</li>
-</ul>
-<p>成本和效率问题是从企业经营角度讲，C10k/C10M问题则是从技术角度出发挑战软硬件极限。C10k/C10M 问题得解，成本问题和效率问题迎刃而解。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>《约束理论与企业优化》中指出：“除了瓶颈之外，任何改进都是幻觉。”</p>
-<p>CPU告诉我们，它自己很快，而上下文切换慢、内存读数据慢、磁盘寻址与取数据慢、网络传输慢……总之，离开CPU 后的一切，除了一级高速缓存，都很慢。我们观察计算机的组成可以知道，主要由运算器、控制器、存储器、输入设备、输出设备五部分组成。运算器和控制器主要集成在CPU中，除此之外全是I/O，包括读写内存、读写磁盘、读写网卡全都是I/O。<strong>I/O成了最大的瓶颈</strong>。</p>
-<p>异步程序可以提高效率，而最大的瓶颈在I/O，业界诞生的解决方案没出意料：<strong>异步I/O吧，异步I/O吧，异步I/O吧吧！</strong></p>
-<h1 id="python怎么做异步编程"><a href="#python怎么做异步编程" class="headerlink" title="python怎么做异步编程"></a>python怎么做异步编程</h1><p>如今，地球上最发达、规模最庞大的计算机程序，莫过于因特网。而从CPU的时间观中可知，网络I/O是最大的I/O瓶颈，除了宕机没有比它更慢的。所以，诸多异步框架都对准的是<strong>网络I/O</strong>。</p>
-<h2 id="异步进化之路"><a href="#异步进化之路" class="headerlink" title="异步进化之路"></a>异步进化之路</h2><p>那么异步只是怎么逐步由同步进化而来呢？我们从一个爬虫例子说起，从因特网上下载10篇网页。</p>
-<h3 id="同步阻塞方式"><a href="#同步阻塞方式" class="headerlink" title="同步阻塞方式"></a>同步阻塞方式</h3><p>最容易想到的解决方案就是依次下载，从建立socket连接到发送网络请求再到读取响应数据，顺序进行。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">blocking_way</span>():</span></span><br><span class="line">    sock = socket.socket()</span><br><span class="line">    <span class="comment"># blocking</span></span><br><span class="line">    sock.connect((<span class="string">&#x27;example.com&#x27;</span>, <span class="number">80</span>))</span><br><span class="line">    request = <span class="string">&#x27;GET / HTTP/1.0\r\nHost: example.com\r\n\r\n&#x27;</span></span><br><span class="line">    sock.send(request.encode(<span class="string">&#x27;ascii&#x27;</span>))</span><br><span class="line">    response = <span class="string">b&#x27;&#x27;</span></span><br><span class="line">    chunk = sock.recv(<span class="number">4096</span>)</span><br><span class="line">    <span class="keyword">while</span> chunk:</span><br><span class="line">        response += chunk</span><br><span class="line">        <span class="comment"># blocking</span></span><br><span class="line">        chunk = sock.recv(<span class="number">4096</span>)</span><br><span class="line">    <span class="keyword">return</span> response</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sync_way</span>():</span></span><br><span class="line">    res = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">        res.append(blocking_way())</span><br><span class="line">    <span class="keyword">return</span> len(res)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注：总体耗时约为4.5秒。（因网络波动每次测试结果有所变动，本文取多次平均值）</p>
-</blockquote>
-<p>创建网络连接，多久能创建完成不是客户端决定的，而是由网络状况和服务端处理能力共同决定。服务端什么时候返回了响应数据并被客户端接收到可供程序读取，也是不可预测的。所以sock.connect()和sock.recv()这两个调用在默认情况下是阻塞的。</p>
-<blockquote>
-<p>注：sock.send()函数并不会阻塞太久，它只负责将请求数据拷贝到TCP/IP协议栈的系统缓冲区中就返回，并不等待服务端返回的应答确认。</p>
-</blockquote>
-<p>上面说了很多，我们力图说明一件事：<strong>同步阻塞的网络交互方式，效率低十分低下</strong>。特别是在网络交互频繁的程序中。这种方式根本不可能挑战C10K/C10M。</p>
-<h3 id="改进方式：多进程"><a href="#改进方式：多进程" class="headerlink" title="改进方式：多进程"></a>改进方式：多进程</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">from</span> concurrent <span class="keyword">import</span> futures</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">blocking_way</span>():</span></span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;与同步代码相同，此处省略&#x27;&#x27;&#x27;</span></span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">process_way</span>():</span></span><br><span class="line">    workers = <span class="number">10</span></span><br><span class="line">    <span class="keyword">with</span> futures.ProcessPoolExecutor(worksers) <span class="keyword">as</span> executor:</span><br><span class="line">        futs = &#123;executor.submit(blocking_way) <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>)&#125;</span><br><span class="line">    <span class="keyword">return</span> len([fut.result() <span class="keyword">for</span> fut <span class="keyword">in</span> futs])</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注：总体耗时约为 0.6 秒</p>
-</blockquote>
-<p>改善效果立竿见影。但仍然有问题。总体耗时并没有缩减到原来的十分之一，而是九分之一左右，还有一些时间耗到哪里去了？进程切换开销。</p>
-<p>进程切换开销不止像“CPU的时间观”所列的“上下文切换”那么低。CPU从一个进程切换到另一个进程，需要把旧进程运行时的寄存器状态、内存状态全部保存好，再将另一个进程之前保存的数据恢复。对CPU来讲，几个小时就干等着。当进程数量大于CPU核心数量时，进程切换是必然需要的。</p>
-<p>除了切换开销，多进程还有另外的缺点。一般的服务器在能够稳定运行的前提下，可以同时处理的进程数在数十个到数百个规模。如果进程数量规模更大，系统运行将不稳定，而且可用内存资源往往也会不足。</p>
-<p>多进程解决方案在面临每天需要成百上千万次下载任务的爬虫系统，或者需要同时搞定数万并发的电商系统来说，并不适合。</p>
-<p>除了切换开销大，以及可支持的任务规模小之外，多进程还有其他缺点，如状态共享等</p>
-<h3 id="继续改进：多线程"><a href="#继续改进：多线程" class="headerlink" title="继续改进：多线程"></a>继续改进：多线程</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">from</span> concurrent <span class="keyword">import</span> futures</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">blocking_way</span>():</span></span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;与同步代码相同，此处省略&#x27;&#x27;&#x27;</span></span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">thread_way</span>():</span></span><br><span class="line">    workers = <span class="number">10</span></span><br><span class="line">    <span class="keyword">with</span> futures.ThreadPoolExecutor(workers) <span class="keyword">as</span> executor:</span><br><span class="line">        futs = &#123;executor.submit(blocking_way) <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>)&#125;</span><br><span class="line">    <span class="keyword">return</span> len([fut.result() <span class="keyword">for</span> fut <span class="keyword">in</span> futs])</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注：总体运行时间约0.43秒。</p>
-</blockquote>
-<p>结果符合预期，比多进程耗时要少些。从运行时间上看，多线程似乎已经解决了切换开销大的问题。而且可支持的任务数量规模，也变成了数百个到数千个。</p>
-<p>但是，多线程仍有问题，特别是Python里的多线程。首先，Python中的多线程因为GIL的存在，它们并不能利用CPU多核优势，一个Python进程中，只允许有一个线程处于运行状态。那为什么结果还是如预期，耗时缩减到了十分之一？</p>
-<p>因为在做阻塞的系统调用时，例如sock.connect(),sock.recv()时，当前线程会释放GIL，让别的线程有执行机会。但是单个线程内，在阻塞调用上还是阻塞的。</p>
-<p>除了GIL之外，所有的多线程还有通病。它们是被OS调度，调度策略是抢占式的，以保证同等优先级的线程都有均等的执行机会，那带来的问题是：并不知道下一时刻是哪个线程被运行，也不知道它正要执行的代码是什么。所以就可能存在<strong>竞态条件</strong>。</p>
-<p>例如爬虫工作线程从任务队列拿待抓取URL的时候，如果多个爬虫线程同时来取，那这个任务到底该给谁？那就需要用到“锁”或“同步队列”来保证下载任务不会被重复执行。</p>
-<p>而且线程支持的多任务规模，在数百到数千的数量规模。在大规模的高频网络交互系统中，仍然有些吃力。当然，多线程最主要的问题还是<strong>竞态条件</strong>。</p>
-<h3 id="非阻塞方式"><a href="#非阻塞方式" class="headerlink" title="非阻塞方式"></a>非阻塞方式</h3><p>终于，我们来到了非阻塞解决方案。先来看看最原始的非阻塞如何工作的。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import socket</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def nonblocking_way():</span><br><span class="line">    sock &#x3D; socket.socket()</span><br><span class="line">    sock.setblocking(False)</span><br><span class="line">    try:</span><br><span class="line">        sock.connect((&#39;example.com&#39;, 80))</span><br><span class="line">    except BlockingIOError:</span><br><span class="line">        # 非阻塞连接过程中也会抛出异常</span><br><span class="line">        pass</span><br><span class="line">    request &#x3D; &#39;GET &#x2F; HTTP&#x2F;1.0\r\nHost: example.com\r\n\r\n&#39;</span><br><span class="line">    data &#x3D; request.encode(&#39;ascii&#39;)</span><br><span class="line">    # 不知道socket何时就绪，所以不断尝试发送</span><br><span class="line">    while True:</span><br><span class="line">        try:</span><br><span class="line">            sock.send(data)</span><br><span class="line">            # 直到send不抛异常，则发送完成</span><br><span class="line">            break</span><br><span class="line">        except OSError:</span><br><span class="line">            pass</span><br><span class="line"></span><br><span class="line">    response &#x3D; b&#39;&#39;</span><br><span class="line">    while True:</span><br><span class="line">        try:</span><br><span class="line">            chunk &#x3D; sock.recv(4096)</span><br><span class="line">            while chunk:</span><br><span class="line">                response +&#x3D; chunk</span><br><span class="line">                chunk &#x3D; sock.recv(4096)</span><br><span class="line">            break</span><br><span class="line">        except OSError:</span><br><span class="line">            pass</span><br><span class="line"></span><br><span class="line">    return response</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def sync_way():</span><br><span class="line">    res &#x3D; []</span><br><span class="line">    for i in range(10):</span><br><span class="line">        res.append(nonblocking_way())</span><br><span class="line">    return len(res)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注：总体耗时约4.3秒。</p>
-</blockquote>
-<p>首先注意到两点，就感觉被骗了。一是耗时与同步阻塞相当，二是代码更复杂。要非阻塞何用？且慢。</p>
-<p>上图代码<code>sock.setblocking(False)</code>告诉OS，让socket上阻塞调用都改为非阻塞的方式。之前我们说到，非阻塞就是在做一件事的时候，不阻碍调用它的程序做别的事情。上述代码在执行完 sock.connect() 和 sock.recv()后的确不再阻塞，可以继续往下执行请求准备的代码或者是执行下一次读取。</p>
-<p>代码变得更复杂也是上述原因所致。第11行要放在try语句内，是因为socket在发送非阻塞连接请求过程中，系统底层也会抛出异常。connect()被调用之后，立即可以往下执行第15和16行的代码。</p>
-<p>需要while循环不断尝试send()，是因为connect()已经非阻塞，在send()之时并不知道 socket 的连接是否就绪，只有不断尝试，尝试成功为止，即发送数据成功了。recv()调用也是同理。</p>
-<p>虽然 connect() 和 recv()不再阻塞主程序，空出来的时间段CPU没有空闲着，但并没有利用好这空闲去做其他有意义的事情，而是在循环尝试读写 socket（不停判断非阻塞调用的状态是否就绪）。还得处理来自底层的可忽略的异常。也不能同时处理多个 socket 。</p>
-<p>然后10次下载任务仍然按序进行。所以总体执行时间和同步阻塞相当。如果非得这样子，那还不如同步阻塞算了。</p>
-<h3 id="非阻塞改进"><a href="#非阻塞改进" class="headerlink" title="非阻塞改进"></a>非阻塞改进</h3><h4 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h4><p><strong>判断非阻塞调用是否就绪如果 OS能做</strong>，是不是应用程序就可以不用自己去等待和判断了，就可以利用这个空闲去做其他事情以提高效率。</p>
-<p>所以OS将I/O状态的变化都封装成了事件，如可读事件、可写事件。并且提供了专门的系统模块让应用程序可以接收事件通知。这个模块就是select。让应用程序可以通过select注册文件描述符和回调函数。当文件描述符的状态发生变化时，select就调用事先注册的回调函数。</p>
-<p>select因其算法效率比较低，后来改进成了poll，再后来又有进一步改进，BSD内核改进成了kqueue模块，而Linux内核改进成了epoll模块。这四个模块的作用都相同，暴露给程序员使用的API也几乎一致，区别在于kqueue 和 epoll在处理大量文件描述符时效率更高。</p>
-<p>鉴于 Linux 服务器的普遍性，以及为了追求更高效率，所以我们常常听闻被探讨的模块都是 epoll 。</p>
-<p>关于io多路复用（select/poll/epoll）请参看 io 模型章节。</p>
-<h4 id="回调-Callback"><a href="#回调-Callback" class="headerlink" title="回调(Callback)"></a>回调(Callback)</h4><p>把I/O事件的等待和监听任务交给了 OS，那 OS在知道I/O状态发生改变后（例如socket连接已建立成功可发送数据），它又怎么知道接下来该干嘛呢？只能回调。</p>
-<p>需要我们将发送数据与读取数据封装成独立的函数，让epoll代替应用程序监听socket状态时，得告诉epoll：“如果socket状态变为可以往里写数据（连接建立成功了），请调用HTTP请求发送函数。如果socket变为可以读数据了（客户端已收到响应），请调用响应处理函数。”</p>
-<p>于是我们利用epoll结合回调机制重构爬虫代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import socket</span><br><span class="line">from selectors import DefaultSelector, EVENT_WRITE, EVENT_READ</span><br><span class="line"></span><br><span class="line">selector &#x3D; DefaultSelector()</span><br><span class="line">stopped &#x3D; False</span><br><span class="line">urls_todo &#x3D; &#123;&#39;&#x2F;&#39;, &#39;&#x2F;1&#39;, &#39;&#x2F;2&#39;, &#39;&#x2F;3&#39;, &#39;&#x2F;4&#39;, &#39;&#x2F;5&#39;, &#39;&#x2F;6&#39;, &#39;&#x2F;7&#39;, &#39;&#x2F;8&#39;, &#39;&#x2F;9&#39;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Crawler:</span><br><span class="line">    def __init__(self, url):</span><br><span class="line">        self.url &#x3D; url</span><br><span class="line">        self.sock &#x3D; None</span><br><span class="line">        self.response &#x3D; b&#39;&#39;</span><br><span class="line"></span><br><span class="line">    def fetch(self):</span><br><span class="line">        self.sock &#x3D; socket.socket()</span><br><span class="line">        self.sock.setblocking(False)</span><br><span class="line">        try:</span><br><span class="line">            self.sock.connect((&#39;example.com&#39;, 80))</span><br><span class="line">        except BlockingIOError:</span><br><span class="line">            pass</span><br><span class="line">        selector.register(self.sock.fileno(), EVENT_WRITE, self.connected)</span><br><span class="line"></span><br><span class="line">    def connected(self, key, mask):</span><br><span class="line">        selector.unregister(key.fd)</span><br><span class="line">        get &#x3D; &#39;GET &#123;0&#125; HTTP&#x2F;1.0\r\nHost: example.com\r\n\r\n&#39;.format(self.url)</span><br><span class="line">        self.sock.send(get.encode(&#39;ascii&#39;))</span><br><span class="line">        selector.register(key.fd, EVENT_READ, self.read_response)</span><br><span class="line"></span><br><span class="line">    def read_response(self, key, mask):</span><br><span class="line">        global stopped</span><br><span class="line">        # 如果响应大于4KB，下一次循环会继续读</span><br><span class="line">        chunk &#x3D; self.sock.recv(4096)</span><br><span class="line">        if chunk:</span><br><span class="line">            self.response +&#x3D; chunk</span><br><span class="line">        else:</span><br><span class="line">            selector.unregister(key.fd)</span><br><span class="line">            urls_todo.remove(self.url)</span><br><span class="line">            if not urls_todo:</span><br><span class="line">                stopped &#x3D; True</span><br></pre></td></tr></table></figure>
-<p>此处和前面稍有不同的是，我们将下载不同的10个页面，相对URL路径存放于urls_todo集合中。现在看看改进在哪。</p>
-<p>首先，不断尝试send() 和 recv() 的两个循环被消灭掉了。</p>
-<p>其次，导入了selectors模块，并创建了一个DefaultSelector实例。Python标准库提供的selectors模块是对底层select/poll/epoll/kqueue的封装。DefaultSelector类会根据 OS 环境自动选择最佳的模块，那在 Linux 2.5.44 及更新的版本上都是epoll了。</p>
-<p>然后，在第25行和第31行分别注册了socket可写事件(EVENT_WRITE)和可读事件(EVENT_READ)发生后应该采取的回调函数。</p>
-<p>虽然代码结构清晰了，阻塞操作也交给OS去等待和通知了，但是，我们要抓取10个不同页面，就得创建10个Crawler实例，就有20个事件将要发生，那如何从selector里获取当前正发生的事件，并且得到对应的回调函数去执行呢？</p>
-<h4 id="事件循环（Event-Loop）"><a href="#事件循环（Event-Loop）" class="headerlink" title="事件循环（Event Loop）"></a>事件循环（Event Loop）</h4><p>为了解决上述问题，那我们只得采用老办法，写一个循环，去访问selector模块，等待它告诉我们当前是哪个事件发生了，应该对应哪个回调。这个等待事件通知的循环，称之为事件循环。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def loop():</span><br><span class="line">    while not stopped:</span><br><span class="line">        # 阻塞, 直到一个事件发生</span><br><span class="line">        events &#x3D; selector.select()</span><br><span class="line">        for event_key, event_mask in events:</span><br><span class="line">            callback &#x3D; event_key.data</span><br></pre></td></tr></table></figure>
-<p>上述代码中，我们用stopped全局变量控制事件循环何时停止。当urls_todo消耗完毕后，会标记stopped为True。</p>
-<p>重要的是第49行代码，selector.select() 是一个阻塞调用，因为如果事件不发生，那应用程序就没事件可处理，所以就干脆阻塞在这里等待事件发生。那可以推断，如果只下载一篇网页，一定要connect()之后才能send()继而recv()，那它的效率和阻塞的方式是一样的。因为不在connect()/recv()上阻塞，也得在select()上阻塞。</p>
-<p>所以，selector机制(后文以此称呼代指epoll/kqueue)是设计用来解决大量并发连接的。当系统中有大量非阻塞调用，能随时产生事件的时候，selector机制才能发挥最大的威力。</p>
-<p>下面是如何启创建10个下载任务和启动事件循环的：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    import time</span><br><span class="line">    start &#x3D; time.time()</span><br><span class="line">    for url in urls_todo:</span><br><span class="line">        crawler &#x3D; Crawler(url)</span><br><span class="line">        crawler.fetch()</span><br><span class="line">    loop()</span><br><span class="line">    print(time.time() - start)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注：总体耗时约0.45秒。</p>
-</blockquote>
-<p>上述执行结果令人振奋。在单线程内用 事件循环+回调搞定了10篇网页同时下载的问题。这，已经是异步编程了。虽然有一个for 循环顺序地创建Crawler 实例并调用 fetch 方法，但是fetch内仅有connect()和注册可写事件，而且从执行时间明显可以推断，多个下载任务确实在同时进行！</p>
-<p>上述代码异步执行的过程：</p>
-<ol>
-<li>创建Crawler 实例；</li>
-<li>调用fetch方法，会创建socket连接和在selector上注册可写事件；</li>
-<li>fetch内并无阻塞操作，该方法立即返回；</li>
-<li>重复上述3个步骤，将10个不同的下载任务都加入事件循环；</li>
-<li>启动事件循环，进入第1轮循环，阻塞在事件监听上；</li>
-<li>当某个下载任务EVENT_WRITE被触发，回调其connected方法，第一轮事件循环结束；</li>
-<li>进入第2轮事件循环，当某个下载任务有事件触发，执行其回调函数；此时已经不能推测是哪个事件发生，因为有可能是上次connected里的EVENT_READ先被触发，也可能是其他某个任务的EVENT_WRITE被触发；（此时，原来在一个下载任务上会阻塞的那段时间被利用起来执行另一个下载任务了）</li>
-<li>循环往复，直至所有下载任务被处理完成</li>
-<li>退出事件循环，结束整个下载程序</li>
-</ol>
-<h4 id="非阻塞总结"><a href="#非阻塞总结" class="headerlink" title="非阻塞总结"></a>非阻塞总结</h4><p>目前为止，我们已经从同步阻塞学习到了异步非阻塞。掌握了在单线程内同时并发执行多个网络I/O阻塞型任务的黑魔法。而且与多线程相比，连线程切换都没有了，执行回调函数是函数调用开销，在线程的栈内完成，因此性能也更好，单机支持的任务规模也变成了数万到数十万个。（不过我们知道：没有免费午餐，也没有银弹。）</p>
-<p>部分编程语言中，对异步编程的支持就止步于此（不含语言官方之外的扩展）。需要程序猿直接使用epoll去注册事件和回调、维护一个事件循环，然后大多数时间都花在设计回调函数上。</p>
-<p>通过本节的学习，我们应该认识到，不论什么编程语言，但凡要做异步编程，上述的“<strong>事件循环+回调</strong>”这种模式是逃不掉的，尽管它可能用的不是epoll，也可能不是while循环。如果你找到了一种不属于 “等会儿告诉你”模型的异步方式，请立即给我打电话（注意，打电话是Call）。</p>
-<p>为什么我们在某些异步编程中并没有看到 CallBack 模式呢？这就是我们接下来要探讨的问题。本节是学习异步编程的一个终点，也是另一个起点。毕竟咱们讲 Python 异步编程，还没提到其主角协程的用武之地。</p>
-<h2 id="python的异步实现"><a href="#python的异步实现" class="headerlink" title="python的异步实现"></a>python的异步实现</h2><p>我们将在本节学习到 Python生态对异步编程的支持是如何继承前文所述的“事件循环+回调”模式演变到asyncio的原生协程模式。</p>
-<h3 id="回调之痛，以终为始"><a href="#回调之痛，以终为始" class="headerlink" title="回调之痛，以终为始"></a>回调之痛，以终为始</h3><p>在上节中，我们已经学会了“事件循环+回调”的基本运行原理，可以基于这种方式在单线程内实现异步编程。也确实能够大大提高程序运行效率。但是，刚才所学的只是最基本的，然而在生产项目中，要应对的复杂度会大大增加。考虑如下问题：</p>
-<ol>
-<li>如果回调函数执行不正常该如何？</li>
-<li>如果回调里面还要嵌套回调怎么办？要嵌套很多层怎么办？</li>
-<li>如果嵌套了多层，其中某个环节出错了会造成什么后果？</li>
-<li>如果有个数据需要被每个回调都处理怎么办？</li>
-<li>……</li>
-</ol>
-<p>在实际编程中，上述系列问题不可避免。在这些问题的背后隐藏着回调编程模式的一些</p>
-<p>缺点：</p>
-<ul>
-<li>回调地狱</li>
-<li>破坏代码结构<br>写同步代码时，关联的操作时自上而下运行：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">do_a()</span><br><span class="line">do_b()</span><br></pre></td></tr></table></figure>
-如果 b 处理依赖于 a 处理的结果，而 a 过程是异步调用，就不知 a何时能返回值，需要将后续的处理过程以callback的方式传递给 a ，让 a执行完以后可以执行 b。代码变化为：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">do_a(do_b())</span><br></pre></td></tr></table></figure>
-如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：</span><br></pre></td></tr></table></figure>
-上面实际也是回调地狱式的风格，但这不是主要矛盾。主要在于，原本从上而下的代码结构，要改成从内到外的。先f，再e，再d，…，直到最外层 a 执行完成。在同步版本中，执行完a后执行b，这是线程的指令指针控制着的流程，而在回调版本中，流程就是程序猿需要注意和安排的。</li>
-<li>共享状态管理困难<br>回顾同步阻塞版的爬虫代码，sock对象从头使用到尾，而在回调的版本中，我们必须在Crawler实例化后的对象self里保存它自己的sock对象。如果不是采用OOP的编程风格，那需要把要共享的状态接力似的传递给每一个回调。多个异步调用之间，到底要共享哪些状态，事先就得考虑清楚，精心设计。</li>
-<li>错误处理困难<br>一连串的回调构成一个完整的调用链。例如上述的 a 到 f。假如 d抛了异常怎么办？整个调用链断掉，接力传递的状态也会丢失，这种现象称为调用栈撕裂。 c 不知道该干嘛，继续异常，然后是 b 异常，接着 a异常。好嘛，报错日志就告诉你，a 调用出错了，但实际是 d出错。所以，为了防止栈撕裂，异常必须以数据的形式返回，而不是直接抛出异常，然后每个回调中需要检查上次调用的返回值，以防错误吞没。</li>
-</ul>
-<p>如果说代码风格难看是小事，但栈撕裂和状态管理困难这两个缺点会让基于回调的异步编程很艰难。所以不同编程语言的生态都在致力于解决这个问题。才诞生了后来的Promise、Co-routine等解决方案。</p>
-<p>Python 生态也以终为始，秉承着“程序猿不必难程序猿”的原则，让语言和框架开发者苦逼一点，也要让应用开发者舒坦。在事件循环+回调的基础上衍生出了基于协程的解决方案，代表作有 Tornado、Twisted、asyncio 等。接下来我们随着 Python 生态异步编程的发展过程，深入理解Python异步编程。</p>
-<h1 id="核心问题"><a href="#核心问题" class="headerlink" title="核心问题"></a>核心问题</h1><p>通过前面的学习，我们清楚地认识到异步编程最大的困难：异步任务何时执行完毕？接下来要对异步调用的返回结果做什么操作？</p>
-<p>上述问题我们已经通过事件循环和回调解决了。但是回调会让程序变得复杂。要异步，必回调，又是否有办法规避其缺点呢？那需要弄清楚其本质，为什么回调是必须的？还有使用回调时克服的那些缺点又是为了什么？</p>
-<p>答案是程序为了知道自己已经干了什么？正在干什么？将来要干什么？换言之，程序得知道当前所处的状态，而且要将这个状态在不同的回调之间延续下去。</p>
-<p>多个回调之间的状态管理困难，那让每个回调都能管理自己的状态怎么样？链式调用会有栈撕裂的困难，让回调之间不再链式调用怎样？不链式调用的话，那又如何让被调用者知道已经完成了？那就让这个回调通知那个回调如何？而且一个回调，不就是一个待处理任务吗？</p>
-<p>任务之间得相互通知，每个任务得有自己的状态。那不就是很古老的编程技法：协作式多任务？然而要在单线程内做调度，啊哈，协程！每个协程具有自己的栈帧，当然能知道自己处于什么状态，协程之间可以协作那自然可以通知别的协程。</p>
-<h1 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h1><p>协程(Co-routine)，即是协作式的例程。</p>
-<p>它是非抢占式的多任务子例程的概括，可以允许有多个入口点在例程中确定的位置来控制程序的暂停与恢复执行。</p>
-<p>例程是什么？编程语言定义的可被调用的代码段，为了完成某个特定功能而封装在一起的一系列指令。一般的编程语言都用称为函数或方法的代码结构来体现。</p>
-<h2 id="基于生成器的协程（yield）"><a href="#基于生成器的协程（yield）" class="headerlink" title="基于生成器的协程（yield）"></a>基于生成器的协程（yield）</h2><p>早期的 Pythoner 发现Python中有种特殊的对象——生成器（Generator），它的特点和协程很像。每一次迭代之间，会暂停执行，继续下一次迭代的时候还不会丢失先前的状态。</p>
-<p>为了支持用生成器做简单的协程，Python2.5对生成器进行了增强(PEP342)，该增强提案的标题是 “Coroutines via EnhancedGenerators”。有了PEP342的加持，生成器可以通过yield暂停执行和向外返回数据，也可以通过send()向生成器内发送数据，还可以通过throw()向生成器内抛出异常以便随时终止生成器的运行。</p>
-<p>yiled 具体解释参看 yield章节。</p>
-<h2 id="yield-from"><a href="#yield-from" class="headerlink" title="yield from"></a>yield from</h2><p>yield from 是Python 3.3新引入的语法（PEP380）。它主要解决的就是在生成器里玩生成器不方便的问题。它有两大主要功能。</p>
-<p>第一个功能是：让嵌套生成器不必通过循环迭代yield，而是直接yield  from。以下两种在生成器里玩子生成器的方式是等价的。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def gen_one():</span><br><span class="line">    subgen &#x3D; range(10)    </span><br><span class="line">    yield from subgen</span><br><span class="line"></span><br><span class="line">def gen_two():</span><br><span class="line">    subgen &#x3D; range(10)    </span><br><span class="line">    for item in subgen:        </span><br><span class="line">        yield item</span><br></pre></td></tr></table></figure>
-<p>第二个功能就是在子生成器和原生成器的调用者之间打开双向通道，两者可以直接通信。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def gen():</span><br><span class="line">    yield from subgen()</span><br><span class="line"></span><br><span class="line">def subgen():</span><br><span class="line">    while True:</span><br><span class="line">        x &#x3D; yield</span><br><span class="line">        yield x+1</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    g &#x3D; gen()</span><br><span class="line">    next(g)                # 驱动生成器g开始执行到第一个 yield</span><br><span class="line">    retval &#x3D; g.send(1)     # 看似向生成器 gen() 发送数据</span><br><span class="line">    print(retval)          # 返回2</span><br><span class="line">    g.throw(StopIteration) # 看似向gen()抛入异常</span><br></pre></td></tr></table></figure>
-<p>通过上述代码清晰地理解了yield from的双向通道功能。关键字yield from在gen()内部为subgen()和main()开辟了通信通道。main()里可以直接将数据1发送给subgen(),subgen()也可以将计算后的数据2返回到main()里，main()里也可以直接向subgen()抛入异常以终止subgen()。</p>
-<blockquote>
-<p>顺带一提，yield from 除了可以 yield from <generator> 还可以 yield from <iterable>。</p>
-</blockquote>
-<p>用yield from改进基于生成器的协程，代码抽象程度更高。使业务逻辑相关的代码更精简。由于其双向通道功能可以让协程之间随心所欲传递数据，使Python异步编程的协程解决方案大大向前迈进了一步。</p>
-<p>于是Python语言开发者们充分利用yield from，使 Guido 主导的Python异步编程框架Tulip迅速脱胎换骨，并迫不及待得让它在 Python 3.4 中换了个名字asyncio以“实习生”角色出现在标准库中。</p>
-<p>可以参看 <a href="https://segmentfault.com/a/1190000009781688">yield from 详细解释</a></p>
-<h2 id="asyncio"><a href="#asyncio" class="headerlink" title="asyncio"></a>asyncio</h2><p>asyncio是Python 3.4 试验性引入的异步I/O框架（PEP 3156），提供了基于协程做异步I/O编写单线程并发代码的基础设施。其核心组件有事件循环（Event Loop）、协程(Coroutine）、任务(Task)、未来对象(Future)以及其他一些扩充和辅助性质的模块。</p>
-<p>在引入asyncio的时候，还提供了一个装饰器@asyncio.coroutine用于装饰使用了yield from的函数，以标记其为协程。但并不强制使用这个装饰器。</p>
-<p>虽然发展到 Python 3.4 时有了yield from的加持让协程更容易了，但是由于协程在Python中发展的历史包袱所致，很多人仍然弄不明白生成器和协程的联系与区别，也弄不明白yield 和 yield from 的区别。这种混乱的状态也违背Python之禅的一些准则。</p>
-<p>于是Python设计者们又快马加鞭地在 3.5 中新增了async/await语法（PEP 492），对协程有了明确而显式的支持，称之为原生协程。async/await 和 yield from这两种风格的协程底层复用共同的实现，而且相互兼容。</p>
-<p>在Python 3.6 中asyncio库“转正”，不再是实验性质的，成为标准库的正式一员。</p>
-<p>行至此处，我们已经掌握了asyncio的核心原理，学习了它的原型，也学习了异步I/O在 CPython 官方支持的生态下是如何一步步发展至今的。</p>
-<p>实际上，真正的asyncio比我们前几节中学到的要复杂得多，它还实现了零拷贝、公平调度、异常处理、任务状态管理等等使 Python 异步编程更完善的内容。理解原理和原型对我们后续学习有莫大的帮助。</p>
-<h2 id="await-async"><a href="#await-async" class="headerlink" title="await/async"></a>await/async</h2><p>本节中，我们将初步体验asyncio库和新增语法async/await给我们带来的便利。由于Python2-3的过度期间，Python3.0-3.4的使用者并不是太多，也为了不让更多的人困惑，也因为aysncio在3.6才转正，所以更深入学习asyncio库的时候我们将使用async/await定义的原生协程风格，yield from风格的协程不再阐述（实际上它们可用很小的代价相互代替）。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import asyncio</span><br><span class="line">import aiohttp</span><br><span class="line"></span><br><span class="line">host &#x3D; &#39;http:&#x2F;&#x2F;example.com&#39;</span><br><span class="line">urls_todo &#x3D; &#123;&#39;&#x2F;&#39;, &#39;&#x2F;1&#39;, &#39;&#x2F;2&#39;, &#39;&#x2F;3&#39;, &#39;&#x2F;4&#39;, &#39;&#x2F;5&#39;, &#39;&#x2F;6&#39;, &#39;&#x2F;7&#39;, &#39;&#x2F;8&#39;, &#39;&#x2F;9&#39;&#125;</span><br><span class="line"></span><br><span class="line">loop &#x3D; asyncio.get_event_loop()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def fetch(url):</span><br><span class="line">    async with aiohttp.ClientSession(loop&#x3D;loop) as session:</span><br><span class="line">        async with session.get(url) as response:</span><br><span class="line">            response &#x3D; await response.read()</span><br><span class="line">            return response</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    import time</span><br><span class="line">    start &#x3D; time.time()</span><br><span class="line">    tasks &#x3D; [fetch(host + url) for url in urls_todo]</span><br><span class="line">    loop.run_until_complete(asyncio.gather(*tasks))</span><br><span class="line">    print(time.time() - start)</span><br></pre></td></tr></table></figure>
-<p>对比生成器版的协程，使用asyncio库后变化很大：</p>
-<ul>
-<li>没有了yield 或 yield from，而是async/await</li>
-<li>没有了自造的loop()，取而代之的是asyncio.get_event_loop()</li>
-<li>无需自己在socket上做异步操作，不用显式地注册和注销事件，aiohttp库已经代劳</li>
-<li>没有了显式的 Future 和 Task，asyncio已封装</li>
-<li>更少量的代码，更优雅的设计</li>
-</ul>
-<blockquote>
-<p>说明：我们这里发送和接收HTTP请求不再自己操作socket的原因是，在实际做业务项目的过程中，要处理妥善地HTTP协议会很复杂，我们需要的是功能完善的异步HTTP客户端，业界已经有了成熟的解决方案，DRY不是吗？</p>
-</blockquote>
-<p>和同步阻塞版的代码对比：</p>
-<ul>
-<li>异步化</li>
-<li>代码量相当（引入aiohttp框架后更少）</li>
-<li>代码逻辑同样简单，跟同步代码一样的结构、一样的逻辑</li>
-<li>接近10倍的性能提升</li>
-</ul>
-<p>生成器与asyncio提供的新版语法的区别请参看： <a href="https://www.jianshu.com/p/032ad0848f6b">async/await详解</a></p>
-<p>到此为止，我们已经深入地学习了异步编程是什么、为什么、在Python里是怎么样发展的。我们找到了一种让代码看起来跟同步代码一样简单，而效率却提升N倍（具体提升情况取决于项目规模、网络环境、实现细节）的异步编程方法。它也没有回调的那些缺点。</p>
-<h1 id="WSGI-ASGI"><a href="#WSGI-ASGI" class="headerlink" title="WSGI/ASGI"></a>WSGI/ASGI</h1><p>经过以上对异步编程的学习，接下来我们要把这些异步运用到python web中。</p>
-<p>在python web编程中，有很多流行的框架，大体分为2类：wsgi、asgi.</p>
-<p>这里需要特别解释一下几个名词：<br>wsgi server (比如uWSGI/gunicorn） 要和 wsgi   application（比如django/flask）交互，uwsgi需要将过来的请求转给django 处理，那么uWSGI 和 django的交互和调用就需要一个统一的规范，这个规范就是WSGI（Web Server Gateway Interface）</p>
-<p>asgi与wsgi的区别之处就在于，asgi扩展了wsgi,可以支持WebSocket，具有异步功能。</p>
-<ul>
-<li><p>wsgi application有以下代表：</p>
-<ol>
-<li>Django</li>
-<li>flask</li>
-<li>bottle</li>
-<li>webpy</li>
-</ol>
-</li>
-<li><p>wsgi server有以下代表：</p>
-<ol>
-<li>uWSGI</li>
-<li>gunicorn</li>
-</ol>
-</li>
-<li><p>asgi application有以下代表</p>
-<ol>
-<li>Starlette（需要使用ASGI服务作为容器，比如Uvicorn）</li>
-<li>Django Channels</li>
-<li>FastAPI(集成Starlette)</li>
-<li>tornado</li>
-<li>Snaic</li>
-<li>Quart</li>
-<li>twisted</li>
-</ol>
-</li>
-<li><p>asgi server有以下代表</p>
-<ol>
-<li>uvicorn </li>
-</ol>
-</li>
-</ul>
-<p>那么如果已经是wsgi的同步框架能不能无缝转成异步呢？no problem —&gt; greenlet/gevent</p>
-<p>我们已经知道，要异步，<strong>事件循环+回调</strong> 跑不掉。那么这个事件循环+回调在uvicorn的中只怎么体现的呢？</p>
-<p><code>myapp.py</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    uvicorn.run(app&#x3D;&#39;myapp.main:app&#39;)</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><code>uvicorn/mainpy</code></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class Server:</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    def run(self, sockets&#x3D;None):</span><br><span class="line">        self.config.setup_event_loop()</span><br><span class="line">        loop &#x3D; asyncio.get_event_loop()</span><br><span class="line">        loop.run_until_complete(self.serve(sockets&#x3D;sockets))</span><br><span class="line">        </span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
-<p>可以看到<code>asyncio.get_event_loop()</code>获取时间循环，然后把封装了sock的serve（其实就是future对象）放入事件循环处理。</p>
-<p>uvicorn 支持的loop有3种，auto/asyncio/uvloop, 默认是auto. auto会尝试首先<strong>加载uvloop</strong>,加载失败才会加载asyncio的loop.</p>
-<blockquote>
-<p>值得一说的是，可以使用uvicorn + gunicorn部署python asgi服务。uvicorn实现了gunicorn的worker接口，所以gunicorn启动服务的时候可以指定使用uvicorn的worker，比如：<code>gunicorn -k uvicorn.workers.UvicornWorker</code></p>
-</blockquote>
-<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ul>
-<li><a href="https://mp.weixin.qq.com/s?__biz=MzIxMjY5NTE0MA==&mid=2247483720&idx=1&sn=f016c06ddd17765fd50b705fed64429c" title="" target="">深入理解Python异步编程</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>架构</category>
-        <category>python</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>异步编程</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>RESTful思考</title>
     <url>/2020/10/21/RestFul%E6%80%9D%E8%80%83/</url>
     <content><![CDATA[<h1 id="Richardson的成熟度模型"><a href="#Richardson的成熟度模型" class="headerlink" title="Richardson的成熟度模型"></a>Richardson的成熟度模型</h1><p><img src="/images/restful-grade.png" alt="RIchardson成熟度模型1"><br><img src="/images/RIchardson-restful.png" alt="RIchardson成熟度模型2"></p>
@@ -337,6 +58,179 @@
         <tag>etag</tag>
         <tag>Richardson成熟度模型</tag>
         <tag>RMM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo-Next + Github Page制作个人网站使用记录</title>
+    <url>/2020/10/20/hexo/</url>
+    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
+<li>在github上创建仓库</li>
+<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
+<li>仓库新建分支gh-page</li>
+<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
+<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
+</ol>
+<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
+<li><p>修改内容自动重载并启动server</p>
+<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
+<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
+<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
+</li>
+</ol>
+<a id="more"></a>
+
+<ol start="2">
+<li><p>背景动画</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>其他可以参考</p>
+<ul>
+<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
+<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
+<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>Next</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>IO模型</title>
+    <url>/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</url>
+    <content><![CDATA[<h1 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h1><p>在Linux(UNIX)操作系统中，共有五种IO模型，分别是：阻塞IO模型、非阻塞IO模型、IO复用模型、信号驱动IO模型以及异步IO模型。</p>
+<a id="more"></a>
+
+<ul>
+<li>参看：<img src="/images/io%E6%A8%A1%E5%9E%8B.png" alt="io模型"></li>
+</ul>
+<p>在处理 IO 的时候，阻塞和非阻塞都是同步 IO。只有使用了特殊的 API 才是异步 IO。<img src="https://pic3.zhimg.com/50/7d3eb389b7724878bd7e12ebc6dbcdb5_hd.jpg?source=1940ef5c" data-rawwidth="415" data-rawheight="150" class="content_image" width="415"/></p>
+<h1 id="同步-异步和阻塞-非阻塞"><a href="#同步-异步和阻塞-非阻塞" class="headerlink" title="同步/异步和阻塞/非阻塞"></a>同步/异步和阻塞/非阻塞</h1><p>阻塞/非阻塞 与 同步/异步不能简单的从字面理解，提供一个从分布式系统角度的回答。</p>
+<ol>
+<li><p><strong>同步与异步</strong>. 同步和异步关注的是消息通信机制 (synchronous communication/ asynchronous communication).所谓同步，就是在发出一个<em>调用</em>时，在没有得到结果之前，该<em>调用</em>就不返回。但是一旦调用返回，就得到返回值了。换句话说，就是由<em>调用者</em>主动等待这个<em>调用</em>的结果。而异步则是相反，<em>调用</em>在发出之后，这个调用就直接返回了，所以没有返回结果。换句话说，当一个异步过程调用发出后，调用者不会立刻得到结果。而是在<em>调用</em>发出后，<em>被调用者</em>通过状态、通知来通知调用者，或通过回调函数处理这个调用。</p>
+</li>
+<li><p>阻塞与非阻塞<br>阻塞和非阻塞关注的是程序在等待调用结果（消息，返回值）时的状态: <strong>阻塞调用</strong>是指调用结果返回之前，当前线程会被挂起。调用线程只有在得到结果之后才会返回。<strong>非阻塞调用</strong>指在不能立刻得到结果之前，该调用不会阻塞当前线程。</p>
+</li>
+<li><p>打一个通俗的比方</p>
+</li>
+</ol>
+<ul>
+<li>老张爱喝茶，废话不说，煮开水。</li>
+<li>出场人物：老张，水壶两把（普通水壶，简称水壶；会响的水壶，简称响水壶）。<ol>
+<li>老张把水壶放到火上，立等水开。（同步阻塞）老张觉得自己有点傻</li>
+<li>老张把水壶放到火上，去客厅看电视，时不时去厨房看看水开没有。（同步非阻塞）</li>
+<li>老张还是觉得自己有点傻，于是变高端了，买了把会响笛的那种水壶。水开之后，能大声发出嘀<del>~</del>的噪音。老张把响水壶放到火上，立等水开。（异步阻塞）</li>
+<li>老张觉得这样傻等意义不大,老张把响水壶放到火上，去客厅看电视，水壶响之前不再去看它了，响了再去拿壶。（异步非阻塞）老张觉得自己聪明了。</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p>所谓同步异步，只是对于水壶而言。普通水壶，同步；响水壶，异步。虽然都能干活，但响水壶可以在自己完工之后，提示老张水开了。这是普通水壶所不能及的。同步只能让调用者去轮询自己（情况2中），造成老张效率的低下。所谓阻塞非阻塞，仅仅对于老张而言。立等的老张，阻塞；看电视的老张，非阻塞。情况1和情况3中老张就是阻塞的，媳妇喊他都不知道。虽然3中响水壶是异步的，可对于立等的老张没有太大的意义。所以一般异步是配合非阻塞使用的，这样才能发挥异步的效用。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>阻塞、非阻塞、多路IO复用，都是同步IO，异步必定是非阻塞的，所以不存在异步阻塞和异步非阻塞的说法。真正的异步IO需要CPU的深度参与。换句话说，只有用户线程在操作IO的时候根本不去考虑IO的执行全部都交给CPU去完成，而自己只等待一个完成信号的时候，才是真正的异步IO。所以，拉一个子线程去轮询、去死循环，或者使用select、poll、epool，都不是异步。</p>
+<ul>
+<li>异步就是异步</li>
+</ul>
+<p>有许多io模型的相关文章主要涉及四个概念同步( synchronous).异步( asynchronous).阻塞(plocking)和non- blocking).有些文章将这四个作了两两组合,于是有了<strong>异步阳塞和异步非阳塞</strong>,可以很明确地说完全是是羍强之理解。无论是&lt;Uⅸ网络编程&gt;一书中所列的○io模式,还是POSIX标准都没有提这两个概念。异步就是异步!只有同步时才有阻塞和非阻塞之说。</p>
+<ul>
+<li>阻塞和非阻塞</li>
+</ul>
+<p>非阻塞时,要区分场合范围.比如linux中说的非阻塞iO和Java的NIO1.0中的非阻塞I/O不是相同的概念。从最根本来说,阻塞就是进程“被”休息,CPU处理其它进程去了,非阻塞可以理解成将大的整片时间的阻塞分成N多的小的阻塞,所以进程不断地有机会 被”CPU光顾,理论上可以做点其它事,看上去 Linux非阻塞I/O 要比阻塞好，但CPU会很大机率因socket没数据而空转 虽然这个进程是爽了，但是从整个机器的效率来说,浪费更大了！Java NIO1.0中的非阻塞I/O中的 Selector select()函数还是阻塞的,所以不会有无谓的CPU浪费Java NIO1.0,与其说是非阻塞I/O, 还不如说是,多路复用I/O,更好让人理解！</p>
+<ul>
+<li>异步</li>
+</ul>
+<p>异步可以说是I/O最理想的模型:CPU的原则是,有必要的时候才会参与,既不浪费,也不怠慢。理想中的异步I/O, Application无需等待socket数据(也正是因此进程而被”休息”).也无需 copy socket data,将由其它的同学(理想状态,不是CPU)负责将socket data copy到Appliation事先指定的内存后,通知一声Appliation(一般是回调函数)<br>copy socket data, Application是不用做了，但事情总是需要做，不管是谁做，CPU是否还是要花费精力去参与呢?可以用”内存映射”以及DMA等方式来达到“不用CPU去参与繁重的工作”的目的. “内存映射”是不用copy,而DMA是有其它芯片来代替CPU处理.</p>
+<p>同步和异步针对应用程序来，关注的是程序中间的协作关系；阻塞与非阻塞更关注的是单个进程的执行状态。</p>
+]]></content>
+      <categories>
+        <category>架构</category>
+      </categories>
+      <tags>
+        <tag>IO模型</tag>
+        <tag>阻塞</tag>
+        <tag>非阻塞</tag>
+        <tag>同步</tag>
+        <tag>异步</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>yield</title>
+    <url>/2020/10/20/yiled/</url>
+    <content><![CDATA[<h1 id="yield"><a href="#yield" class="headerlink" title="yield"></a>yield</h1><p>为了解释yiled需要理解几个概念：</p>
+<ul>
+<li>可迭代对象</li>
+<li>迭代器</li>
+<li>生成器</li>
+</ul>
+<h2 id="可迭代对象"><a href="#可迭代对象" class="headerlink" title="可迭代对象"></a>可迭代对象</h2><p>创建一个列表（list）时，你可以逐个地读取里面的每一项元素，这个过程称之为迭代（iteration）。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; for i in mylist:</span><br><span class="line">...    print(i)</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+<p>mylist是一个可迭代对象。当使用列表推导式（list comprehension）创建了一个列表时，它就是一个可迭代对象：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; mylist &#x3D; [x*x for x in range(3)]</span><br><span class="line">&gt;&gt;&gt; for i in mylist:</span><br><span class="line">...    print(i)</span><br><span class="line">0</span><br><span class="line">1</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
+<p>任何可以使用在<code>for...in...</code>语句中的对象都可以叫做<strong>可迭代对象</strong>，例如：lists，strings，files等等。这些可迭代对象使用非常方便因为它能如你所愿的尽可能读取其中的元素，但是你不得不把所有的值存储在内存中，当它有大量元素的时候这并不一定总是你想要的。</p>
+<p><strong>注</strong>：dict对象以及任何<strong>实现了<strong>iter</strong>()或者<strong>getitem</strong>()方法的类都是可迭代对象</strong>，此外，可迭代对象还可以用在zip,map等函数中，当一个可迭代对象作为参数传递给内建函数iter()时，它会返回一个迭代器对象。通常没必要自己来处理迭代器本身或者手动调用iter()，for语句会自动调用iter()，它会创建一个临时的未命名的变量来持有这个迭代器用于循环期间。 </p>
+<h2 id="迭代器（ITERATOR）"><a href="#迭代器（ITERATOR）" class="headerlink" title="迭代器（ITERATOR）"></a>迭代器（ITERATOR）</h2><p>迭代器代表一个数据流对象，不断重复调用迭代器的next()方法可以逐次地返回数据流中的每一项，当没有更多数据可用时，next()方法会抛出异常StopIteration。此时迭代器对象已经枯竭了，之后调用next()方法都会抛出异常StopIteration。迭代器需要有一个__iter()__方法用来返回迭代器本身。因此它也是一个可迭代的对象。</p>
+<h2 id="生成器"><a href="#生成器" class="headerlink" title="生成器"></a>生成器</h2><h3 id="1-生成器定义"><a href="#1-生成器定义" class="headerlink" title="1. 生成器定义"></a>1. 生成器定义</h3><p>在Python中，一边循环一边计算的机制，称为生成器：<code>generator</code>。<br>生成器也是一个迭代器，但是你只可以迭代他们一次，不能重复迭代，因为它并没有把所有值存储在内存中，而是实时地生成值</p>
+<h3 id="2-为什么要有生成器"><a href="#2-为什么要有生成器" class="headerlink" title="2. 为什么要有生成器"></a>2. 为什么要有生成器</h3><p>列表所有数据都在内存中，如果有海量数据的话将会非常耗内存。</p>
+<p>如：仅仅需要访问前面几个元素，那后面绝大多数元素占用的空间都白白浪费了。</p>
+<p>如果列表元素按照某种算法推算出来，那我们就可以在循环的过程中不断推算出后续的元素，这样就不必创建完整的list，从而节省大量的空间。</p>
+<p>简单一句话：<strong>我又想要得到庞大的数据，又想让它占用空间少，那就用生成器！</strong></p>
+<h3 id="3-如何创建生成器"><a href="#3-如何创建生成器" class="headerlink" title="3. 如何创建生成器"></a>3. 如何创建生成器</h3><ul>
+<li><p>通过()生成，</p>
+<p>只要把一个列表生成式的<code>[]</code>改成<code>()</code>，就创建了一个generator：</p>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>L = [x * x <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">10</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>L</span><br><span class="line">[<span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">9</span>, <span class="number">16</span>, <span class="number">25</span>, <span class="number">36</span>, <span class="number">49</span>, <span class="number">64</span>, <span class="number">81</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>g = (x * x <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">10</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>g</span><br><span class="line">&lt;generator object &lt;genexpr&gt; at <span class="number">0x1022ef630</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>创建<code>L</code>和<code>g</code>的区别仅在于最外层的<code>[]</code>和<code>()</code>，<code>L</code>是一个list，而<code>g</code>是一个generator。</p>
+<ul>
+<li>使用<code>yield</code>关键字生成</li>
+</ul>
+<p>如果一个函数中包含<code>yield</code>关键字，那么这个函数就不再是一个普通函数，而是一个generator。调用函数就是创建了一个生成器（generator）对象。如果我们想定义一个自己的生成器函数怎么办？用return好像不行。没关系，python有yield的关键词。其作用和return的功能差不多，就是返回一个值给调用者，只不过有yield的函数返回值后函数依然保持调用yield时的状态，当下次调用的时候，在原先的基础上继续执行代码，直到遇到下一个yield或者满足结束条件结束函数为止。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">test</span>():</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">yield</span> <span class="number">1</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">yield</span> <span class="number">2</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">yield</span> <span class="number">3</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>t = test()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>t</span><br><span class="line">&lt;generator object test at <span class="number">0x7f3da9d00e08</span>&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-生成器的调用"><a href="#4-生成器的调用" class="headerlink" title="4. 生成器的调用"></a>4. 生成器的调用</h3><ol>
+<li><p>for循环：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> gen:</span><br><span class="line">    print(item)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>next：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">print(next(gen))<span class="comment">#output:0</span></span><br><span class="line">print(next(gen))<span class="comment">#output:1</span></span><br><span class="line">print(next(gen))<span class="comment">#output:2</span></span><br><span class="line">print(next(gen))<span class="comment">#output:3</span></span><br><span class="line">print(next(gen))<span class="comment">#output:4</span></span><br><span class="line">print(next(gen))<span class="comment">#output:Traceback (most recent call last):StopIteration</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>从第一个用for的调用方式我们可以知道生成器是可迭代的。更准确的说法是他就是个迭代器。<br>我们可以验证一下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Iterable, Iterator</span><br><span class="line">print(isinstance(gen, Iterable))<span class="comment">#output:True</span></span><br><span class="line">print(isinstance(gen, Iterator))<span class="comment">#output:True</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-生成器的工作原理"><a href="#4-生成器的工作原理" class="headerlink" title="4. 生成器的工作原理"></a>4. 生成器的工作原理</h3><p>（1）生成器(generator)能够迭代的关键是它有一个<code>next()</code>方法，</p>
+<p>　　工作原理就是通过**重复调用next()**方法，直到捕获一个异常。</p>
+<p>（2）带有<code>yield</code>的函数不再是一个普通函数，而是一个生成器<code>generator</code>。</p>
+<p>　　可用<code>next()</code>调用生成器对象来取值。next 两种方式 <code>t.__next__()</code> | <code>next(t)</code>。</p>
+<p>　　可用<code>for</code>循环获取返回值（每执行一次，取生成器里面一个值）</p>
+<p>　　（基本上不会用<code>next()</code>来获取下一个返回值，而是直接使用<code>for</code>循环来迭代）。</p>
+<p>（3）<code>yield</code>相当于<code>return</code>返回一个值，并且记住这个返回的位置，下次迭代时，代码从yield的下一条语句开始执行。</p>
+<p>（4）<code>.send()</code>和<code>next()</code>一样，都能让生成器继续往下走一步（下次遇到yield停），但<code>send()</code>能传一个值，这个值作为<code>yield</code>表达式整体的结果</p>
+<p>　　——换句话说，就是send可以强行修改上一个yield表达式值。比如函数中有一个yield赋值，a = yield 5，第一次迭代到这里会返回5，a还没有赋值。第二次迭代时，使用.send(10)，那么，就是强行修改yield 5表达式的值为10，本来是5的，那么a=10</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">test</span>():</span></span><br><span class="line"><span class="meta">... </span>    i = <span class="number">0</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">while</span> i &lt; <span class="number">5</span>:</span><br><span class="line"><span class="meta">... </span>        temp = <span class="keyword">yield</span> i</span><br><span class="line"><span class="meta">... </span>        print(temp)</span><br><span class="line"><span class="meta">... </span>        i += <span class="number">1</span></span><br><span class="line">        </span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = test()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__next__()</span><br><span class="line"><span class="number">0</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__next__()</span><br><span class="line"><span class="literal">None</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__next__()</span><br><span class="line"><span class="literal">None</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.send(<span class="string">&quot;10&quot;</span>)</span><br><span class="line"><span class="number">10</span></span><br><span class="line"><span class="number">3</span></span><br></pre></td></tr></table></figure>
+<p>关于为何第二次a.<strong>next</strong>()有None输出的问题，可以简单的理解为：a.<strong>next</strong>()和a.send(None)是等价的，或者这么说： <code>return i</code>这个表达式的返回值是None, temp = yiled i可以理解为： temp = return i； 因为程序中遇到return，方法就结束，所以temp = return i = None. 当然这样描述是不准确的，只为理解。</p>
+<p>生成器仅仅保存了一套生成数值的算法，并且没有让这个算法现在就开始执行，而是我什么时候调它，它什么时候开始计算一个新的值，并给你返回。</p>
+<blockquote>
+<p>参考 <a href="https://blog.csdn.net/SL_World/article/details/86507872">https://blog.csdn.net/SL_World/article/details/86507872</a></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>yield</tag>
       </tags>
   </entry>
   <entry>
@@ -421,179 +315,6 @@
       </tags>
   </entry>
   <entry>
-    <title>hexo-Next + Github Page制作个人网站使用记录</title>
-    <url>/2020/10/20/hexo/</url>
-    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
-<li>在github上创建仓库</li>
-<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
-<li>仓库新建分支gh-page</li>
-<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
-<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
-</ol>
-<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
-<li><p>修改内容自动重载并启动server</p>
-<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
-<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
-<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
-</li>
-</ol>
-<a id="more"></a>
-
-<ol start="2">
-<li><p>背景动画</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>其他可以参考</p>
-<ul>
-<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
-<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
-<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
-</ul>
-</li>
-</ol>
-]]></content>
-      <categories>
-        <category>hexo</category>
-      </categories>
-      <tags>
-        <tag>hexo</tag>
-        <tag>Next</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>yield</title>
-    <url>/2020/10/20/yiled/</url>
-    <content><![CDATA[<h1 id="yield"><a href="#yield" class="headerlink" title="yield"></a>yield</h1><p>为了解释yiled需要理解几个概念：</p>
-<ul>
-<li>可迭代对象</li>
-<li>迭代器</li>
-<li>生成器</li>
-</ul>
-<h2 id="可迭代对象"><a href="#可迭代对象" class="headerlink" title="可迭代对象"></a>可迭代对象</h2><p>创建一个列表（list）时，你可以逐个地读取里面的每一项元素，这个过程称之为迭代（iteration）。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; for i in mylist:</span><br><span class="line">...    print(i)</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
-<p>mylist是一个可迭代对象。当使用列表推导式（list comprehension）创建了一个列表时，它就是一个可迭代对象：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; mylist &#x3D; [x*x for x in range(3)]</span><br><span class="line">&gt;&gt;&gt; for i in mylist:</span><br><span class="line">...    print(i)</span><br><span class="line">0</span><br><span class="line">1</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
-<p>任何可以使用在<code>for...in...</code>语句中的对象都可以叫做<strong>可迭代对象</strong>，例如：lists，strings，files等等。这些可迭代对象使用非常方便因为它能如你所愿的尽可能读取其中的元素，但是你不得不把所有的值存储在内存中，当它有大量元素的时候这并不一定总是你想要的。</p>
-<p><strong>注</strong>：dict对象以及任何<strong>实现了<strong>iter</strong>()或者<strong>getitem</strong>()方法的类都是可迭代对象</strong>，此外，可迭代对象还可以用在zip,map等函数中，当一个可迭代对象作为参数传递给内建函数iter()时，它会返回一个迭代器对象。通常没必要自己来处理迭代器本身或者手动调用iter()，for语句会自动调用iter()，它会创建一个临时的未命名的变量来持有这个迭代器用于循环期间。 </p>
-<h2 id="迭代器（ITERATOR）"><a href="#迭代器（ITERATOR）" class="headerlink" title="迭代器（ITERATOR）"></a>迭代器（ITERATOR）</h2><p>迭代器代表一个数据流对象，不断重复调用迭代器的next()方法可以逐次地返回数据流中的每一项，当没有更多数据可用时，next()方法会抛出异常StopIteration。此时迭代器对象已经枯竭了，之后调用next()方法都会抛出异常StopIteration。迭代器需要有一个__iter()__方法用来返回迭代器本身。因此它也是一个可迭代的对象。</p>
-<h2 id="生成器"><a href="#生成器" class="headerlink" title="生成器"></a>生成器</h2><h3 id="1-生成器定义"><a href="#1-生成器定义" class="headerlink" title="1. 生成器定义"></a>1. 生成器定义</h3><p>在Python中，一边循环一边计算的机制，称为生成器：<code>generator</code>。<br>生成器也是一个迭代器，但是你只可以迭代他们一次，不能重复迭代，因为它并没有把所有值存储在内存中，而是实时地生成值</p>
-<h3 id="2-为什么要有生成器"><a href="#2-为什么要有生成器" class="headerlink" title="2. 为什么要有生成器"></a>2. 为什么要有生成器</h3><p>列表所有数据都在内存中，如果有海量数据的话将会非常耗内存。</p>
-<p>如：仅仅需要访问前面几个元素，那后面绝大多数元素占用的空间都白白浪费了。</p>
-<p>如果列表元素按照某种算法推算出来，那我们就可以在循环的过程中不断推算出后续的元素，这样就不必创建完整的list，从而节省大量的空间。</p>
-<p>简单一句话：<strong>我又想要得到庞大的数据，又想让它占用空间少，那就用生成器！</strong></p>
-<h3 id="3-如何创建生成器"><a href="#3-如何创建生成器" class="headerlink" title="3. 如何创建生成器"></a>3. 如何创建生成器</h3><ul>
-<li><p>通过()生成，</p>
-<p>只要把一个列表生成式的<code>[]</code>改成<code>()</code>，就创建了一个generator：</p>
-</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>L = [x * x <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">10</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>L</span><br><span class="line">[<span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">9</span>, <span class="number">16</span>, <span class="number">25</span>, <span class="number">36</span>, <span class="number">49</span>, <span class="number">64</span>, <span class="number">81</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>g = (x * x <span class="keyword">for</span> x <span class="keyword">in</span> range(<span class="number">10</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>g</span><br><span class="line">&lt;generator object &lt;genexpr&gt; at <span class="number">0x1022ef630</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<p>创建<code>L</code>和<code>g</code>的区别仅在于最外层的<code>[]</code>和<code>()</code>，<code>L</code>是一个list，而<code>g</code>是一个generator。</p>
-<ul>
-<li>使用<code>yield</code>关键字生成</li>
-</ul>
-<p>如果一个函数中包含<code>yield</code>关键字，那么这个函数就不再是一个普通函数，而是一个generator。调用函数就是创建了一个生成器（generator）对象。如果我们想定义一个自己的生成器函数怎么办？用return好像不行。没关系，python有yield的关键词。其作用和return的功能差不多，就是返回一个值给调用者，只不过有yield的函数返回值后函数依然保持调用yield时的状态，当下次调用的时候，在原先的基础上继续执行代码，直到遇到下一个yield或者满足结束条件结束函数为止。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">test</span>():</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">yield</span> <span class="number">1</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">yield</span> <span class="number">2</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">yield</span> <span class="number">3</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>t = test()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>t</span><br><span class="line">&lt;generator object test at <span class="number">0x7f3da9d00e08</span>&gt;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="4-生成器的调用"><a href="#4-生成器的调用" class="headerlink" title="4. 生成器的调用"></a>4. 生成器的调用</h3><ol>
-<li><p>for循环：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> gen:</span><br><span class="line">    print(item)</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>next：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">print(next(gen))<span class="comment">#output:0</span></span><br><span class="line">print(next(gen))<span class="comment">#output:1</span></span><br><span class="line">print(next(gen))<span class="comment">#output:2</span></span><br><span class="line">print(next(gen))<span class="comment">#output:3</span></span><br><span class="line">print(next(gen))<span class="comment">#output:4</span></span><br><span class="line">print(next(gen))<span class="comment">#output:Traceback (most recent call last):StopIteration</span></span><br></pre></td></tr></table></figure>
-
-</li>
-</ol>
-<p>从第一个用for的调用方式我们可以知道生成器是可迭代的。更准确的说法是他就是个迭代器。<br>我们可以验证一下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Iterable, Iterator</span><br><span class="line">print(isinstance(gen, Iterable))<span class="comment">#output:True</span></span><br><span class="line">print(isinstance(gen, Iterator))<span class="comment">#output:True</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="4-生成器的工作原理"><a href="#4-生成器的工作原理" class="headerlink" title="4. 生成器的工作原理"></a>4. 生成器的工作原理</h3><p>（1）生成器(generator)能够迭代的关键是它有一个<code>next()</code>方法，</p>
-<p>　　工作原理就是通过**重复调用next()**方法，直到捕获一个异常。</p>
-<p>（2）带有<code>yield</code>的函数不再是一个普通函数，而是一个生成器<code>generator</code>。</p>
-<p>　　可用<code>next()</code>调用生成器对象来取值。next 两种方式 <code>t.__next__()</code> | <code>next(t)</code>。</p>
-<p>　　可用<code>for</code>循环获取返回值（每执行一次，取生成器里面一个值）</p>
-<p>　　（基本上不会用<code>next()</code>来获取下一个返回值，而是直接使用<code>for</code>循环来迭代）。</p>
-<p>（3）<code>yield</code>相当于<code>return</code>返回一个值，并且记住这个返回的位置，下次迭代时，代码从yield的下一条语句开始执行。</p>
-<p>（4）<code>.send()</code>和<code>next()</code>一样，都能让生成器继续往下走一步（下次遇到yield停），但<code>send()</code>能传一个值，这个值作为<code>yield</code>表达式整体的结果</p>
-<p>　　——换句话说，就是send可以强行修改上一个yield表达式值。比如函数中有一个yield赋值，a = yield 5，第一次迭代到这里会返回5，a还没有赋值。第二次迭代时，使用.send(10)，那么，就是强行修改yield 5表达式的值为10，本来是5的，那么a=10</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">test</span>():</span></span><br><span class="line"><span class="meta">... </span>    i = <span class="number">0</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">while</span> i &lt; <span class="number">5</span>:</span><br><span class="line"><span class="meta">... </span>        temp = <span class="keyword">yield</span> i</span><br><span class="line"><span class="meta">... </span>        print(temp)</span><br><span class="line"><span class="meta">... </span>        i += <span class="number">1</span></span><br><span class="line">        </span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = test()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__next__()</span><br><span class="line"><span class="number">0</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__next__()</span><br><span class="line"><span class="literal">None</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__next__()</span><br><span class="line"><span class="literal">None</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.send(<span class="string">&quot;10&quot;</span>)</span><br><span class="line"><span class="number">10</span></span><br><span class="line"><span class="number">3</span></span><br></pre></td></tr></table></figure>
-<p>关于为何第二次a.<strong>next</strong>()有None输出的问题，可以简单的理解为：a.<strong>next</strong>()和a.send(None)是等价的，或者这么说： <code>return i</code>这个表达式的返回值是None, temp = yiled i可以理解为： temp = return i； 因为程序中遇到return，方法就结束，所以temp = return i = None. 当然这样描述是不准确的，只为理解。</p>
-<p>生成器仅仅保存了一套生成数值的算法，并且没有让这个算法现在就开始执行，而是我什么时候调它，它什么时候开始计算一个新的值，并给你返回。</p>
-<blockquote>
-<p>参考 <a href="https://blog.csdn.net/SL_World/article/details/86507872">https://blog.csdn.net/SL_World/article/details/86507872</a></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>python</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>yield</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>IO模型</title>
-    <url>/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</url>
-    <content><![CDATA[<h1 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h1><p>在Linux(UNIX)操作系统中，共有五种IO模型，分别是：阻塞IO模型、非阻塞IO模型、IO复用模型、信号驱动IO模型以及异步IO模型。</p>
-<a id="more"></a>
-
-<ul>
-<li>参看：<img src="/images/io%E6%A8%A1%E5%9E%8B.png" alt="io模型"></li>
-</ul>
-<p>在处理 IO 的时候，阻塞和非阻塞都是同步 IO。只有使用了特殊的 API 才是异步 IO。<img src="https://pic3.zhimg.com/50/7d3eb389b7724878bd7e12ebc6dbcdb5_hd.jpg?source=1940ef5c" data-rawwidth="415" data-rawheight="150" class="content_image" width="415"/></p>
-<h1 id="同步-异步和阻塞-非阻塞"><a href="#同步-异步和阻塞-非阻塞" class="headerlink" title="同步/异步和阻塞/非阻塞"></a>同步/异步和阻塞/非阻塞</h1><p>阻塞/非阻塞 与 同步/异步不能简单的从字面理解，提供一个从分布式系统角度的回答。</p>
-<ol>
-<li><p><strong>同步与异步</strong>. 同步和异步关注的是消息通信机制 (synchronous communication/ asynchronous communication).所谓同步，就是在发出一个<em>调用</em>时，在没有得到结果之前，该<em>调用</em>就不返回。但是一旦调用返回，就得到返回值了。换句话说，就是由<em>调用者</em>主动等待这个<em>调用</em>的结果。而异步则是相反，<em>调用</em>在发出之后，这个调用就直接返回了，所以没有返回结果。换句话说，当一个异步过程调用发出后，调用者不会立刻得到结果。而是在<em>调用</em>发出后，<em>被调用者</em>通过状态、通知来通知调用者，或通过回调函数处理这个调用。</p>
-</li>
-<li><p>阻塞与非阻塞<br>阻塞和非阻塞关注的是程序在等待调用结果（消息，返回值）时的状态: <strong>阻塞调用</strong>是指调用结果返回之前，当前线程会被挂起。调用线程只有在得到结果之后才会返回。<strong>非阻塞调用</strong>指在不能立刻得到结果之前，该调用不会阻塞当前线程。</p>
-</li>
-<li><p>打一个通俗的比方</p>
-</li>
-</ol>
-<ul>
-<li>老张爱喝茶，废话不说，煮开水。</li>
-<li>出场人物：老张，水壶两把（普通水壶，简称水壶；会响的水壶，简称响水壶）。<ol>
-<li>老张把水壶放到火上，立等水开。（同步阻塞）老张觉得自己有点傻</li>
-<li>老张把水壶放到火上，去客厅看电视，时不时去厨房看看水开没有。（同步非阻塞）</li>
-<li>老张还是觉得自己有点傻，于是变高端了，买了把会响笛的那种水壶。水开之后，能大声发出嘀<del>~</del>的噪音。老张把响水壶放到火上，立等水开。（异步阻塞）</li>
-<li>老张觉得这样傻等意义不大,老张把响水壶放到火上，去客厅看电视，水壶响之前不再去看它了，响了再去拿壶。（异步非阻塞）老张觉得自己聪明了。</li>
-</ol>
-</li>
-</ul>
-<blockquote>
-<p>所谓同步异步，只是对于水壶而言。普通水壶，同步；响水壶，异步。虽然都能干活，但响水壶可以在自己完工之后，提示老张水开了。这是普通水壶所不能及的。同步只能让调用者去轮询自己（情况2中），造成老张效率的低下。所谓阻塞非阻塞，仅仅对于老张而言。立等的老张，阻塞；看电视的老张，非阻塞。情况1和情况3中老张就是阻塞的，媳妇喊他都不知道。虽然3中响水壶是异步的，可对于立等的老张没有太大的意义。所以一般异步是配合非阻塞使用的，这样才能发挥异步的效用。</p>
-</blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>阻塞、非阻塞、多路IO复用，都是同步IO，异步必定是非阻塞的，所以不存在异步阻塞和异步非阻塞的说法。真正的异步IO需要CPU的深度参与。换句话说，只有用户线程在操作IO的时候根本不去考虑IO的执行全部都交给CPU去完成，而自己只等待一个完成信号的时候，才是真正的异步IO。所以，拉一个子线程去轮询、去死循环，或者使用select、poll、epool，都不是异步。</p>
-<ul>
-<li>异步就是异步</li>
-</ul>
-<p>有许多io模型的相关文章主要涉及四个概念同步( synchronous).异步( asynchronous).阻塞(plocking)和non- blocking).有些文章将这四个作了两两组合,于是有了<strong>异步阳塞和异步非阳塞</strong>,可以很明确地说完全是是羍强之理解。无论是&lt;Uⅸ网络编程&gt;一书中所列的○io模式,还是POSIX标准都没有提这两个概念。异步就是异步!只有同步时才有阻塞和非阻塞之说。</p>
-<ul>
-<li>阻塞和非阻塞</li>
-</ul>
-<p>非阻塞时,要区分场合范围.比如linux中说的非阻塞iO和Java的NIO1.0中的非阻塞I/O不是相同的概念。从最根本来说,阻塞就是进程“被”休息,CPU处理其它进程去了,非阻塞可以理解成将大的整片时间的阻塞分成N多的小的阻塞,所以进程不断地有机会 被”CPU光顾,理论上可以做点其它事,看上去 Linux非阻塞I/O 要比阻塞好，但CPU会很大机率因socket没数据而空转 虽然这个进程是爽了，但是从整个机器的效率来说,浪费更大了！Java NIO1.0中的非阻塞I/O中的 Selector select()函数还是阻塞的,所以不会有无谓的CPU浪费Java NIO1.0,与其说是非阻塞I/O, 还不如说是,多路复用I/O,更好让人理解！</p>
-<ul>
-<li>异步</li>
-</ul>
-<p>异步可以说是I/O最理想的模型:CPU的原则是,有必要的时候才会参与,既不浪费,也不怠慢。理想中的异步I/O, Application无需等待socket数据(也正是因此进程而被”休息”).也无需 copy socket data,将由其它的同学(理想状态,不是CPU)负责将socket data copy到Appliation事先指定的内存后,通知一声Appliation(一般是回调函数)<br>copy socket data, Application是不用做了，但事情总是需要做，不管是谁做，CPU是否还是要花费精力去参与呢?可以用”内存映射”以及DMA等方式来达到“不用CPU去参与繁重的工作”的目的. “内存映射”是不用copy,而DMA是有其它芯片来代替CPU处理.</p>
-<p>同步和异步针对应用程序来，关注的是程序中间的协作关系；阻塞与非阻塞更关注的是单个进程的执行状态。</p>
-]]></content>
-      <categories>
-        <category>架构</category>
-      </categories>
-      <tags>
-        <tag>IO模型</tag>
-        <tag>阻塞</tag>
-        <tag>非阻塞</tag>
-        <tag>同步</tag>
-        <tag>异步</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>mysql大小写敏感问题</title>
     <url>/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Mysql/MariaDB 默认是大小写不敏感的，有时会比较影响业务，我们期望能够大小写敏感。</p>
@@ -644,6 +365,88 @@
       <tags>
         <tag>mysql</tag>
         <tag>大小写敏感</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>缓存穿透，缓存击穿，缓存雪崩</title>
+    <url>/2020/10/19/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%EF%BC%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。</p>
+<a id="more"></a>
+
+<h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><ul>
+<li><p>描述<br>缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。</p>
+</li>
+<li><p>解决方案<br>有很多种方法可以有效地解决缓存穿透问题，最常见的则是采用布隆过滤器，将所有可能存在的数据哈希到一个足够大的bitmap中，一个一定不存在的数据会被 这个bitmap拦截掉，从而避免了对底层存储系统的查询压力。另外也有一个更为简单粗暴的方法（我们采用的就是这种），如果一个查询返回的数据为空（不管是数 据不存在，还是系统故障），我们仍然把这个空结果进行缓存，但它的过期时间会很短，最长不超过五分钟。</p>
+</li>
+</ul>
+<h2 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h2><ul>
+<li><p>描述<br>缓存雪崩是指在我们设置缓存时采用了相同的过期时间，导致缓存在某一时刻同时失效，请求全部转发到DB，DB瞬时压力过重雪崩。</p>
+</li>
+<li><p>解决方案<br>缓存失效时的雪崩效应对底层系统的冲击非常可怕。大多数系统设计者考虑用加锁或者队列的方式保证缓存的单线 程（进程）写，从而避免失效时大量的并发请求落到底层存储系统上。这里分享一个简单方案就时讲缓存失效时间分散开，比如我们可以在原有的失效时间基础上增加一个随机值，比如1-5分钟随机，这样每一个缓存的过期时间的重复率就会降低，就很难引发集体失效的事件。</p>
+</li>
+</ul>
+<h2 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h2><ul>
+<li><p>描述<br>对于一些设置了过期时间的key，如果这些key可能会在某些时间点被超高并发地访问，是一种非常“热点”的数据。这个时候，需要考虑一个问题：缓存被“击穿”的问题，这个和缓存雪崩的区别在于这里针对某一key缓存，前者则是很多key。<br>缓存在某个时间点过期的时候，恰好在这个时间点对这个Key有大量的并发请求过来，这些请求发现缓存过期一般都会从后端DB加载数据并回设到缓存，这个时候大并发的请求可能会瞬间把后端DB压垮。</p>
+</li>
+<li><p>解决方案</p>
+</li>
+</ul>
+<ol>
+<li>使用互斥锁(mutex key)<br>业界比较常用的做法，是使用mutex。简单地来说，就是在缓存失效的时候（判断拿出来的值为空），不是立即去load db，而是先使用缓存工具的某些带成功操作返回值的操作（比如Redis的SETNX或者Memcache的ADD）去set一个mutex key，当操作返回成功时，再进行load db的操作并回设缓存；否则，就重试整个get缓存的方法。<br>SETNX，是「SET if Not eXists」的缩写，也就是只有不存在的时候才设置，可以利用它来实现锁的效果。在redis2.6.1之前版本未实现setnx的过期时间，所以这里给出两种版本代码参考：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//2.6.1前单机版本锁</span></span><br><span class="line"><span class="function">String <span class="title">get</span><span class="params">(String key)</span> </span>&#123; </span><br><span class="line">   String value = redis.get(key); </span><br><span class="line">   <span class="keyword">if</span> (value  == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="string">&quot;1&quot;</span>)) &#123;  </span><br><span class="line">        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">        redis.expire(key_mutex, <span class="number">3</span> * <span class="number">60</span>)  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        redis.set(key, value);  </span><br><span class="line">        redis.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        <span class="comment">//其他线程休息50毫秒后重试  </span></span><br><span class="line">        Thread.sleep(<span class="number">50</span>);  </span><br><span class="line">        get(key);  </span><br><span class="line">    &#125;  </span><br><span class="line">  &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+最新版本代码：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">get</span><span class="params">(key)</span> </span>&#123;</span><br><span class="line">      String value = redis.get(key);</span><br><span class="line">      <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123; <span class="comment">//代表缓存值过期</span></span><br><span class="line">          <span class="comment">//设置3min的超时，防止del操作失败的时候，下次缓存过期一直不能load db</span></span><br><span class="line">          <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="number">1</span>, <span class="number">3</span> * <span class="number">60</span>) == <span class="number">1</span>) &#123;  <span class="comment">//代表设置成功</span></span><br><span class="line">               value = db.get(key);</span><br><span class="line">                      redis.set(key, value, expire_secs);</span><br><span class="line">                      redis.del(key_mutex);</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;  <span class="comment">//这个时候代表同时候的其他线程已经load db并回设到缓存了，这时候重试获取缓存值即可</span></span><br><span class="line">                      sleep(<span class="number">50</span>);</span><br><span class="line">                      get(key);  <span class="comment">//重试</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> value;      </span><br><span class="line">          &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+memcache代码：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (memcache.get(key) == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
+<li>“提前”使用互斥锁(mutex key)：<br>在value内部设置1个超时值(timeout1), timeout1比实际的memcache timeout(timeout2)小。当从cache读取到timeout1发现它已经过期时候，马上延长timeout1并重新设置到cache。然后再从数据库加载数据并设置到cache中。伪代码如下：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">v = memcache.get(key);  </span><br><span class="line"><span class="keyword">if</span> (v == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">    <span class="keyword">if</span> (v.timeout &lt;= now()) &#123;  </span><br><span class="line">        <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">            <span class="comment">// extend the timeout for other threads  </span></span><br><span class="line">            v.timeout += <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>;  </span><br><span class="line">            memcache.set(key, v, KEY_TIMEOUT * <span class="number">2</span>);  </span><br><span class="line">  </span><br><span class="line">            <span class="comment">// load the latest value from db  </span></span><br><span class="line">            v = db.get(key);  </span><br><span class="line">            v.timeout = KEY_TIMEOUT;  </span><br><span class="line">            memcache.set(key, value, KEY_TIMEOUT * <span class="number">2</span>);  </span><br><span class="line">            memcache.delete(key_mutex);  </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">            sleep(<span class="number">50</span>);  </span><br><span class="line">            retry();  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
+<li>“永远不过期”  </li>
+<li>这里的“永远不过期”包含两层意思：</li>
+</ol>
+<ul>
+<li>(1) 从redis上看，确实没有设置过期时间，这就保证了，不会出现热点key过期问题，也就是“物理”不过期。</li>
+<li>(2) 从功能上看，如果不过期，那不就成静态的了吗？所以我们把过期时间存在key对应的value里，如果发现要过期了，通过一个后台的异步线程进行缓存的构建，也就是“逻辑”过期<br>从实战看，这种方法对于性能非常友好，唯一不足的就是构建缓存时候，其余线程(非构建缓存的线程)可能访问的是老数据，但是对于一般的互联网功能来说这个还是可以忍受。<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">String <span class="title">get</span><span class="params">(<span class="keyword">final</span> String key)</span> </span>&#123;  </span><br><span class="line">        V v = redis.get(key);  </span><br><span class="line">        String value = v.getValue();  </span><br><span class="line">        <span class="keyword">long</span> timeout = v.getTimeout();  </span><br><span class="line">        <span class="keyword">if</span> (v.timeout &lt;= System.currentTimeMillis()) &#123;  </span><br><span class="line">            <span class="comment">// 异步更新后台异常执行  </span></span><br><span class="line">            threadPool.execute(<span class="keyword">new</span> Runnable() &#123;  </span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">                    String keyMutex = <span class="string">&quot;mutex:&quot;</span> + key;  </span><br><span class="line">                    <span class="keyword">if</span> (redis.setnx(keyMutex, <span class="string">&quot;1&quot;</span>)) &#123;  </span><br><span class="line">                        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">                        redis.expire(keyMutex, <span class="number">3</span> * <span class="number">60</span>);  </span><br><span class="line">                        String dbValue = db.get(key);  </span><br><span class="line">                        redis.set(key, dbValue);  </span><br><span class="line">                        redis.delete(keyMutex);  </span><br><span class="line">                    &#125;  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;);  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">return</span> value;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ol start="4">
+<li>资源保护<br>采用netflix的hystrix，可以做资源的隔离保护主线程池，如果把这个应用到缓存的构建也未尝不可。<br>四种解决方案：没有最佳只有最合适<table>
+<thead>
+<tr>
+<th>解决方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>简单分布式互斥锁（mutex key）</td>
+<td>1. 思路简单  2. 保证一致性</td>
+<td>1. 代码复杂度增大  2. 存在死锁的风险  3. 存在线程池阻塞的风险</td>
+</tr>
+<tr>
+<td>“提前”使用互斥锁</td>
+<td>1. 保证一致性</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>不过期(本文)</td>
+<td>1. 异步构建缓存，不会阻塞线程池</td>
+<td>1. 不保证一致性。  2. 代码复杂度增大(每个value都要维护一个timekey)。  3. 占用一定的内存空间(每个value都要维护一个timekey)。</td>
+</tr>
+<tr>
+<td>资源隔离组件hystrix(本文)</td>
+<td>1. hystrix技术成熟，有效保证后端。  2. hystrix监控强大。</td>
+<td>1. 部分访问存在降级策略。</td>
+</tr>
+</tbody></table>
+</li>
+</ol>
+<blockquote>
+<p>四种方案来源网络，详文请链接：<a href="http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io">http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io</a></p>
+</blockquote>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>针对业务系统，永远都是具体情况具体分析，没有最好，只有最合适。<br>最后，对于缓存系统常见的缓存满了和数据丢失问题，需要根据具体业务分析，通常我们采用LRU策略处理溢出，Redis的RDB和AOF持久化策略来保证一定情况下的数据安全。</p>
+]]></content>
+      <categories>
+        <category>架构</category>
+      </categories>
+      <tags>
+        <tag>缓存穿透</tag>
+        <tag>缓存击穿</tag>
+        <tag>缓存雪崩</tag>
       </tags>
   </entry>
   <entry>
@@ -1229,85 +1032,282 @@
       </tags>
   </entry>
   <entry>
-    <title>缓存穿透，缓存击穿，缓存雪崩</title>
-    <url>/2020/10/19/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%EF%BC%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。</p>
+    <title>python异步编程</title>
+    <url>/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/</url>
+    <content><![CDATA[<h1 id="什么是异步编程"><a href="#什么是异步编程" class="headerlink" title="什么是异步编程"></a>什么是异步编程</h1><p>提到异步，那么就有同步。需要了解一下几个名词：同步/异步、阻塞/非阻塞。</p>
 <a id="more"></a>
 
-<h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><ul>
-<li><p>描述<br>缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。</p>
-</li>
-<li><p>解决方案<br>有很多种方法可以有效地解决缓存穿透问题，最常见的则是采用布隆过滤器，将所有可能存在的数据哈希到一个足够大的bitmap中，一个一定不存在的数据会被 这个bitmap拦截掉，从而避免了对底层存储系统的查询压力。另外也有一个更为简单粗暴的方法（我们采用的就是这种），如果一个查询返回的数据为空（不管是数 据不存在，还是系统故障），我们仍然把这个空结果进行缓存，但它的过期时间会很短，最长不超过五分钟。</p>
-</li>
+<p>具体解释参看 io模型与阻塞相关章节。</p>
+<h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><ul>
+<li>并发描述的是程序的组织结构。指程序要被设计成多个可独立执行的子任务。</li>
+<li>以利用有限的计算机资源使多个任务可以被实时或近实时执行为目的。</li>
 </ul>
-<h2 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h2><ul>
-<li><p>描述<br>缓存雪崩是指在我们设置缓存时采用了相同的过期时间，导致缓存在某一时刻同时失效，请求全部转发到DB，DB瞬时压力过重雪崩。</p>
-</li>
-<li><p>解决方案<br>缓存失效时的雪崩效应对底层系统的冲击非常可怕。大多数系统设计者考虑用加锁或者队列的方式保证缓存的单线 程（进程）写，从而避免失效时大量的并发请求落到底层存储系统上。这里分享一个简单方案就时讲缓存失效时间分散开，比如我们可以在原有的失效时间基础上增加一个随机值，比如1-5分钟随机，这样每一个缓存的过期时间的重复率就会降低，就很难引发集体失效的事件。</p>
-</li>
+<h2 id="并行"><a href="#并行" class="headerlink" title="并行"></a>并行</h2><ul>
+<li>并行描述的是程序的执行状态。指多个任务同时被执行。</li>
+<li>以利用富余计算资源（多核CPU）加速完成多个任务为目的。</li>
+<li>并发提供了一种程序组织结构方式，让问题的解决方案可以并行执行，但并行执行不是必须的。</li>
 </ul>
-<h2 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h2><ul>
-<li><p>描述<br>对于一些设置了过期时间的key，如果这些key可能会在某些时间点被超高并发地访问，是一种非常“热点”的数据。这个时候，需要考虑一个问题：缓存被“击穿”的问题，这个和缓存雪崩的区别在于这里针对某一key缓存，前者则是很多key。<br>缓存在某个时间点过期的时候，恰好在这个时间点对这个Key有大量的并发请求过来，这些请求发现缓存过期一般都会从后端DB加载数据并回设到缓存，这个时候大并发的请求可能会瞬间把后端DB压垮。</p>
-</li>
-<li><p>解决方案</p>
-</li>
+<h2 id="概念总结"><a href="#概念总结" class="headerlink" title="概念总结"></a>概念总结</h2><ul>
+<li>并行是为了利用多核加速多任务完成的进度</li>
+<li>并发是为了让独立的子任务都有机会被尽快执行，但不一定能加速整体进度</li>
+<li>非阻塞是为了提高程序整体执行效率</li>
+<li>异步是高效地组织非阻塞任务的方式</li>
 </ul>
-<ol>
-<li>使用互斥锁(mutex key)<br>业界比较常用的做法，是使用mutex。简单地来说，就是在缓存失效的时候（判断拿出来的值为空），不是立即去load db，而是先使用缓存工具的某些带成功操作返回值的操作（比如Redis的SETNX或者Memcache的ADD）去set一个mutex key，当操作返回成功时，再进行load db的操作并回设缓存；否则，就重试整个get缓存的方法。<br>SETNX，是「SET if Not eXists」的缩写，也就是只有不存在的时候才设置，可以利用它来实现锁的效果。在redis2.6.1之前版本未实现setnx的过期时间，所以这里给出两种版本代码参考：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//2.6.1前单机版本锁</span></span><br><span class="line"><span class="function">String <span class="title">get</span><span class="params">(String key)</span> </span>&#123; </span><br><span class="line">   String value = redis.get(key); </span><br><span class="line">   <span class="keyword">if</span> (value  == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="string">&quot;1&quot;</span>)) &#123;  </span><br><span class="line">        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">        redis.expire(key_mutex, <span class="number">3</span> * <span class="number">60</span>)  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        redis.set(key, value);  </span><br><span class="line">        redis.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        <span class="comment">//其他线程休息50毫秒后重试  </span></span><br><span class="line">        Thread.sleep(<span class="number">50</span>);  </span><br><span class="line">        get(key);  </span><br><span class="line">    &#125;  </span><br><span class="line">  &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-最新版本代码：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">get</span><span class="params">(key)</span> </span>&#123;</span><br><span class="line">      String value = redis.get(key);</span><br><span class="line">      <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123; <span class="comment">//代表缓存值过期</span></span><br><span class="line">          <span class="comment">//设置3min的超时，防止del操作失败的时候，下次缓存过期一直不能load db</span></span><br><span class="line">          <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="number">1</span>, <span class="number">3</span> * <span class="number">60</span>) == <span class="number">1</span>) &#123;  <span class="comment">//代表设置成功</span></span><br><span class="line">               value = db.get(key);</span><br><span class="line">                      redis.set(key, value, expire_secs);</span><br><span class="line">                      redis.del(key_mutex);</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;  <span class="comment">//这个时候代表同时候的其他线程已经load db并回设到缓存了，这时候重试获取缓存值即可</span></span><br><span class="line">                      sleep(<span class="number">50</span>);</span><br><span class="line">                      get(key);  <span class="comment">//重试</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> value;      </span><br><span class="line">          &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-memcache代码：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (memcache.get(key) == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
-<li>“提前”使用互斥锁(mutex key)：<br>在value内部设置1个超时值(timeout1), timeout1比实际的memcache timeout(timeout2)小。当从cache读取到timeout1发现它已经过期时候，马上延长timeout1并重新设置到cache。然后再从数据库加载数据并设置到cache中。伪代码如下：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">v = memcache.get(key);  </span><br><span class="line"><span class="keyword">if</span> (v == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">    <span class="keyword">if</span> (v.timeout &lt;= now()) &#123;  </span><br><span class="line">        <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">            <span class="comment">// extend the timeout for other threads  </span></span><br><span class="line">            v.timeout += <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>;  </span><br><span class="line">            memcache.set(key, v, KEY_TIMEOUT * <span class="number">2</span>);  </span><br><span class="line">  </span><br><span class="line">            <span class="comment">// load the latest value from db  </span></span><br><span class="line">            v = db.get(key);  </span><br><span class="line">            v.timeout = KEY_TIMEOUT;  </span><br><span class="line">            memcache.set(key, value, KEY_TIMEOUT * <span class="number">2</span>);  </span><br><span class="line">            memcache.delete(key_mutex);  </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">            sleep(<span class="number">50</span>);  </span><br><span class="line">            retry();  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
-<li>“永远不过期”  </li>
-<li>这里的“永远不过期”包含两层意思：</li>
-</ol>
-<ul>
-<li>(1) 从redis上看，确实没有设置过期时间，这就保证了，不会出现热点key过期问题，也就是“物理”不过期。</li>
-<li>(2) 从功能上看，如果不过期，那不就成静态的了吗？所以我们把过期时间存在key对应的value里，如果发现要过期了，通过一个后台的异步线程进行缓存的构建，也就是“逻辑”过期<br>从实战看，这种方法对于性能非常友好，唯一不足的就是构建缓存时候，其余线程(非构建缓存的线程)可能访问的是老数据，但是对于一般的互联网功能来说这个还是可以忍受。<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">String <span class="title">get</span><span class="params">(<span class="keyword">final</span> String key)</span> </span>&#123;  </span><br><span class="line">        V v = redis.get(key);  </span><br><span class="line">        String value = v.getValue();  </span><br><span class="line">        <span class="keyword">long</span> timeout = v.getTimeout();  </span><br><span class="line">        <span class="keyword">if</span> (v.timeout &lt;= System.currentTimeMillis()) &#123;  </span><br><span class="line">            <span class="comment">// 异步更新后台异常执行  </span></span><br><span class="line">            threadPool.execute(<span class="keyword">new</span> Runnable() &#123;  </span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">                    String keyMutex = <span class="string">&quot;mutex:&quot;</span> + key;  </span><br><span class="line">                    <span class="keyword">if</span> (redis.setnx(keyMutex, <span class="string">&quot;1&quot;</span>)) &#123;  </span><br><span class="line">                        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">                        redis.expire(keyMutex, <span class="number">3</span> * <span class="number">60</span>);  </span><br><span class="line">                        String dbValue = db.get(key);  </span><br><span class="line">                        redis.set(key, dbValue);  </span><br><span class="line">                        redis.delete(keyMutex);  </span><br><span class="line">                    &#125;  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;);  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">return</span> value;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<p>要支持并发，必须拆分为多任务，不同任务相对而言才有阻塞/非阻塞、同步/异步。所以，并发、异步、非阻塞三个词总是如影随形。</p>
+<h2 id="异步编程"><a href="#异步编程" class="headerlink" title="异步编程"></a>异步编程</h2><p>以进程、线程、协程、函数/方法作为执行任务程序的基本单位，结合回调、事件循环、信号量等机制，以提高程序整体执行效率和并发能力的编程方式。</p>
+<p>如果在某程序的运行时，能根据已经执行的指令准确判断它接下来要进行哪个具体操作，那它是同步程序，反之则为异步程序。（无序与有序的区别）</p>
+<p>同步/异步、阻塞/非阻塞并非水火不容，要看讨论的程序所处的封装级别。例如购物程序在处理多个用户的浏览请求可以是异步的，而更新库存时必须是同步的。</p>
+<h2 id="异步之难-nan"><a href="#异步之难-nan" class="headerlink" title="异步之难(nán)"></a>异步之难(nán)</h2><p>控制不住“计几”写的程序，因为其执行顺序不可预料，当下正要发生什么事件不可预料。在并行情况下更为复杂和艰难。</p>
+<p>所以，几乎所有的异步框架都将异步编程模型简化：一次只允许处理一个事件。故而有关异步的讨论几乎都集中在了单线程内。</p>
+<p>如果某事件处理程序需要长时间执行，所有其他部分都会被阻塞。</p>
+<p>所以，一旦采取异步编程，每个异步调用必须“足够小”，不能耗时太久。如何拆分异步任务成了难题。</p>
+<p>程序下一步行为往往依赖上一步执行结果，如何知晓上次异步调用已完成并获取结果？</p>
+<p><strong>回调（Callback）成了必然选择</strong>。那又需要面临“回调地狱”的折磨。</p>
+<p>同步代码改为异步代码，必然破坏代码结构。</p>
+<p>解决问题的逻辑也要转变，不再是一条路走到黑，需要精心安排异步任务。</p>
+<h1 id="为什么要异步编程"><a href="#为什么要异步编程" class="headerlink" title="为什么要异步编程"></a>为什么要异步编程</h1><p>如上文所述，异步编程面临诸多难点，Python 之父亲自上阵打磨4年才使 asyncio 模块在Python 3.6中“转正”，如此苦心为什么？答案只有一个：它值得！下面我们看看为何而值得。</p>
+<h2 id="CPU的时间观"><a href="#CPU的时间观" class="headerlink" title="CPU的时间观"></a>CPU的时间观</h2><p><img src="/images/cpu%E6%97%B6%E9%97%B4%E8%A7%82.png" alt="cpu时间观"></p>
+<p>我们将一个 2.6GHz 的 CPU 拟人化，假设它执行一条命令的时间，他它感觉上过了一秒钟。CPU是计算机的处理核心，也是最宝贵的资源，如果有浪费CPU的运行时间，导致其利用率不足，那程序效率必然低下（因为实际上有资源可以使效率更高）。</p>
+<p>如上图所示，在千兆网上传输2KB数据，CPU感觉过了14个小时，如果是在10M的公网上呢？那效率会低百倍！如果在这么长的一段时间内，CPU只是傻等结果而不能去干其他事情，是不是在浪费CPU的青春？</p>
+<p>鲁迅说，浪费“CPU”的时间等于谋财害命。而凶手就是程序猿。</p>
+<h2 id="面临的问题"><a href="#面临的问题" class="headerlink" title="面临的问题"></a>面临的问题</h2><ul>
+<li>成本问题</li>
 </ul>
-<ol start="4">
-<li>资源保护<br>采用netflix的hystrix，可以做资源的隔离保护主线程池，如果把这个应用到缓存的构建也未尝不可。<br>四种解决方案：没有最佳只有最合适<table>
-<thead>
-<tr>
-<th>解决方案</th>
-<th>优点</th>
-<th>缺点</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>简单分布式互斥锁（mutex key）</td>
-<td>1. 思路简单  2. 保证一致性</td>
-<td>1. 代码复杂度增大  2. 存在死锁的风险  3. 存在线程池阻塞的风险</td>
-</tr>
-<tr>
-<td>“提前”使用互斥锁</td>
-<td>1. 保证一致性</td>
-<td>同上</td>
-</tr>
-<tr>
-<td>不过期(本文)</td>
-<td>1. 异步构建缓存，不会阻塞线程池</td>
-<td>1. 不保证一致性。  2. 代码复杂度增大(每个value都要维护一个timekey)。  3. 占用一定的内存空间(每个value都要维护一个timekey)。</td>
-</tr>
-<tr>
-<td>资源隔离组件hystrix(本文)</td>
-<td>1. hystrix技术成熟，有效保证后端。  2. hystrix监控强大。</td>
-<td>1. 部分访问存在降级策略。</td>
-</tr>
-</tbody></table>
-</li>
-</ol>
 <blockquote>
-<p>四种方案来源网络，详文请链接：<a href="http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io">http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io</a></p>
+<p>如果一个程序不能有效利用一台计算机资源，那必然需要更多的计算机通过运行更多的程序实例来弥补需求缺口。例如我前不久主导重写的项目，使用Python异步编程，改版后由原来的7台服务器削减至3台，成本骤降57%。一台AWS m4.xlarge 型通用服务器按需付费实例一年价格约 1.2 万人民币。</p>
 </blockquote>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>针对业务系统，永远都是具体情况具体分析，没有最好，只有最合适。<br>最后，对于缓存系统常见的缓存满了和数据丢失问题，需要根据具体业务分析，通常我们采用LRU策略处理溢出，Redis的RDB和AOF持久化策略来保证一定情况下的数据安全。</p>
+<ul>
+<li><p>效率问题</p>
+<blockquote>
+<p>如果不在乎钱的消耗，那也会在意效率问题。当服务器数量堆叠到一定规模后，如果不改进软件架构和实现，加机器是徒劳，而且运维成本会骤然增加。比如别人家的电商平台支持6000单/秒支付，而自家在下单量才支撑2000单/秒，在双十一这种活动的时候，钱送上门也赚不到。</p>
+</blockquote>
+</li>
+<li><p>C10k/C10M挑战</p>
+<blockquote>
+<p>C10k（concurrently handling 10k connections）是一个在1999年被提出来的技术挑战，如何在一颗1GHz CPU，2G内存，1gbps网络环境下，让单台服务器同时为1万个客户端提供FTP服务。而到了2010年后，随着硬件技术的发展，这个问题被延伸为C10M，即如何利用8核心CPU，64G内存，在10gbps的网络上保持1000万并发连接，或是每秒钟处理100万的连接。（两种类型的计算机资源在各自的时代都约为1200美元）</p>
+</blockquote>
+</li>
+</ul>
+<p>成本和效率问题是从企业经营角度讲，C10k/C10M问题则是从技术角度出发挑战软硬件极限。C10k/C10M 问题得解，成本问题和效率问题迎刃而解。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>《约束理论与企业优化》中指出：“除了瓶颈之外，任何改进都是幻觉。”</p>
+<p>CPU告诉我们，它自己很快，而上下文切换慢、内存读数据慢、磁盘寻址与取数据慢、网络传输慢……总之，离开CPU 后的一切，除了一级高速缓存，都很慢。我们观察计算机的组成可以知道，主要由运算器、控制器、存储器、输入设备、输出设备五部分组成。运算器和控制器主要集成在CPU中，除此之外全是I/O，包括读写内存、读写磁盘、读写网卡全都是I/O。<strong>I/O成了最大的瓶颈</strong>。</p>
+<p>异步程序可以提高效率，而最大的瓶颈在I/O，业界诞生的解决方案没出意料：<strong>异步I/O吧，异步I/O吧，异步I/O吧吧！</strong></p>
+<h1 id="python怎么做异步编程"><a href="#python怎么做异步编程" class="headerlink" title="python怎么做异步编程"></a>python怎么做异步编程</h1><p>如今，地球上最发达、规模最庞大的计算机程序，莫过于因特网。而从CPU的时间观中可知，网络I/O是最大的I/O瓶颈，除了宕机没有比它更慢的。所以，诸多异步框架都对准的是<strong>网络I/O</strong>。</p>
+<h2 id="异步进化之路"><a href="#异步进化之路" class="headerlink" title="异步进化之路"></a>异步进化之路</h2><p>那么异步只是怎么逐步由同步进化而来呢？我们从一个爬虫例子说起，从因特网上下载10篇网页。</p>
+<h3 id="同步阻塞方式"><a href="#同步阻塞方式" class="headerlink" title="同步阻塞方式"></a>同步阻塞方式</h3><p>最容易想到的解决方案就是依次下载，从建立socket连接到发送网络请求再到读取响应数据，顺序进行。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">blocking_way</span>():</span></span><br><span class="line">    sock = socket.socket()</span><br><span class="line">    <span class="comment"># blocking</span></span><br><span class="line">    sock.connect((<span class="string">&#x27;example.com&#x27;</span>, <span class="number">80</span>))</span><br><span class="line">    request = <span class="string">&#x27;GET / HTTP/1.0\r\nHost: example.com\r\n\r\n&#x27;</span></span><br><span class="line">    sock.send(request.encode(<span class="string">&#x27;ascii&#x27;</span>))</span><br><span class="line">    response = <span class="string">b&#x27;&#x27;</span></span><br><span class="line">    chunk = sock.recv(<span class="number">4096</span>)</span><br><span class="line">    <span class="keyword">while</span> chunk:</span><br><span class="line">        response += chunk</span><br><span class="line">        <span class="comment"># blocking</span></span><br><span class="line">        chunk = sock.recv(<span class="number">4096</span>)</span><br><span class="line">    <span class="keyword">return</span> response</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sync_way</span>():</span></span><br><span class="line">    res = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">        res.append(blocking_way())</span><br><span class="line">    <span class="keyword">return</span> len(res)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注：总体耗时约为4.5秒。（因网络波动每次测试结果有所变动，本文取多次平均值）</p>
+</blockquote>
+<p>创建网络连接，多久能创建完成不是客户端决定的，而是由网络状况和服务端处理能力共同决定。服务端什么时候返回了响应数据并被客户端接收到可供程序读取，也是不可预测的。所以sock.connect()和sock.recv()这两个调用在默认情况下是阻塞的。</p>
+<blockquote>
+<p>注：sock.send()函数并不会阻塞太久，它只负责将请求数据拷贝到TCP/IP协议栈的系统缓冲区中就返回，并不等待服务端返回的应答确认。</p>
+</blockquote>
+<p>上面说了很多，我们力图说明一件事：<strong>同步阻塞的网络交互方式，效率低十分低下</strong>。特别是在网络交互频繁的程序中。这种方式根本不可能挑战C10K/C10M。</p>
+<h3 id="改进方式：多进程"><a href="#改进方式：多进程" class="headerlink" title="改进方式：多进程"></a>改进方式：多进程</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">from</span> concurrent <span class="keyword">import</span> futures</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">blocking_way</span>():</span></span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;与同步代码相同，此处省略&#x27;&#x27;&#x27;</span></span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">process_way</span>():</span></span><br><span class="line">    workers = <span class="number">10</span></span><br><span class="line">    <span class="keyword">with</span> futures.ProcessPoolExecutor(worksers) <span class="keyword">as</span> executor:</span><br><span class="line">        futs = &#123;executor.submit(blocking_way) <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>)&#125;</span><br><span class="line">    <span class="keyword">return</span> len([fut.result() <span class="keyword">for</span> fut <span class="keyword">in</span> futs])</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注：总体耗时约为 0.6 秒</p>
+</blockquote>
+<p>改善效果立竿见影。但仍然有问题。总体耗时并没有缩减到原来的十分之一，而是九分之一左右，还有一些时间耗到哪里去了？进程切换开销。</p>
+<p>进程切换开销不止像“CPU的时间观”所列的“上下文切换”那么低。CPU从一个进程切换到另一个进程，需要把旧进程运行时的寄存器状态、内存状态全部保存好，再将另一个进程之前保存的数据恢复。对CPU来讲，几个小时就干等着。当进程数量大于CPU核心数量时，进程切换是必然需要的。</p>
+<p>除了切换开销，多进程还有另外的缺点。一般的服务器在能够稳定运行的前提下，可以同时处理的进程数在数十个到数百个规模。如果进程数量规模更大，系统运行将不稳定，而且可用内存资源往往也会不足。</p>
+<p>多进程解决方案在面临每天需要成百上千万次下载任务的爬虫系统，或者需要同时搞定数万并发的电商系统来说，并不适合。</p>
+<p>除了切换开销大，以及可支持的任务规模小之外，多进程还有其他缺点，如状态共享等</p>
+<h3 id="继续改进：多线程"><a href="#继续改进：多线程" class="headerlink" title="继续改进：多线程"></a>继续改进：多线程</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">from</span> concurrent <span class="keyword">import</span> futures</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">blocking_way</span>():</span></span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;与同步代码相同，此处省略&#x27;&#x27;&#x27;</span></span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">thread_way</span>():</span></span><br><span class="line">    workers = <span class="number">10</span></span><br><span class="line">    <span class="keyword">with</span> futures.ThreadPoolExecutor(workers) <span class="keyword">as</span> executor:</span><br><span class="line">        futs = &#123;executor.submit(blocking_way) <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>)&#125;</span><br><span class="line">    <span class="keyword">return</span> len([fut.result() <span class="keyword">for</span> fut <span class="keyword">in</span> futs])</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注：总体运行时间约0.43秒。</p>
+</blockquote>
+<p>结果符合预期，比多进程耗时要少些。从运行时间上看，多线程似乎已经解决了切换开销大的问题。而且可支持的任务数量规模，也变成了数百个到数千个。</p>
+<p>但是，多线程仍有问题，特别是Python里的多线程。首先，Python中的多线程因为GIL的存在，它们并不能利用CPU多核优势，一个Python进程中，只允许有一个线程处于运行状态。那为什么结果还是如预期，耗时缩减到了十分之一？</p>
+<p>因为在做阻塞的系统调用时，例如sock.connect(),sock.recv()时，当前线程会释放GIL，让别的线程有执行机会。但是单个线程内，在阻塞调用上还是阻塞的。</p>
+<p>除了GIL之外，所有的多线程还有通病。它们是被OS调度，调度策略是抢占式的，以保证同等优先级的线程都有均等的执行机会，那带来的问题是：并不知道下一时刻是哪个线程被运行，也不知道它正要执行的代码是什么。所以就可能存在<strong>竞态条件</strong>。</p>
+<p>例如爬虫工作线程从任务队列拿待抓取URL的时候，如果多个爬虫线程同时来取，那这个任务到底该给谁？那就需要用到“锁”或“同步队列”来保证下载任务不会被重复执行。</p>
+<p>而且线程支持的多任务规模，在数百到数千的数量规模。在大规模的高频网络交互系统中，仍然有些吃力。当然，多线程最主要的问题还是<strong>竞态条件</strong>。</p>
+<h3 id="非阻塞方式"><a href="#非阻塞方式" class="headerlink" title="非阻塞方式"></a>非阻塞方式</h3><p>终于，我们来到了非阻塞解决方案。先来看看最原始的非阻塞如何工作的。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import socket</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def nonblocking_way():</span><br><span class="line">    sock &#x3D; socket.socket()</span><br><span class="line">    sock.setblocking(False)</span><br><span class="line">    try:</span><br><span class="line">        sock.connect((&#39;example.com&#39;, 80))</span><br><span class="line">    except BlockingIOError:</span><br><span class="line">        # 非阻塞连接过程中也会抛出异常</span><br><span class="line">        pass</span><br><span class="line">    request &#x3D; &#39;GET &#x2F; HTTP&#x2F;1.0\r\nHost: example.com\r\n\r\n&#39;</span><br><span class="line">    data &#x3D; request.encode(&#39;ascii&#39;)</span><br><span class="line">    # 不知道socket何时就绪，所以不断尝试发送</span><br><span class="line">    while True:</span><br><span class="line">        try:</span><br><span class="line">            sock.send(data)</span><br><span class="line">            # 直到send不抛异常，则发送完成</span><br><span class="line">            break</span><br><span class="line">        except OSError:</span><br><span class="line">            pass</span><br><span class="line"></span><br><span class="line">    response &#x3D; b&#39;&#39;</span><br><span class="line">    while True:</span><br><span class="line">        try:</span><br><span class="line">            chunk &#x3D; sock.recv(4096)</span><br><span class="line">            while chunk:</span><br><span class="line">                response +&#x3D; chunk</span><br><span class="line">                chunk &#x3D; sock.recv(4096)</span><br><span class="line">            break</span><br><span class="line">        except OSError:</span><br><span class="line">            pass</span><br><span class="line"></span><br><span class="line">    return response</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def sync_way():</span><br><span class="line">    res &#x3D; []</span><br><span class="line">    for i in range(10):</span><br><span class="line">        res.append(nonblocking_way())</span><br><span class="line">    return len(res)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注：总体耗时约4.3秒。</p>
+</blockquote>
+<p>首先注意到两点，就感觉被骗了。一是耗时与同步阻塞相当，二是代码更复杂。要非阻塞何用？且慢。</p>
+<p>上图代码<code>sock.setblocking(False)</code>告诉OS，让socket上阻塞调用都改为非阻塞的方式。之前我们说到，非阻塞就是在做一件事的时候，不阻碍调用它的程序做别的事情。上述代码在执行完 sock.connect() 和 sock.recv()后的确不再阻塞，可以继续往下执行请求准备的代码或者是执行下一次读取。</p>
+<p>代码变得更复杂也是上述原因所致。第11行要放在try语句内，是因为socket在发送非阻塞连接请求过程中，系统底层也会抛出异常。connect()被调用之后，立即可以往下执行第15和16行的代码。</p>
+<p>需要while循环不断尝试send()，是因为connect()已经非阻塞，在send()之时并不知道 socket 的连接是否就绪，只有不断尝试，尝试成功为止，即发送数据成功了。recv()调用也是同理。</p>
+<p>虽然 connect() 和 recv()不再阻塞主程序，空出来的时间段CPU没有空闲着，但并没有利用好这空闲去做其他有意义的事情，而是在循环尝试读写 socket（不停判断非阻塞调用的状态是否就绪）。还得处理来自底层的可忽略的异常。也不能同时处理多个 socket 。</p>
+<p>然后10次下载任务仍然按序进行。所以总体执行时间和同步阻塞相当。如果非得这样子，那还不如同步阻塞算了。</p>
+<h3 id="非阻塞改进"><a href="#非阻塞改进" class="headerlink" title="非阻塞改进"></a>非阻塞改进</h3><h4 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h4><p><strong>判断非阻塞调用是否就绪如果 OS能做</strong>，是不是应用程序就可以不用自己去等待和判断了，就可以利用这个空闲去做其他事情以提高效率。</p>
+<p>所以OS将I/O状态的变化都封装成了事件，如可读事件、可写事件。并且提供了专门的系统模块让应用程序可以接收事件通知。这个模块就是select。让应用程序可以通过select注册文件描述符和回调函数。当文件描述符的状态发生变化时，select就调用事先注册的回调函数。</p>
+<p>select因其算法效率比较低，后来改进成了poll，再后来又有进一步改进，BSD内核改进成了kqueue模块，而Linux内核改进成了epoll模块。这四个模块的作用都相同，暴露给程序员使用的API也几乎一致，区别在于kqueue 和 epoll在处理大量文件描述符时效率更高。</p>
+<p>鉴于 Linux 服务器的普遍性，以及为了追求更高效率，所以我们常常听闻被探讨的模块都是 epoll 。</p>
+<p>关于io多路复用（select/poll/epoll）请参看 io 模型章节。</p>
+<h4 id="回调-Callback"><a href="#回调-Callback" class="headerlink" title="回调(Callback)"></a>回调(Callback)</h4><p>把I/O事件的等待和监听任务交给了 OS，那 OS在知道I/O状态发生改变后（例如socket连接已建立成功可发送数据），它又怎么知道接下来该干嘛呢？只能回调。</p>
+<p>需要我们将发送数据与读取数据封装成独立的函数，让epoll代替应用程序监听socket状态时，得告诉epoll：“如果socket状态变为可以往里写数据（连接建立成功了），请调用HTTP请求发送函数。如果socket变为可以读数据了（客户端已收到响应），请调用响应处理函数。”</p>
+<p>于是我们利用epoll结合回调机制重构爬虫代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import socket</span><br><span class="line">from selectors import DefaultSelector, EVENT_WRITE, EVENT_READ</span><br><span class="line"></span><br><span class="line">selector &#x3D; DefaultSelector()</span><br><span class="line">stopped &#x3D; False</span><br><span class="line">urls_todo &#x3D; &#123;&#39;&#x2F;&#39;, &#39;&#x2F;1&#39;, &#39;&#x2F;2&#39;, &#39;&#x2F;3&#39;, &#39;&#x2F;4&#39;, &#39;&#x2F;5&#39;, &#39;&#x2F;6&#39;, &#39;&#x2F;7&#39;, &#39;&#x2F;8&#39;, &#39;&#x2F;9&#39;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Crawler:</span><br><span class="line">    def __init__(self, url):</span><br><span class="line">        self.url &#x3D; url</span><br><span class="line">        self.sock &#x3D; None</span><br><span class="line">        self.response &#x3D; b&#39;&#39;</span><br><span class="line"></span><br><span class="line">    def fetch(self):</span><br><span class="line">        self.sock &#x3D; socket.socket()</span><br><span class="line">        self.sock.setblocking(False)</span><br><span class="line">        try:</span><br><span class="line">            self.sock.connect((&#39;example.com&#39;, 80))</span><br><span class="line">        except BlockingIOError:</span><br><span class="line">            pass</span><br><span class="line">        selector.register(self.sock.fileno(), EVENT_WRITE, self.connected)</span><br><span class="line"></span><br><span class="line">    def connected(self, key, mask):</span><br><span class="line">        selector.unregister(key.fd)</span><br><span class="line">        get &#x3D; &#39;GET &#123;0&#125; HTTP&#x2F;1.0\r\nHost: example.com\r\n\r\n&#39;.format(self.url)</span><br><span class="line">        self.sock.send(get.encode(&#39;ascii&#39;))</span><br><span class="line">        selector.register(key.fd, EVENT_READ, self.read_response)</span><br><span class="line"></span><br><span class="line">    def read_response(self, key, mask):</span><br><span class="line">        global stopped</span><br><span class="line">        # 如果响应大于4KB，下一次循环会继续读</span><br><span class="line">        chunk &#x3D; self.sock.recv(4096)</span><br><span class="line">        if chunk:</span><br><span class="line">            self.response +&#x3D; chunk</span><br><span class="line">        else:</span><br><span class="line">            selector.unregister(key.fd)</span><br><span class="line">            urls_todo.remove(self.url)</span><br><span class="line">            if not urls_todo:</span><br><span class="line">                stopped &#x3D; True</span><br></pre></td></tr></table></figure>
+<p>此处和前面稍有不同的是，我们将下载不同的10个页面，相对URL路径存放于urls_todo集合中。现在看看改进在哪。</p>
+<p>首先，不断尝试send() 和 recv() 的两个循环被消灭掉了。</p>
+<p>其次，导入了selectors模块，并创建了一个DefaultSelector实例。Python标准库提供的selectors模块是对底层select/poll/epoll/kqueue的封装。DefaultSelector类会根据 OS 环境自动选择最佳的模块，那在 Linux 2.5.44 及更新的版本上都是epoll了。</p>
+<p>然后，在第25行和第31行分别注册了socket可写事件(EVENT_WRITE)和可读事件(EVENT_READ)发生后应该采取的回调函数。</p>
+<p>虽然代码结构清晰了，阻塞操作也交给OS去等待和通知了，但是，我们要抓取10个不同页面，就得创建10个Crawler实例，就有20个事件将要发生，那如何从selector里获取当前正发生的事件，并且得到对应的回调函数去执行呢？</p>
+<h4 id="事件循环（Event-Loop）"><a href="#事件循环（Event-Loop）" class="headerlink" title="事件循环（Event Loop）"></a>事件循环（Event Loop）</h4><p>为了解决上述问题，那我们只得采用老办法，写一个循环，去访问selector模块，等待它告诉我们当前是哪个事件发生了，应该对应哪个回调。这个等待事件通知的循环，称之为事件循环。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def loop():</span><br><span class="line">    while not stopped:</span><br><span class="line">        # 阻塞, 直到一个事件发生</span><br><span class="line">        events &#x3D; selector.select()</span><br><span class="line">        for event_key, event_mask in events:</span><br><span class="line">            callback &#x3D; event_key.data</span><br></pre></td></tr></table></figure>
+<p>上述代码中，我们用stopped全局变量控制事件循环何时停止。当urls_todo消耗完毕后，会标记stopped为True。</p>
+<p>重要的是第49行代码，selector.select() 是一个阻塞调用，因为如果事件不发生，那应用程序就没事件可处理，所以就干脆阻塞在这里等待事件发生。那可以推断，如果只下载一篇网页，一定要connect()之后才能send()继而recv()，那它的效率和阻塞的方式是一样的。因为不在connect()/recv()上阻塞，也得在select()上阻塞。</p>
+<p>所以，selector机制(后文以此称呼代指epoll/kqueue)是设计用来解决大量并发连接的。当系统中有大量非阻塞调用，能随时产生事件的时候，selector机制才能发挥最大的威力。</p>
+<p>下面是如何启创建10个下载任务和启动事件循环的：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    import time</span><br><span class="line">    start &#x3D; time.time()</span><br><span class="line">    for url in urls_todo:</span><br><span class="line">        crawler &#x3D; Crawler(url)</span><br><span class="line">        crawler.fetch()</span><br><span class="line">    loop()</span><br><span class="line">    print(time.time() - start)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注：总体耗时约0.45秒。</p>
+</blockquote>
+<p>上述执行结果令人振奋。在单线程内用 事件循环+回调搞定了10篇网页同时下载的问题。这，已经是异步编程了。虽然有一个for 循环顺序地创建Crawler 实例并调用 fetch 方法，但是fetch内仅有connect()和注册可写事件，而且从执行时间明显可以推断，多个下载任务确实在同时进行！</p>
+<p>上述代码异步执行的过程：</p>
+<ol>
+<li>创建Crawler 实例；</li>
+<li>调用fetch方法，会创建socket连接和在selector上注册可写事件；</li>
+<li>fetch内并无阻塞操作，该方法立即返回；</li>
+<li>重复上述3个步骤，将10个不同的下载任务都加入事件循环；</li>
+<li>启动事件循环，进入第1轮循环，阻塞在事件监听上；</li>
+<li>当某个下载任务EVENT_WRITE被触发，回调其connected方法，第一轮事件循环结束；</li>
+<li>进入第2轮事件循环，当某个下载任务有事件触发，执行其回调函数；此时已经不能推测是哪个事件发生，因为有可能是上次connected里的EVENT_READ先被触发，也可能是其他某个任务的EVENT_WRITE被触发；（此时，原来在一个下载任务上会阻塞的那段时间被利用起来执行另一个下载任务了）</li>
+<li>循环往复，直至所有下载任务被处理完成</li>
+<li>退出事件循环，结束整个下载程序</li>
+</ol>
+<h4 id="非阻塞总结"><a href="#非阻塞总结" class="headerlink" title="非阻塞总结"></a>非阻塞总结</h4><p>目前为止，我们已经从同步阻塞学习到了异步非阻塞。掌握了在单线程内同时并发执行多个网络I/O阻塞型任务的黑魔法。而且与多线程相比，连线程切换都没有了，执行回调函数是函数调用开销，在线程的栈内完成，因此性能也更好，单机支持的任务规模也变成了数万到数十万个。（不过我们知道：没有免费午餐，也没有银弹。）</p>
+<p>部分编程语言中，对异步编程的支持就止步于此（不含语言官方之外的扩展）。需要程序猿直接使用epoll去注册事件和回调、维护一个事件循环，然后大多数时间都花在设计回调函数上。</p>
+<p>通过本节的学习，我们应该认识到，不论什么编程语言，但凡要做异步编程，上述的“<strong>事件循环+回调</strong>”这种模式是逃不掉的，尽管它可能用的不是epoll，也可能不是while循环。如果你找到了一种不属于 “等会儿告诉你”模型的异步方式，请立即给我打电话（注意，打电话是Call）。</p>
+<p>为什么我们在某些异步编程中并没有看到 CallBack 模式呢？这就是我们接下来要探讨的问题。本节是学习异步编程的一个终点，也是另一个起点。毕竟咱们讲 Python 异步编程，还没提到其主角协程的用武之地。</p>
+<h2 id="python的异步实现"><a href="#python的异步实现" class="headerlink" title="python的异步实现"></a>python的异步实现</h2><p>我们将在本节学习到 Python生态对异步编程的支持是如何继承前文所述的“事件循环+回调”模式演变到asyncio的原生协程模式。</p>
+<h3 id="回调之痛，以终为始"><a href="#回调之痛，以终为始" class="headerlink" title="回调之痛，以终为始"></a>回调之痛，以终为始</h3><p>在上节中，我们已经学会了“事件循环+回调”的基本运行原理，可以基于这种方式在单线程内实现异步编程。也确实能够大大提高程序运行效率。但是，刚才所学的只是最基本的，然而在生产项目中，要应对的复杂度会大大增加。考虑如下问题：</p>
+<ol>
+<li>如果回调函数执行不正常该如何？</li>
+<li>如果回调里面还要嵌套回调怎么办？要嵌套很多层怎么办？</li>
+<li>如果嵌套了多层，其中某个环节出错了会造成什么后果？</li>
+<li>如果有个数据需要被每个回调都处理怎么办？</li>
+<li>……</li>
+</ol>
+<p>在实际编程中，上述系列问题不可避免。在这些问题的背后隐藏着回调编程模式的一些</p>
+<p>缺点：</p>
+<ul>
+<li>回调地狱</li>
+<li>破坏代码结构<br>写同步代码时，关联的操作时自上而下运行：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">do_a()</span><br><span class="line">do_b()</span><br></pre></td></tr></table></figure>
+如果 b 处理依赖于 a 处理的结果，而 a 过程是异步调用，就不知 a何时能返回值，需要将后续的处理过程以callback的方式传递给 a ，让 a执行完以后可以执行 b。代码变化为：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">do_a(do_b())</span><br></pre></td></tr></table></figure>
+如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：</span><br></pre></td></tr></table></figure>
+上面实际也是回调地狱式的风格，但这不是主要矛盾。主要在于，原本从上而下的代码结构，要改成从内到外的。先f，再e，再d，…，直到最外层 a 执行完成。在同步版本中，执行完a后执行b，这是线程的指令指针控制着的流程，而在回调版本中，流程就是程序猿需要注意和安排的。</li>
+<li>共享状态管理困难<br>回顾同步阻塞版的爬虫代码，sock对象从头使用到尾，而在回调的版本中，我们必须在Crawler实例化后的对象self里保存它自己的sock对象。如果不是采用OOP的编程风格，那需要把要共享的状态接力似的传递给每一个回调。多个异步调用之间，到底要共享哪些状态，事先就得考虑清楚，精心设计。</li>
+<li>错误处理困难<br>一连串的回调构成一个完整的调用链。例如上述的 a 到 f。假如 d抛了异常怎么办？整个调用链断掉，接力传递的状态也会丢失，这种现象称为调用栈撕裂。 c 不知道该干嘛，继续异常，然后是 b 异常，接着 a异常。好嘛，报错日志就告诉你，a 调用出错了，但实际是 d出错。所以，为了防止栈撕裂，异常必须以数据的形式返回，而不是直接抛出异常，然后每个回调中需要检查上次调用的返回值，以防错误吞没。</li>
+</ul>
+<p>如果说代码风格难看是小事，但栈撕裂和状态管理困难这两个缺点会让基于回调的异步编程很艰难。所以不同编程语言的生态都在致力于解决这个问题。才诞生了后来的Promise、Co-routine等解决方案。</p>
+<p>Python 生态也以终为始，秉承着“程序猿不必难程序猿”的原则，让语言和框架开发者苦逼一点，也要让应用开发者舒坦。在事件循环+回调的基础上衍生出了基于协程的解决方案，代表作有 Tornado、Twisted、asyncio 等。接下来我们随着 Python 生态异步编程的发展过程，深入理解Python异步编程。</p>
+<h1 id="核心问题"><a href="#核心问题" class="headerlink" title="核心问题"></a>核心问题</h1><p>通过前面的学习，我们清楚地认识到异步编程最大的困难：异步任务何时执行完毕？接下来要对异步调用的返回结果做什么操作？</p>
+<p>上述问题我们已经通过事件循环和回调解决了。但是回调会让程序变得复杂。要异步，必回调，又是否有办法规避其缺点呢？那需要弄清楚其本质，为什么回调是必须的？还有使用回调时克服的那些缺点又是为了什么？</p>
+<p>答案是程序为了知道自己已经干了什么？正在干什么？将来要干什么？换言之，程序得知道当前所处的状态，而且要将这个状态在不同的回调之间延续下去。</p>
+<p>多个回调之间的状态管理困难，那让每个回调都能管理自己的状态怎么样？链式调用会有栈撕裂的困难，让回调之间不再链式调用怎样？不链式调用的话，那又如何让被调用者知道已经完成了？那就让这个回调通知那个回调如何？而且一个回调，不就是一个待处理任务吗？</p>
+<p>任务之间得相互通知，每个任务得有自己的状态。那不就是很古老的编程技法：协作式多任务？然而要在单线程内做调度，啊哈，协程！每个协程具有自己的栈帧，当然能知道自己处于什么状态，协程之间可以协作那自然可以通知别的协程。</p>
+<h1 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h1><p>协程(Co-routine)，即是协作式的例程。</p>
+<p>它是非抢占式的多任务子例程的概括，可以允许有多个入口点在例程中确定的位置来控制程序的暂停与恢复执行。</p>
+<p>例程是什么？编程语言定义的可被调用的代码段，为了完成某个特定功能而封装在一起的一系列指令。一般的编程语言都用称为函数或方法的代码结构来体现。</p>
+<h2 id="基于生成器的协程（yield）"><a href="#基于生成器的协程（yield）" class="headerlink" title="基于生成器的协程（yield）"></a>基于生成器的协程（yield）</h2><p>早期的 Pythoner 发现Python中有种特殊的对象——生成器（Generator），它的特点和协程很像。每一次迭代之间，会暂停执行，继续下一次迭代的时候还不会丢失先前的状态。</p>
+<p>为了支持用生成器做简单的协程，Python2.5对生成器进行了增强(PEP342)，该增强提案的标题是 “Coroutines via EnhancedGenerators”。有了PEP342的加持，生成器可以通过yield暂停执行和向外返回数据，也可以通过send()向生成器内发送数据，还可以通过throw()向生成器内抛出异常以便随时终止生成器的运行。</p>
+<p>yiled 具体解释参看 yield章节。</p>
+<h2 id="yield-from"><a href="#yield-from" class="headerlink" title="yield from"></a>yield from</h2><p>yield from 是Python 3.3新引入的语法（PEP380）。它主要解决的就是在生成器里玩生成器不方便的问题。它有两大主要功能。</p>
+<p>第一个功能是：让嵌套生成器不必通过循环迭代yield，而是直接yield  from。以下两种在生成器里玩子生成器的方式是等价的。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def gen_one():</span><br><span class="line">    subgen &#x3D; range(10)    </span><br><span class="line">    yield from subgen</span><br><span class="line"></span><br><span class="line">def gen_two():</span><br><span class="line">    subgen &#x3D; range(10)    </span><br><span class="line">    for item in subgen:        </span><br><span class="line">        yield item</span><br></pre></td></tr></table></figure>
+<p>第二个功能就是在子生成器和原生成器的调用者之间打开双向通道，两者可以直接通信。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def gen():</span><br><span class="line">    yield from subgen()</span><br><span class="line"></span><br><span class="line">def subgen():</span><br><span class="line">    while True:</span><br><span class="line">        x &#x3D; yield</span><br><span class="line">        yield x+1</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    g &#x3D; gen()</span><br><span class="line">    next(g)                # 驱动生成器g开始执行到第一个 yield</span><br><span class="line">    retval &#x3D; g.send(1)     # 看似向生成器 gen() 发送数据</span><br><span class="line">    print(retval)          # 返回2</span><br><span class="line">    g.throw(StopIteration) # 看似向gen()抛入异常</span><br></pre></td></tr></table></figure>
+<p>通过上述代码清晰地理解了yield from的双向通道功能。关键字yield from在gen()内部为subgen()和main()开辟了通信通道。main()里可以直接将数据1发送给subgen(),subgen()也可以将计算后的数据2返回到main()里，main()里也可以直接向subgen()抛入异常以终止subgen()。</p>
+<blockquote>
+<p>顺带一提，yield from 除了可以 yield from <generator> 还可以 yield from <iterable>。</p>
+</blockquote>
+<p>用yield from改进基于生成器的协程，代码抽象程度更高。使业务逻辑相关的代码更精简。由于其双向通道功能可以让协程之间随心所欲传递数据，使Python异步编程的协程解决方案大大向前迈进了一步。</p>
+<p>于是Python语言开发者们充分利用yield from，使 Guido 主导的Python异步编程框架Tulip迅速脱胎换骨，并迫不及待得让它在 Python 3.4 中换了个名字asyncio以“实习生”角色出现在标准库中。</p>
+<p>可以参看 <a href="https://segmentfault.com/a/1190000009781688">yield from 详细解释</a></p>
+<h2 id="asyncio"><a href="#asyncio" class="headerlink" title="asyncio"></a>asyncio</h2><p>asyncio是Python 3.4 试验性引入的异步I/O框架（PEP 3156），提供了基于协程做异步I/O编写单线程并发代码的基础设施。其核心组件有事件循环（Event Loop）、协程(Coroutine）、任务(Task)、未来对象(Future)以及其他一些扩充和辅助性质的模块。</p>
+<p>在引入asyncio的时候，还提供了一个装饰器@asyncio.coroutine用于装饰使用了yield from的函数，以标记其为协程。但并不强制使用这个装饰器。</p>
+<p>虽然发展到 Python 3.4 时有了yield from的加持让协程更容易了，但是由于协程在Python中发展的历史包袱所致，很多人仍然弄不明白生成器和协程的联系与区别，也弄不明白yield 和 yield from 的区别。这种混乱的状态也违背Python之禅的一些准则。</p>
+<p>于是Python设计者们又快马加鞭地在 3.5 中新增了async/await语法（PEP 492），对协程有了明确而显式的支持，称之为原生协程。async/await 和 yield from这两种风格的协程底层复用共同的实现，而且相互兼容。</p>
+<p>在Python 3.6 中asyncio库“转正”，不再是实验性质的，成为标准库的正式一员。</p>
+<p>行至此处，我们已经掌握了asyncio的核心原理，学习了它的原型，也学习了异步I/O在 CPython 官方支持的生态下是如何一步步发展至今的。</p>
+<p>实际上，真正的asyncio比我们前几节中学到的要复杂得多，它还实现了零拷贝、公平调度、异常处理、任务状态管理等等使 Python 异步编程更完善的内容。理解原理和原型对我们后续学习有莫大的帮助。</p>
+<h2 id="await-async"><a href="#await-async" class="headerlink" title="await/async"></a>await/async</h2><p>本节中，我们将初步体验asyncio库和新增语法async/await给我们带来的便利。由于Python2-3的过度期间，Python3.0-3.4的使用者并不是太多，也为了不让更多的人困惑，也因为aysncio在3.6才转正，所以更深入学习asyncio库的时候我们将使用async/await定义的原生协程风格，yield from风格的协程不再阐述（实际上它们可用很小的代价相互代替）。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import asyncio</span><br><span class="line">import aiohttp</span><br><span class="line"></span><br><span class="line">host &#x3D; &#39;http:&#x2F;&#x2F;example.com&#39;</span><br><span class="line">urls_todo &#x3D; &#123;&#39;&#x2F;&#39;, &#39;&#x2F;1&#39;, &#39;&#x2F;2&#39;, &#39;&#x2F;3&#39;, &#39;&#x2F;4&#39;, &#39;&#x2F;5&#39;, &#39;&#x2F;6&#39;, &#39;&#x2F;7&#39;, &#39;&#x2F;8&#39;, &#39;&#x2F;9&#39;&#125;</span><br><span class="line"></span><br><span class="line">loop &#x3D; asyncio.get_event_loop()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async def fetch(url):</span><br><span class="line">    async with aiohttp.ClientSession(loop&#x3D;loop) as session:</span><br><span class="line">        async with session.get(url) as response:</span><br><span class="line">            response &#x3D; await response.read()</span><br><span class="line">            return response</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    import time</span><br><span class="line">    start &#x3D; time.time()</span><br><span class="line">    tasks &#x3D; [fetch(host + url) for url in urls_todo]</span><br><span class="line">    loop.run_until_complete(asyncio.gather(*tasks))</span><br><span class="line">    print(time.time() - start)</span><br></pre></td></tr></table></figure>
+<p>对比生成器版的协程，使用asyncio库后变化很大：</p>
+<ul>
+<li>没有了yield 或 yield from，而是async/await</li>
+<li>没有了自造的loop()，取而代之的是asyncio.get_event_loop()</li>
+<li>无需自己在socket上做异步操作，不用显式地注册和注销事件，aiohttp库已经代劳</li>
+<li>没有了显式的 Future 和 Task，asyncio已封装</li>
+<li>更少量的代码，更优雅的设计</li>
+</ul>
+<blockquote>
+<p>说明：我们这里发送和接收HTTP请求不再自己操作socket的原因是，在实际做业务项目的过程中，要处理妥善地HTTP协议会很复杂，我们需要的是功能完善的异步HTTP客户端，业界已经有了成熟的解决方案，DRY不是吗？</p>
+</blockquote>
+<p>和同步阻塞版的代码对比：</p>
+<ul>
+<li>异步化</li>
+<li>代码量相当（引入aiohttp框架后更少）</li>
+<li>代码逻辑同样简单，跟同步代码一样的结构、一样的逻辑</li>
+<li>接近10倍的性能提升</li>
+</ul>
+<p>生成器与asyncio提供的新版语法的区别请参看： <a href="https://www.jianshu.com/p/032ad0848f6b">async/await详解</a></p>
+<p>到此为止，我们已经深入地学习了异步编程是什么、为什么、在Python里是怎么样发展的。我们找到了一种让代码看起来跟同步代码一样简单，而效率却提升N倍（具体提升情况取决于项目规模、网络环境、实现细节）的异步编程方法。它也没有回调的那些缺点。</p>
+<h1 id="WSGI-ASGI"><a href="#WSGI-ASGI" class="headerlink" title="WSGI/ASGI"></a>WSGI/ASGI</h1><p>经过以上对异步编程的学习，接下来我们要把这些异步运用到python web中。</p>
+<p>在python web编程中，有很多流行的框架，大体分为2类：wsgi、asgi.</p>
+<p>这里需要特别解释一下几个名词：<br>wsgi server (比如uWSGI/gunicorn） 要和 wsgi   application（比如django/flask）交互，uwsgi需要将过来的请求转给django 处理，那么uWSGI 和 django的交互和调用就需要一个统一的规范，这个规范就是WSGI（Web Server Gateway Interface）</p>
+<p>asgi与wsgi的区别之处就在于，asgi扩展了wsgi,可以支持WebSocket，具有异步功能。</p>
+<ul>
+<li><p>wsgi application有以下代表：</p>
+<ol>
+<li>Django</li>
+<li>flask</li>
+<li>bottle</li>
+<li>webpy</li>
+</ol>
+</li>
+<li><p>wsgi server有以下代表：</p>
+<ol>
+<li>uWSGI</li>
+<li>gunicorn</li>
+</ol>
+</li>
+<li><p>asgi application有以下代表</p>
+<ol>
+<li>Starlette（需要使用ASGI服务作为容器，比如Uvicorn）</li>
+<li>Django Channels</li>
+<li>FastAPI(集成Starlette)</li>
+<li>tornado</li>
+<li>Snaic</li>
+<li>Quart</li>
+<li>twisted</li>
+</ol>
+</li>
+<li><p>asgi server有以下代表</p>
+<ol>
+<li>uvicorn </li>
+</ol>
+</li>
+</ul>
+<p>那么如果已经是wsgi的同步框架能不能无缝转成异步呢？no problem —&gt; greenlet/gevent</p>
+<p>我们已经知道，要异步，<strong>事件循环+回调</strong> 跑不掉。那么这个事件循环+回调在uvicorn的中只怎么体现的呢？</p>
+<p><code>myapp.py</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    uvicorn.run(app&#x3D;&#39;myapp.main:app&#39;)</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>uvicorn/mainpy</code></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class Server:</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    def run(self, sockets&#x3D;None):</span><br><span class="line">        self.config.setup_event_loop()</span><br><span class="line">        loop &#x3D; asyncio.get_event_loop()</span><br><span class="line">        loop.run_until_complete(self.serve(sockets&#x3D;sockets))</span><br><span class="line">        </span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>asyncio.get_event_loop()</code>获取时间循环，然后把封装了sock的serve（其实就是future对象）放入事件循环处理。</p>
+<p>uvicorn 支持的loop有3种，auto/asyncio/uvloop, 默认是auto. auto会尝试首先<strong>加载uvloop</strong>,加载失败才会加载asyncio的loop.</p>
+<blockquote>
+<p>值得一说的是，可以使用uvicorn + gunicorn部署python asgi服务。uvicorn实现了gunicorn的worker接口，所以gunicorn启动服务的时候可以指定使用uvicorn的worker，比如：<code>gunicorn -k uvicorn.workers.UvicornWorker</code></p>
+</blockquote>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ul>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzIxMjY5NTE0MA==&mid=2247483720&idx=1&sn=f016c06ddd17765fd50b705fed64429c" title="" target="">深入理解Python异步编程</a></li>
+</ul>
 ]]></content>
       <categories>
         <category>架构</category>
+        <category>python</category>
       </categories>
       <tags>
-        <tag>缓存穿透</tag>
-        <tag>缓存击穿</tag>
-        <tag>缓存雪崩</tag>
+        <tag>python</tag>
+        <tag>异步编程</tag>
       </tags>
   </entry>
 </search>
