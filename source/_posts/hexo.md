@@ -46,8 +46,8 @@ vendors:
 
 3. 其他可以参考
 
-   - [ NexT主题进阶配置 ]:  https://wylu.me/posts/e0424f3f/
-   - [ hexo文档 ]: https://hexo.io/zh-cn/docs/front-matterh
-   - [ next  IIssNan文档 ]: http://theme-next.iissnan.com/
+   - [ NexT主题进阶配置 ](https://wylu.me/posts/e0424f3f/)
+   - [ hexo文档 ](https://hexo.io/zh-cn/docs/front-matterh)
+   - [ next  IIssNan文档 ]( http://theme-next.iissnan.com/)
 
      

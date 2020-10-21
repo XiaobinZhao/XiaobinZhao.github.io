@@ -1,6 +1,7 @@
 ---
 title: python异步编程
 date: 2020-10-20 09:49:01
+top: true
 tag: 
 - python
 - 异步编程
@@ -591,3 +592,9 @@ class Server:
 uvicorn 支持的loop有3种，auto/asyncio/uvloop, 默认是auto. auto会尝试首先**加载uvloop**,加载失败才会加载asyncio的loop.
 
 > 值得一说的是，可以使用uvicorn + gunicorn部署python asgi服务。uvicorn实现了gunicorn的worker接口，所以gunicorn启动服务的时候可以指定使用uvicorn的worker，比如：`gunicorn -k uvicorn.workers.UvicornWorker`
+
+
+
+# 参考文献
+
+- {% link  '深入理解Python异步编程'  https://mp.weixin.qq.com/s?__biz=MzIxMjY5NTE0MA==&mid=2247483720&idx=1&sn=f016c06ddd17765fd50b705fed64429c  %}
