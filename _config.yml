@@ -122,3 +122,16 @@ tag_cloud:
     #outlineColor: '#E2E1D1'
     #maxSpeed: 0.1
     #pauseOnSelected: true # true 意味着当选中对应 tag 时,停止转动
+
+plugins: hexo-generate-feed
+
+# rss配置
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+  hub:
+  content:
+  content_limit: 140
+  content_limit_delim: ' '
+  order_by: -date

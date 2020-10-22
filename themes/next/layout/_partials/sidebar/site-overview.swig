@@ -7,6 +7,15 @@
   <div class="site-description" itemprop="description">{{ description }}</div>
 </div>
 
+{% if theme.rss %}
+   <div class="feed-link motion-element">
+     <a href="{{ url_for(theme.rss) }}" rel="alternate">
+       <i class="fa fa-rss"></i>
+       RSS
+     </a>
+   </div>
+ {% endif %}
+
 {%- if theme.site_state %}
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
