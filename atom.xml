@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2020-10-21T10:19:09.899Z</updated>
+  <updated>2020-10-22T03:30:22.320Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -17,11 +17,30 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>遗留系统改造思路和方法论</title>
+    <link href="https://xiaobinzhao.github.io/2020/10/22/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E6%94%B9%E9%80%A0%E6%80%9D%E8%B7%AF%E5%92%8C%E6%96%B9%E6%B3%95%E8%AE%BA/"/>
+    <id>https://xiaobinzhao.github.io/2020/10/22/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E6%94%B9%E9%80%A0%E6%80%9D%E8%B7%AF%E5%92%8C%E6%96%B9%E6%B3%95%E8%AE%BA/</id>
+    <published>2020-10-22T02:05:22.000Z</published>
+    <updated>2020-10-22T03:30:22.320Z</updated>
+    
+    
+    <summary type="html">我们总是会遇到各种遗留系统因为种种原因不能重新开发又不能“弃之如履”，那么有一套经验总结的方法论显得尤为必要，本文简单记录了一些要点，抛砖引玉。</summary>
+    
+    
+    
+    <category term="架构" scheme="https://xiaobinzhao.github.io/categories/%E6%9E%B6%E6%9E%84/"/>
+    
+    
+    <category term="遗留系统改造" scheme="https://xiaobinzhao.github.io/tags/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E6%94%B9%E9%80%A0/"/>
+    
+  </entry>
+  
+  <entry>
     <title>RESTful思考</title>
     <link href="https://xiaobinzhao.github.io/2020/10/21/RestFul%E6%80%9D%E8%80%83/"/>
     <id>https://xiaobinzhao.github.io/2020/10/21/RestFul%E6%80%9D%E8%80%83/</id>
     <published>2020-10-21T09:49:01.000Z</published>
-    <updated>2020-10-21T10:19:09.899Z</updated>
+    <updated>2020-10-22T02:14:34.086Z</updated>
     
     
     <summary type="html">Richardson的成熟度模型以及RESTful API设计的一些思考</summary>
