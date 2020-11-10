@@ -111,16 +111,15 @@
 <h4 id="回调-Callback"><a href="#回调-Callback" class="headerlink" title="回调(Callback)"></a>回调(Callback)</h4><p>把I/O事件的等待和监听任务交给了 OS，那 OS在知道I/O状态发生改变后（例如socket连接已建立成功可发送数据），它又怎么知道接下来该干嘛呢？只能回调。</p>
 <p>需要我们将发送数据与读取数据封装成独立的函数，让epoll代替应用程序监听socket状态时，得告诉epoll：“如果socket状态变为可以往里写数据（连接建立成功了），请调用HTTP请求发送函数。如果socket变为可以读数据了（客户端已收到响应），请调用响应处理函数。”</p>
 <p>于是我们利用epoll结合回调机制重构爬虫代码：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import socket</span><br><span class="line">from selectors import DefaultSelector, EVENT_WRITE, EVENT_READ</span><br><span class="line"></span><br><span class="line">selector &#x3D; DefaultSelector()</span><br><span class="line">stopped &#x3D; False</span><br><span class="line">urls_todo &#x3D; &#123;&#39;&#x2F;&#39;, &#39;&#x2F;1&#39;, &#39;&#x2F;2&#39;, &#39;&#x2F;3&#39;, &#39;&#x2F;4&#39;, &#39;&#x2F;5&#39;, &#39;&#x2F;6&#39;, &#39;&#x2F;7&#39;, &#39;&#x2F;8&#39;, &#39;&#x2F;9&#39;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Crawler:</span><br><span class="line">    def __init__(self, url):</span><br><span class="line">        self.url &#x3D; url</span><br><span class="line">        self.sock &#x3D; None</span><br><span class="line">        self.response &#x3D; b&#39;&#39;</span><br><span class="line"></span><br><span class="line">    def fetch(self):</span><br><span class="line">        self.sock &#x3D; socket.socket()</span><br><span class="line">        self.sock.setblocking(False)</span><br><span class="line">        try:</span><br><span class="line">            self.sock.connect((&#39;example.com&#39;, 80))</span><br><span class="line">        except BlockingIOError:</span><br><span class="line">            pass</span><br><span class="line">        selector.register(self.sock.fileno(), EVENT_WRITE, self.connected)</span><br><span class="line"></span><br><span class="line">    def connected(self, key, mask):</span><br><span class="line">        selector.unregister(key.fd)</span><br><span class="line">        get &#x3D; &#39;GET &#123;0&#125; HTTP&#x2F;1.0\r\nHost: example.com\r\n\r\n&#39;.format(self.url)</span><br><span class="line">        self.sock.send(get.encode(&#39;ascii&#39;))</span><br><span class="line">        selector.register(key.fd, EVENT_READ, self.read_response)</span><br><span class="line"></span><br><span class="line">    def read_response(self, key, mask):</span><br><span class="line">        global stopped</span><br><span class="line">        # 如果响应大于4KB，下一次循环会继续读</span><br><span class="line">        chunk &#x3D; self.sock.recv(4096)</span><br><span class="line">        if chunk:</span><br><span class="line">            self.response +&#x3D; chunk</span><br><span class="line">        else:</span><br><span class="line">            selector.unregister(key.fd)</span><br><span class="line">            urls_todo.remove(self.url)</span><br><span class="line">            if not urls_todo:</span><br><span class="line">                stopped &#x3D; True</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import socket</span><br><span class="line">from selectors import DefaultSelector, EVENT_WRITE, EVENT_READ</span><br><span class="line"></span><br><span class="line">selector &#x3D; DefaultSelector()</span><br><span class="line">stopped &#x3D; False</span><br><span class="line">urls_todo &#x3D; &#123;&#39;&#x2F;&#39;, &#39;&#x2F;1&#39;, &#39;&#x2F;2&#39;, &#39;&#x2F;3&#39;, &#39;&#x2F;4&#39;, &#39;&#x2F;5&#39;, &#39;&#x2F;6&#39;, &#39;&#x2F;7&#39;, &#39;&#x2F;8&#39;, &#39;&#x2F;9&#39;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Crawler:</span><br><span class="line">    def __init__(self, url):</span><br><span class="line">        self.url &#x3D; url</span><br><span class="line">        self.sock &#x3D; None</span><br><span class="line">        self.response &#x3D; b&#39;&#39;</span><br><span class="line"></span><br><span class="line">    def fetch(self):</span><br><span class="line">        self.sock &#x3D; socket.socket()</span><br><span class="line">        self.sock.setblocking(False)</span><br><span class="line">        try:</span><br><span class="line">            self.sock.connect((&#39;example.com&#39;, 80))</span><br><span class="line">        except BlockingIOError:</span><br><span class="line">            pass</span><br><span class="line">        selector.register(self.sock.fileno(), EVENT_WRITE, self.connected)</span><br><span class="line"></span><br><span class="line">    def connected(self, key, mask):</span><br><span class="line">        selector.unregister(key.fd)</span><br><span class="line">        get &#x3D; &#39;GET &#123;0&#125; HTTP&#x2F;1.0\r\nHost: example.com\r\n\r\n&#39;.format(self.url)</span><br><span class="line">        self.sock.send(get.encode(&#39;ascii&#39;))</span><br><span class="line">        selector.register(key.fd, EVENT_READ, self.read_response)</span><br><span class="line"></span><br><span class="line">    def read_response(self, key, mask):</span><br><span class="line">        global stopped</span><br><span class="line">        # 如果响应大于4KB，下一次循环会继续读</span><br><span class="line">        chunk &#x3D; self.sock.recv(4096)</span><br><span class="line">        if chunk:</span><br><span class="line">            self.response +&#x3D; chunk</span><br><span class="line">        else:</span><br><span class="line">            selector.unregister(key.fd)</span><br><span class="line">            urls_todo.remove(self.url)</span><br><span class="line">            if not urls_todo:</span><br><span class="line">                stopped &#x3D; True</span><br><span class="line">def loop():</span><br><span class="line">    while not stopped:</span><br><span class="line">        # 阻塞, 直到一个事件发生</span><br><span class="line">        events &#x3D; selector.select()</span><br><span class="line">        for event_key, event_mask in events:</span><br><span class="line">            callback &#x3D; event_key.data</span><br><span class="line">            callback(event_key, event_mask)</span><br></pre></td></tr></table></figure>
 <p>此处和前面稍有不同的是，我们将下载不同的10个页面，相对URL路径存放于urls_todo集合中。现在看看改进在哪。</p>
 <p>首先，不断尝试send() 和 recv() 的两个循环被消灭掉了。</p>
 <p>其次，导入了selectors模块，并创建了一个DefaultSelector实例。Python标准库提供的selectors模块是对底层select/poll/epoll/kqueue的封装。DefaultSelector类会根据 OS 环境自动选择最佳的模块，那在 Linux 2.5.44 及更新的版本上都是epoll了。</p>
 <p>然后，在第25行和第31行分别注册了socket可写事件(EVENT_WRITE)和可读事件(EVENT_READ)发生后应该采取的回调函数。</p>
 <p>虽然代码结构清晰了，阻塞操作也交给OS去等待和通知了，但是，我们要抓取10个不同页面，就得创建10个Crawler实例，就有20个事件将要发生，那如何从selector里获取当前正发生的事件，并且得到对应的回调函数去执行呢？</p>
 <h4 id="事件循环（Event-Loop）"><a href="#事件循环（Event-Loop）" class="headerlink" title="事件循环（Event Loop）"></a>事件循环（Event Loop）</h4><p>为了解决上述问题，那我们只得采用老办法，写一个循环，去访问selector模块，等待它告诉我们当前是哪个事件发生了，应该对应哪个回调。这个等待事件通知的循环，称之为事件循环。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def loop():</span><br><span class="line">    while not stopped:</span><br><span class="line">        # 阻塞, 直到一个事件发生</span><br><span class="line">        events &#x3D; selector.select()</span><br><span class="line">        for event_key, event_mask in events:</span><br><span class="line">            callback &#x3D; event_key.data</span><br></pre></td></tr></table></figure>
 <p>上述代码中，我们用stopped全局变量控制事件循环何时停止。当urls_todo消耗完毕后，会标记stopped为True。</p>
-<p>重要的是第49行代码，selector.select() 是一个阻塞调用，因为如果事件不发生，那应用程序就没事件可处理，所以就干脆阻塞在这里等待事件发生。那可以推断，如果只下载一篇网页，一定要connect()之后才能send()继而recv()，那它的效率和阻塞的方式是一样的。因为不在connect()/recv()上阻塞，也得在select()上阻塞。</p>
+<p>重要的是第46行代码，selector.select() 是一个阻塞调用，因为如果事件不发生，那应用程序就没事件可处理，所以就干脆阻塞在这里等待事件发生。那可以推断，如果只下载一篇网页，一定要connect()之后才能send()继而recv()，那它的效率和阻塞的方式是一样的。因为不在connect()/recv()上阻塞，也得在select()上阻塞。</p>
 <p>所以，selector机制(后文以此称呼代指epoll/kqueue)是设计用来解决大量并发连接的。当系统中有大量非阻塞调用，能随时产生事件的时候，selector机制才能发挥最大的威力。</p>
 <p>下面是如何启创建10个下载任务和启动事件循环的：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    import time</span><br><span class="line">    start &#x3D; time.time()</span><br><span class="line">    for url in urls_todo:</span><br><span class="line">        crawler &#x3D; Crawler(url)</span><br><span class="line">        crawler.fetch()</span><br><span class="line">    loop()</span><br><span class="line">    print(time.time() - start)</span><br></pre></td></tr></table></figure>
@@ -159,7 +158,7 @@
 <li>回调地狱</li>
 <li>破坏代码结构<br>写同步代码时，关联的操作时自上而下运行：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">do_a()</span><br><span class="line">do_b()</span><br></pre></td></tr></table></figure>
 如果 b 处理依赖于 a 处理的结果，而 a 过程是异步调用，就不知 a何时能返回值，需要将后续的处理过程以callback的方式传递给 a ，让 a执行完以后可以执行 b。代码变化为：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">do_a(do_b())</span><br></pre></td></tr></table></figure>
-如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：</span><br></pre></td></tr></table></figure>
+如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">do_a(do_b(do_c(do_d(do_e(do_f(......))))))</span><br></pre></td></tr></table></figure>
 上面实际也是回调地狱式的风格，但这不是主要矛盾。主要在于，原本从上而下的代码结构，要改成从内到外的。先f，再e，再d，…，直到最外层 a 执行完成。在同步版本中，执行完a后执行b，这是线程的指令指针控制着的流程，而在回调版本中，流程就是程序猿需要注意和安排的。</li>
 <li>共享状态管理困难<br>回顾同步阻塞版的爬虫代码，sock对象从头使用到尾，而在回调的版本中，我们必须在Crawler实例化后的对象self里保存它自己的sock对象。如果不是采用OOP的编程风格，那需要把要共享的状态接力似的传递给每一个回调。多个异步调用之间，到底要共享哪些状态，事先就得考虑清楚，精心设计。</li>
 <li>错误处理困难<br>一连串的回调构成一个完整的调用链。例如上述的 a 到 f。假如 d抛了异常怎么办？整个调用链断掉，接力传递的状态也会丢失，这种现象称为调用栈撕裂。 c 不知道该干嘛，继续异常，然后是 b 异常，接着 a异常。好嘛，报错日志就告诉你，a 调用出错了，但实际是 d出错。所以，为了防止栈撕裂，异常必须以数据的形式返回，而不是直接抛出异常，然后每个回调中需要检查上次调用的返回值，以防错误吞没。</li>
@@ -184,7 +183,7 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def gen():</span><br><span class="line">    yield from subgen()</span><br><span class="line"></span><br><span class="line">def subgen():</span><br><span class="line">    while True:</span><br><span class="line">        x &#x3D; yield</span><br><span class="line">        yield x+1</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    g &#x3D; gen()</span><br><span class="line">    next(g)                # 驱动生成器g开始执行到第一个 yield</span><br><span class="line">    retval &#x3D; g.send(1)     # 看似向生成器 gen() 发送数据</span><br><span class="line">    print(retval)          # 返回2</span><br><span class="line">    g.throw(StopIteration) # 看似向gen()抛入异常</span><br></pre></td></tr></table></figure>
 <p>通过上述代码清晰地理解了yield from的双向通道功能。关键字yield from在gen()内部为subgen()和main()开辟了通信通道。main()里可以直接将数据1发送给subgen(),subgen()也可以将计算后的数据2返回到main()里，main()里也可以直接向subgen()抛入异常以终止subgen()。</p>
 <blockquote>
-<p>顺带一提，yield from 除了可以 yield from <generator> 还可以 yield from <iterable>。</p>
+<p>顺带一提，yield from 除了可以 <code>yield from &lt;generator&gt;</code> 还可以<code> yield from &lt;iterable&gt;</code>。</p>
 </blockquote>
 <p>用yield from改进基于生成器的协程，代码抽象程度更高。使业务逻辑相关的代码更精简。由于其双向通道功能可以让协程之间随心所欲传递数据，使Python异步编程的协程解决方案大大向前迈进了一步。</p>
 <p>于是Python语言开发者们充分利用yield from，使 Guido 主导的Python异步编程框架Tulip迅速脱胎换骨，并迫不及待得让它在 Python 3.4 中换了个名字asyncio以“实习生”角色出现在标准库中。</p>
@@ -562,46 +561,6 @@
       </tags>
   </entry>
   <entry>
-    <title>hexo-Next + Github Page制作个人网站使用记录</title>
-    <url>/2020/10/20/hexo/</url>
-    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
-<li>在github上创建仓库</li>
-<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
-<li>仓库新建分支gh-page</li>
-<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
-<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
-</ol>
-<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
-<li><p>修改内容自动重载并启动server</p>
-<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
-<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
-<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
-</li>
-</ol>
-<a id="more"></a>
-
-<ol start="2">
-<li><p>背景动画</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>其他可以参考</p>
-<ul>
-<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
-<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
-<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
-</ul>
-</li>
-</ol>
-]]></content>
-      <categories>
-        <category>hexo</category>
-      </categories>
-      <tags>
-        <tag>hexo</tag>
-        <tag>Next</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>IO模型</title>
     <url>/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</url>
     <content><![CDATA[<h1 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h1><p>在Linux(UNIX)操作系统中，共有五种IO模型，分别是：阻塞IO模型、非阻塞IO模型、IO复用模型、信号驱动IO模型以及异步IO模型。</p>
@@ -785,6 +744,46 @@
       <tags>
         <tag>mysql</tag>
         <tag>大小写敏感</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo-Next + Github Page制作个人网站使用记录</title>
+    <url>/2020/10/20/hexo/</url>
+    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
+<li>在github上创建仓库</li>
+<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
+<li>仓库新建分支gh-page</li>
+<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
+<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
+</ol>
+<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
+<li><p>修改内容自动重载并启动server</p>
+<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
+<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
+<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
+</li>
+</ol>
+<a id="more"></a>
+
+<ol start="2">
+<li><p>背景动画</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>其他可以参考</p>
+<ul>
+<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
+<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
+<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>Next</tag>
       </tags>
   </entry>
   <entry>
