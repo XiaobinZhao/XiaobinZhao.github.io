@@ -300,6 +300,13 @@ class Crawler:
             urls_todo.remove(self.url)
             if not urls_todo:
                 stopped = True
+def loop():
+    while not stopped:
+        # 阻塞, 直到一个事件发生
+        events = selector.select()
+        for event_key, event_mask in events:
+            callback = event_key.data
+            callback(event_key, event_mask)
 ```
 此处和前面稍有不同的是，我们将下载不同的10个页面，相对URL路径存放于urls_todo集合中。现在看看改进在哪。
 
@@ -313,17 +320,10 @@ class Crawler:
 
 #### 事件循环（Event Loop）
 为了解决上述问题，那我们只得采用老办法，写一个循环，去访问selector模块，等待它告诉我们当前是哪个事件发生了，应该对应哪个回调。这个等待事件通知的循环，称之为事件循环。
-```
-def loop():
-    while not stopped:
-        # 阻塞, 直到一个事件发生
-        events = selector.select()
-        for event_key, event_mask in events:
-            callback = event_key.data
-```
+
 上述代码中，我们用stopped全局变量控制事件循环何时停止。当urls_todo消耗完毕后，会标记stopped为True。
 
-重要的是第49行代码，selector.select() 是一个阻塞调用，因为如果事件不发生，那应用程序就没事件可处理，所以就干脆阻塞在这里等待事件发生。那可以推断，如果只下载一篇网页，一定要connect()之后才能send()继而recv()，那它的效率和阻塞的方式是一样的。因为不在connect()/recv()上阻塞，也得在select()上阻塞。
+重要的是第46行代码，selector.select() 是一个阻塞调用，因为如果事件不发生，那应用程序就没事件可处理，所以就干脆阻塞在这里等待事件发生。那可以推断，如果只下载一篇网页，一定要connect()之后才能send()继而recv()，那它的效率和阻塞的方式是一样的。因为不在connect()/recv()上阻塞，也得在select()上阻塞。
 
 所以，selector机制(后文以此称呼代指epoll/kqueue)是设计用来解决大量并发连接的。当系统中有大量非阻塞调用，能随时产生事件的时候，selector机制才能发挥最大的威力。
 
@@ -390,7 +390,7 @@ do_a(do_b())
 ```
 如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：
 ```
-如果整个流程中全部改为异步处理，而流程比较长的话，代码逻辑就会成为这样：
+do_a(do_b(do_c(do_d(do_e(do_f(......))))))
 ```
 上面实际也是回调地狱式的风格，但这不是主要矛盾。主要在于，原本从上而下的代码结构，要改成从内到外的。先f，再e，再d，…，直到最外层 a 执行完成。在同步版本中，执行完a后执行b，这是线程的指令指针控制着的流程，而在回调版本中，流程就是程序猿需要注意和安排的。
 - 共享状态管理困难
@@ -460,7 +460,7 @@ def main():
 ```
 通过上述代码清晰地理解了yield from的双向通道功能。关键字yield from在gen()内部为subgen()和main()开辟了通信通道。main()里可以直接将数据1发送给subgen(),subgen()也可以将计算后的数据2返回到main()里，main()里也可以直接向subgen()抛入异常以终止subgen()。
 
-> 顺带一提，yield from 除了可以 yield from <generator> 还可以 yield from <iterable>。
+> 顺带一提，yield from 除了可以 `yield from <generator>` 还可以` yield from <iterable>`。
 
 用yield from改进基于生成器的协程，代码抽象程度更高。使业务逻辑相关的代码更精简。由于其双向通道功能可以让协程之间随心所欲传递数据，使Python异步编程的协程解决方案大大向前迈进了一步。
 
