@@ -119,7 +119,7 @@
 <p>虽然代码结构清晰了，阻塞操作也交给OS去等待和通知了，但是，我们要抓取10个不同页面，就得创建10个Crawler实例，就有20个事件将要发生，那如何从selector里获取当前正发生的事件，并且得到对应的回调函数去执行呢？</p>
 <h4 id="事件循环（Event-Loop）"><a href="#事件循环（Event-Loop）" class="headerlink" title="事件循环（Event Loop）"></a>事件循环（Event Loop）</h4><p>为了解决上述问题，那我们只得采用老办法，写一个循环，去访问selector模块，等待它告诉我们当前是哪个事件发生了，应该对应哪个回调。这个等待事件通知的循环，称之为事件循环。</p>
 <p>上述代码中，我们用stopped全局变量控制事件循环何时停止。当urls_todo消耗完毕后，会标记stopped为True。</p>
-<p>重要的是第46行代码，selector.select() 是一个阻塞调用，因为如果事件不发生，那应用程序就没事件可处理，所以就干脆阻塞在这里等待事件发生。那可以推断，如果只下载一篇网页，一定要connect()之后才能send()继而recv()，那它的效率和阻塞的方式是一样的。因为不在connect()/recv()上阻塞，也得在select()上阻塞。</p>
+<p>重要的是第44行代码，selector.select() 是一个阻塞调用，因为如果事件不发生，那应用程序就没事件可处理，所以就干脆阻塞在这里等待事件发生。那可以推断，如果只下载一篇网页，一定要connect()之后才能send()继而recv()，那它的效率和阻塞的方式是一样的。因为不在connect()/recv()上阻塞，也得在select()上阻塞。</p>
 <p>所以，selector机制(后文以此称呼代指epoll/kqueue)是设计用来解决大量并发连接的。当系统中有大量非阻塞调用，能随时产生事件的时候，selector机制才能发挥最大的威力。</p>
 <p>下面是如何启创建10个下载任务和启动事件循环的：</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    import time</span><br><span class="line">    start &#x3D; time.time()</span><br><span class="line">    for url in urls_todo:</span><br><span class="line">        crawler &#x3D; Crawler(url)</span><br><span class="line">        crawler.fetch()</span><br><span class="line">    loop()</span><br><span class="line">    print(time.time() - start)</span><br></pre></td></tr></table></figure>
@@ -276,6 +276,406 @@
       <tags>
         <tag>python</tag>
         <tag>异步编程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>cloudbase-init 源码研究</title>
+    <url>/2020/12/04/cloudbase-init%20%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/</url>
+    <content><![CDATA[<h1 id="cloudbase-init-源码研究"><a href="#cloudbase-init-源码研究" class="headerlink" title="cloudbase-init 源码研究"></a>cloudbase-init 源码研究</h1><p>cloudbase-init是cloud-init的windows版本实现，与cloudinit有一些区别，官方文档请参看<a href="https://cloudbase-init.readthedocs.io/">https://cloudbase-init.readthedocs.io/</a></p>
+<p>以下以window10 64位+cloudbase-init 1.1.2为例。</p>
+<h2 id="cloudbase-init的安装文件结构"><a href="#cloudbase-init的安装文件结构" class="headerlink" title="cloudbase-init的安装文件结构"></a>cloudbase-init的安装文件结构</h2><ul>
+<li>源代码参见<a href="https://github.com/openstack/cloudbase-init">github</a></li>
+<li>在windows系统安装之后为：<ul>
+<li>bin 二进制一些工具和服务启动入口</li>
+<li>conf 配置文件</li>
+<li>LocalScripts 本地脚本文件夹</li>
+<li>log 日志目录</li>
+<li>Python python环境（1.1.2版本使用的python是3.6）<ul>
+<li>Scripts目录下一些工具</li>
+<li>Lib/site-packages 目录下安装了cloudbase-init的源码和其依赖包</li>
+<li>其他目录没有特别之处</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h2><p>cloudbase-init使用pbr打包。pbr是setuptools的加强版，是openstack社区出品。使用pbr可以方便的使用git管理版本。</p>
+<p>pbr会把setuptools的配置项转移到setup.cfg中，setup.cfg文件我们重点关注 entry_points这个设置项。entry_points可以方便为我们打包的python应用提供一个可执行的二进制文件，类似于<code>pip install</code> 和 <code>python -m pip intstall</code>的关系。在cloudbase-init中，通过pbr打包，会生成cloudbase-init.exe，位于：Cloudbase-Init\Python\Scripts目录下，cloudbase-init运行的时候，可以直接调用该二进制文件。</p>
+<h2 id="入口"><a href="#入口" class="headerlink" title="入口"></a>入口</h2><p>通过打包章节可以知道cloudbase-init的执行文件为Cloudbase-Init\Python\Scripts\cloudbase-init.exe，这个文件是pbr的entry_points控制生成的。entry_points的设置为：</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[entry_points]</span></span><br><span class="line">console_scripts =</span><br><span class="line">  <span class="attr">cloudbase-init</span> = cloudbaseinit.shell:main</span><br></pre></td></tr></table></figure>
+
+<p>所以，可以知道cloudbase-init项目的入口是cloudbase-init下的<strong>shell.py</strong>.</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>从git clone下代码之后，主要源码位于/cloudbase-init目录下：</p>
+<ul>
+<li>cloudbase-init<ul>
+<li>conf</li>
+<li>metadata</li>
+<li>models</li>
+<li>osutils</li>
+<li>plugins</li>
+<li>tests</li>
+<li>utils</li>
+<li><code>__init__.py</code></li>
+<li>constant.py</li>
+<li>exception.py</li>
+<li>init.py</li>
+<li>shell.py</li>
+<li>version.py</li>
+</ul>
+</li>
+</ul>
+<h3 id="osutils"><a href="#osutils" class="headerlink" title="osutils"></a>osutils</h3><pre class="mermaid">classDiagram
+    BaseOSUtils <|-- PosixUtils
+    BaseOSUtils <|-- WindowsUtils
+    BaseOSUtils : +string PROTOCOL_TCP
+    BaseOSUtils : +string PROTOCOL_UDP
+    BaseOSUtils : +execute_process()
+    BaseOSUtils : +generate_random_password()
+    BaseOSUtils : +create_user()
+    BaseOSUtils : +reboot()
+    BaseOSUtils : +set_timezone()
+    BaseOSUtils : +other_method(...)
+    class WindowsUtils{
+        -class _network_team_manager
+        -_get_system_dir()
+        -other_method()
+    }</pre>
+
+<p>osutils 使用了<strong>简单工厂</strong>设计模式，根据当前操作系统的类型来加载相应的类，并创建对应的对象。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_os_utils</span>():</span></span><br><span class="line">    osutils_class_paths = &#123;</span><br><span class="line">        <span class="string">&#x27;nt&#x27;</span>: <span class="string">&#x27;cloudbaseinit.osutils.windows.WindowsUtils&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;posix&#x27;</span>: <span class="string">&#x27;cloudbaseinit.osutils.posix.PosixUtils&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cl = classloader.ClassLoader()</span><br><span class="line">    <span class="keyword">return</span> cl.load_class(osutils_class_paths[os.name])()</span><br></pre></td></tr></table></figure>
+
+<p><code>os.name</code>的返回值是posix，nt，java之一，分别代表linux/windows/java虚拟机。</p>
+<p>cloudbase-init主要针对windows环境，所以WindowsUtils实现的比较健全，PosixUtils只实现了reboot方法。</p>
+<h3 id="shell-py"><a href="#shell-py" class="headerlink" title="shell.py"></a>shell.py</h3><p>shell.py是cloudbase-init的入口文件，提供3个功能：</p>
+<ol>
+<li>读取配置文件。通过command line参数读取配置文件位置，使用oslo.config加载配置文件。配置文件一般位于：Cloudbase-Init/conf目录下</li>
+<li>初始化log</li>
+<li>进入cloudbase-init的主程序：init.py，执行<code>init.InitManager().configure_host()</code></li>
+</ol>
+<h3 id="init-py"><a href="#init-py" class="headerlink" title="init.py"></a>init.py</h3><p>init.py只有一个public方法，<code>configure_host</code>。该方法的逻辑如下：</p>
+<ol>
+<li>查看配置项<code>reset_service_password</code>是否为true， 为true则需要先修改cloudbase-init服务用户的密码。如果cloudbase-init使用的是系统内置用户（比如Administrator）或者是域用户则跳过修改，密码为长度20的随机字符串。设置自动修改密码，可以避免克隆虚机时，密码泄露。</li>
+<li>等待修改密码并重启完成</li>
+<li>开始执行PRE_NETWORKING阶段plugin，PRE_NETWORKING阶段的plugin只有<code>cloudbaseinit.plugins.windows.ntpclient.NTPClientPlugin</code>，如果NTPClientPlugin不在cloudbase-init.conf的plugins配置项内出现，则跳过。NTPClientPlugin具体逻辑请参看plugins章节。</li>
+<li>如果需要检查版本，需要到官网地址<code>https://www.cloudbase.it/checkupdates.php</code>获取最新版本并输出日志</li>
+<li>开始执行PRE_METADATA_DISCOVERY阶段plugin，PRE_METADATA_DISCOVERY阶段的plugin只有<code>cloudbaseinit.plugins.common.mtu.MTUPlugin</code>，如果MTUPlugin不在cloudbase-init.conf的plugins配置项内出现，则跳过。MTUPlugin具体逻辑请参看plugins章节。</li>
+<li>判断PRE_NETWORKING和PRE_METADATA_DISCOVERY阶段是否有立刻重启的返回值（比如如果设置了RTC，就需要重启），如果有就执行重启</li>
+<li>如果不需要重启，那么开始执行metadata service。</li>
+<li><strong>简单工厂</strong>方式加载配置文件<code>metadata_services</code>选项指定的services，循环执行service的load方法，只要有任何一个load方法正确执行，则返回当前service，停止循环；如果所有的load方法都执行失败，则抛出异常：No available service found，此后MAIN阶段的plugin不会执行。</li>
+<li>如果开启<code>metadata_report_provisioning_started</code>，则需要进行服务状态汇报，目前只有AzureService需要。</li>
+<li>获取instance__uuid，用来保存每个plugin执行的结果。</li>
+<li>执行MAIN阶段的plugins。<strong>简单工厂</strong>方式加载配置文件<code>plugins</code>选项指定的plugins，并且循环执行所有plugin的excute方法。根据excute的返回值来记录plugin的状态和是否需要重启，有任何一个plugin需要重启，则break循环。</li>
+<li>如果开启<code>metadata_report_provisioning_completed</code>并且执行失败，则需要进行服务状态汇报，目前只有AzureService需要。</li>
+<li>根据plugins的返回结果，判断是否需要重启</li>
+<li>如果开启<code>metadata_report_provisioning_completed</code>并且执行成功，则需要进行服务状态汇报，目前只有AzureService需要。</li>
+<li>程序结束</li>
+</ol>
+<h3 id="conf"><a href="#conf" class="headerlink" title="conf"></a>conf</h3><p>包含了cloudbase-init的配置文件提供的配置项。使用了oslo.config第三方包，并且使用oslo.log作为日志工具，oslo.log会自动引入以下配置项，具体每一项的含义参看cloudbase-init的<a href="https://cloudbase-init.readthedocs.io/en/latest/config.html">文档</a>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">debug</span><br><span class="line">log-config-append</span><br><span class="line">log-date-format</span><br><span class="line">log-file</span><br><span class="line">log-dir</span><br><span class="line">watch-log-file</span><br><span class="line">use-syslog</span><br><span class="line">use-journal</span><br><span class="line">syslog_log_facility</span><br><span class="line">use_json</span><br><span class="line">use_stderr</span><br><span class="line">use_eventlog</span><br><span class="line">log_rotate_interval</span><br><span class="line">log_rotate_interval_type</span><br><span class="line">max_logfile_count</span><br><span class="line">max_logfile_size_mb</span><br><span class="line">log_rotation_type</span><br><span class="line">logging_context_format_string</span><br><span class="line">logging_default_format_string</span><br><span class="line">logging_debug_format_suffix</span><br><span class="line">logging_exception_prefix</span><br><span class="line">logging_user_identity_format</span><br><span class="line">default_log_levels</span><br><span class="line">publish_errors</span><br></pre></td></tr></table></figure>
+
+<p>除了log相关的配置项之外，还有一些其他配置，如azure/openstack等平台的特殊参数，我们主要关注的参数位于<code>conf/default.py</code>内，以下几个参数比较重要，其他的请参看<a href="https://cloudbase-init.readthedocs.io/en/latest/config.html">官方文档</a>：</p>
+<p>local_scripts_path：本地脚本目录。我们可以在这个目录下放置一些脚本（powershell/python/cmd shell），cloudbase-init会执行该目录下的脚本。比如小酷云版本实现的自动格式化数据盘功能就是一个python的脚本。</p>
+<p>metadata_services：已启用的元数据服务类的列表，将按列表的顺序测试其可用性。第一个可用的服务将用于检索元数据，并缓存元数据；之后的service可以从缓存获取数据。</p>
+<p>plugins：启用的插件来列表，将按照列表顺序依次执行。插件根据加载的metadata service获取的元数据执行操作。</p>
+<h3 id="metadata-service"><a href="#metadata-service" class="headerlink" title="metadata service"></a>metadata service</h3><pre class="mermaid">classDiagram
+    BaseMetadataService <|-- BaseHTTPMetadataService
+    BaseMetadataService <|-- BaseOpenStackService
+    BaseHTTPMetadataService <|-- HttpService
+    BaseOpenStackService <|-- HttpService
+    BaseMetadataService: -Dict _cache
+    BaseMetadataService: -Boolean _enable_retry
+    BaseMetadataService: +get_name()
+    BaseMetadataService: +load()
+    BaseMetadataService: +other_func()
+    BaseHTTPMetadataService: -String _base_url
+    BaseHTTPMetadataService: -_get_data()
+    BaseHTTPMetadataService: -_http_request()
+    BaseOpenStackService: +get_user_data()
+    BaseOpenStackService: +get_instance_id()
+    BaseOpenStackService: +get_host_name()
+    BaseOpenStackService: +other_func()
+    class HttpService {
+        +load()
+        +other_func()
+    }</pre>
+
+<p>metadata （元数据）服务有：</p>
+<ol>
+<li>cloudbaseinit.metadata.services.httpservice</li>
+<li>cloudbaseinit.metadata.services.configdrive.ConfigDriveService</li>
+<li>cloudbaseinit.metadata.services.nocloudservice.NoCloudConfigDriveService</li>
+<li>cloudbaseinit.metadata.services.ec2service.EC2Service</li>
+<li>cloudbaseinit.metadata.services.cloudstack.CloudStack</li>
+<li>cloudbaseinit.metadata.services.opennebulaservice.OpenNebulaService</li>
+<li>cloudbaseinit.metadata.services.maasservice.MaaSHttpService</li>
+<li>cloudbaseinit.metadata.services.ovfservice.OvfService</li>
+<li>cloudbaseinit.metadata.services.packet.PacketService</li>
+<li>cloudbaseinit.metadata.services.azureservice.AzureService</li>
+<li>cloudbaseinit.metadata.services.base.EmptyMetadataService</li>
+<li>cloudbaseinit.metadata.services.vmwareguestinfoservice.VMwareGuestInfoService</li>
+<li>cloudbaseinit.metadata.services.gceservice.GCEService</li>
+</ol>
+<h4 id="httpservice-openstack"><a href="#httpservice-openstack" class="headerlink" title="httpservice[openstack]"></a>httpservice[openstack]</h4><p>HttpService和EC2Service、MaaSHttpService以及CloudStack使用了相同的基类BaseHTTPMetadataService，这4个服务都是基于http服务获取metadata数据的。</p>
+<ul>
+<li><p>httpService一般用来做Openstack metadata 获取，一般metadata数据所在的http地址是：<code>http://169.254.169.254:80</code>，这个地址可以通过配置文件的<code>metadata_base_url</code>来设置。这个特殊的地址最初是由亚马逊的虚拟计算服务提出的，后由各大厂商继承发展，逐渐成为一个业内通用的做法。这个服务可以提供以下数据：</p>
+<ul>
+<li>instance id： 虚机的uuid</li>
+<li>hostname： 虚机的计算机名字</li>
+<li>public keys： ca证书</li>
+<li><a href="https://docs.microsoft.com/en-us/windows/win32/winrm/authentication-for-remote-connections#client-certificate-based-authentication">WinRM</a> authentication certificates</li>
+<li>static network configuration： 静态网络地址配置</li>
+<li>admin user password： admin用户的密码</li>
+<li>post admin user password (only once)</li>
+<li>user data：user data数据</li>
+</ul>
+</li>
+<li><p>与这个服务相关的配置项有：</p>
+<ul>
+<li>metadata_base_url (string: “<a href="http://169.254.169.254/%E2%80%9D">http://169.254.169.254/”</a>)</li>
+<li>add_metadata_private_ip_route (bool: True)</li>
+<li>https_allow_insecure (bool: False)</li>
+<li>https_ca_bundle (string: None)</li>
+<li>retry_count (integer: 5)</li>
+<li>retry_count_interval (integer: 4)</li>
+</ul>
+</li>
+<li><p>代码逻辑</p>
+<ul>
+<li>由init.py的代码逻辑可以看出，service加载的时候，首先执行service的<code>__init__</code>，其次执行其<code>load()</code>方法。</li>
+<li>httpService的<code>__init__</code>方法主要完成了<code>base_url</code>设置，<code>base_url</code>一般是<code>http://169.254.169.254/</code>，可以通过配置文件<code>metadata_base_url</code>修改</li>
+<li>load方法主要逻辑为<ul>
+<li>设置静态路由，比如<code>169.254.169.254  255.255.255.255   10.221.120.206(网关)   10.221.120.131(本机网卡)      6(跃点数) </code></li>
+<li>获取metadata数据，metadata数据路径为：<code>http://169.254.169.254/openstack/latest/meta_data.json</code>。<ul>
+<li>zstack平台使用lighttpd作为http server服务，每创建一个虚机，就会在lighttpd的web root目录下添加一个以该虚机IP为名字的目录，目录内放置user_data和meta_data数据。但是如果没有设置虚机的userdata参数，那么zstack不会在lighttpd下创建meta_data数据。所以，在zstack平台，如果需要cloudbase-init成功执行，userdata必须设置，哪怕是一个空字符串。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="ConfigDriveService-openstack"><a href="#ConfigDriveService-openstack" class="headerlink" title="ConfigDriveService[openstack]"></a>ConfigDriveService[openstack]</h4><p>ConfigDriveService可以支持cloudbase-init从一个挂载在虚机的磁盘获取metadata数据而不需要网络连接，通常这种获取metadata数据的方式会比http更快。 ConfigDriveService一般用来支持openstack虚拟化平台。支持ConfigDrive的hypervisors包括 libvirt, XenServer, Hyper-V和VMware。这个磁盘可以是以下类型：</p>
+<ul>
+<li><p>cdrom_iso</p>
+</li>
+<li><p>hdd_iso</p>
+</li>
+<li><p>hdd_vfat</p>
+</li>
+<li><p>partition_iso</p>
+</li>
+<li><p>partition_vfat</p>
+<p>这里的5种磁盘格式是由cloudbase-init配置文件的<code>types</code>和<code>locations</code>字段控制的。</p>
+<ul>
+<li><code>types</code>：提供metadata数据的磁盘格式。可选值是vfat和iso。<ul>
+<li>vfat，文件分配表（File Allocation Table，FAT），是一种由微软发明并拥有部分专利的文件系统，FAT已被大多数的操作系统支持（包括linux/freeBSD/BeOS）。FAT16性能有限，现在，一般所讲的FAT专指FAT32。VFAT是对基本FAT文件系统的改进，允许为每个文件存储更多信息。vfat格式一般用来做兼容性的设置，默认建议使用iso。另外，在openstack中，vfat格式会限制磁盘大小为64M，详见<a href="https://docs.openstack.org/nova/queens/user/config-drive.html">openstack config drive user guide</a>。</li>
+<li>iso，ISO-9660，简称ISO，是通用的光盘文件系统。需要用光驱的方式加载，以kvm方式来说，就是给虚机添加一个cdrom的设备。文件是只读的。</li>
+</ul>
+</li>
+<li><code>locations</code>: 提供metadata数据的磁盘的位置。可选值是cdrom/hdd/partition。<ul>
+<li>cdrom: 光驱。光驱设备只能加载iso文件，所以当<code>locations</code>是cdrom时，<code>types</code>只能是iso。</li>
+<li>hdd: hard disk drive，硬盘驱动。</li>
+<li>partition: 分区或者卷（volume）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>这个服务可以提供以下数据：</p>
+<ul>
+<li>instance id： 虚机的uuid</li>
+<li>hostname： 虚机的计算机名字</li>
+<li>public keys： ca证书</li>
+<li>authentication certificates</li>
+<li>static network configuration： 静态网络地址配置</li>
+<li>admin user password： admin用户的密码</li>
+<li>user data：user data数据</li>
+</ul>
+<p>与这个服务相关的配置项有：</p>
+<ul>
+<li><del>raw_hdd (bool: True) 将要被弃用</del></li>
+<li><del>cdrom (bool: True)将要被弃用</del></li>
+<li><del>vfat (bool: True)将要被弃用</del></li>
+<li>types (list: [“vfat”, “iso”])</li>
+<li>locations (list: [“cdrom”, “hdd”, “partition”])</li>
+</ul>
+<h3 id="plugins"><a href="#plugins" class="headerlink" title="plugins"></a>plugins</h3><pre class="mermaid">classDiagram
+    BasePlugin <|-- NTPClientPlugin
+    BasePlugin <|-- AzureGuestAgentPlugin
+    BasePlugin <|-- BootStatusPolicyPlugin
+    BasePlugin <|-- OtherPlugin
+    BasePlugin: +execution_stage
+    BasePlugin: +get_name()
+    BasePlugin: +get_os_requirements()
+    BasePlugin: +execute()
+    class NTPClientPlugin{
+        +execution_stage
+        +execute()
+    }</pre>
+
+
+
+<p>plugins根据加载的metadata service获取的元数据执行操作。plugins执行的时候分成三个阶段：</p>
+<ol>
+<li>PRE_NETWORKING：在任何基于网络请求的操作之前执行，用来设置网络。</li>
+<li>PRE_METADATA_DISCOVERY：在metadata service执行前执行的一些操作。</li>
+<li>MAIN：MAIN阶段执行前，需要metadata service先要获取到当前虚机的instance uuid，instance uuid用来保存每次plugin执行之后的状态（1:执行完成，下次开机跳过。2：下次开机执行）。如果metadata service获取instance uuid过程正常，但是没有得到正确的uuid，比如instance uuid是<code>None</code>，那么每次开机plugins都会执行。但是如果metadata service获取instance uuid过程都出错，比如<code>169.254.169.254</code>地址不通，那么<strong>所有的plugin都不会执行</strong>。</li>
+</ol>
+<p>每一个阶段内的每个子元素（metada/plugin）都可以设置执行结果的code。</p>
+<ul>
+<li>1001 - 立刻重启，并且下次重启不再执行</li>
+<li>1002 - 现在不重启，下次重启再次执行该plugin</li>
+<li>1003 - 重启并且下次开机再次执行</li>
+</ul>
+<h5 id="PRE-NETWORKING"><a href="#PRE-NETWORKING" class="headerlink" title="PRE_NETWORKING"></a>PRE_NETWORKING</h5><p> PRE_NETWORKING阶段执行的plugin只有一个：时钟同步</p>
+<ol>
+<li>cloudbaseinit.plugins.windows.ntpclient.NTPClientPlugin<ul>
+<li>支持的配置项有：<ul>
+<li>ntp_use_dhcp_config (bool: False)是否使用dhcp server提供的NTP来同步时钟，默认是false。</li>
+<li>real_time_clock_utc (bool: False)是否修改RTC时间。</li>
+<li>ntp_enable_service (bool: True)是否启用ntp自动同步，默认开启</li>
+</ul>
+</li>
+<li>注意：<ul>
+<li>可能需要重启（比如修改RTC时间）.</li>
+<li>可能每次开机都运行（比如启用dhcp方式，但是本次获取dhcp数据失败，下次开机继续尝试）。</li>
+</ul>
+</li>
+<li>NTPClientPlugin代码逻辑<ul>
+<li>检查NTPClientPlugin的系统要求：<code>sys.platform</code>和<code>min_os_version</code>;windows平台下<code>sys.platform</code>返回值为win32/linux/cygwin/darwin分别对应windows/linux/“Windows/Cygwin”/Mac OS X。 NTPClientPlugin对这2这者都不做要求。</li>
+<li>执行NTPClientPlugin。判断注册表HKEY_LOCAL_MACHINE目录下路径为<code>SOFTWARE/Cloudbase Solutions/Cloudbase-Init/[instance_uuid]/Plugins/NTPClientPlugin</code>的value，如果value是1（PLUGIN_EXECUTION_DONE）则代表该plugin已经执行成功，不再执行。否则执行NTPClientPlugin的execute方法。</li>
+<li>执行NTPClientPlugin的execute方法。判断是否使用dhcp来同步时间、是否启用NTP、是否修改当前RTC时间格式为UTC(需要重启)。</li>
+<li>Plugin返回本次执行结果[PLUGIN_EXECUTION_DONE(1)|PLUGIN_EXECUTE_ON_NEXT_BOOT(2)]和是否需要重启</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h5 id="PRE-METADATA-DISCOVERY"><a href="#PRE-METADATA-DISCOVERY" class="headerlink" title="PRE_METADATA_DISCOVERY"></a>PRE_METADATA_DISCOVERY</h5><p>PRE_METADATA_DISCOVERY阶段执行的plugin只有一个：设置MTU</p>
+<ol>
+<li>cloudbaseinit.plugins.common.mtu.MTUPlugin<ul>
+<li>支持的配置项有：<ul>
+<li>mtu_use_dhcp_config (bool: True)使用dhcp server提供的MTU参数设置网络。OpenStack GRE Neutron Open vSwitch可能会需要设置这个参数。</li>
+</ul>
+</li>
+<li>注意：<ul>
+<li>每次开机都运行</li>
+</ul>
+</li>
+<li>MTUPlugin代码逻辑<ul>
+<li>mtu参数需要获取当前虚机网卡属性中的<code>dhcp_server</code>，通过dhcp server的ip，发送socket数据包，从回执消息中得到MTU的value.</li>
+<li>设置mtu值。windows XP和Windows Server 2003不支持设置MTU。使用python的<code>subprocess.Popen</code>执行<code>netsh.exe</code>命令来设置MTU。</li>
+<li>plugin返回 PLUGIN_EXECUTE_ON_NEXT_BOOT（2），无需立刻重启。所以每次虚机开机都会去尝试执行设置MTU。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h5 id="MAIN"><a href="#MAIN" class="headerlink" title="MAIN"></a>MAIN</h5><p>MAIN阶段官方提供的plugin如下，分别是：</p>
+<ol>
+<li><p>cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin</p>
+<p>执行本地目录下（配置项local_scripts_path）的脚本，脚本支持 powershell, batch, python等。脚本的返回值可以设置相应的code(1001/1002/1003)来控制是否重启继续执行。</p>
+<ul>
+<li>重启策略：根据脚本返回值决定</li>
+</ul>
+</li>
+<li><p>cloudbaseinit.plugins.common.networkconfig.NetworkConfigPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.common.setuserpassword.SetUserPasswordPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.common.trim.TrimConfigPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.common.userdata.UserDataPlugin</p>
+<p>userdata可以由虚机的创建者或者虚拟化平台自定义，目的是能够把虚机外部的一些参数传进虚机内部，做一些定制化修改。</p>
+<p>userdata的文件内容一般会在第一行指定以哪种方式执行：Batch、PowerShell、bash、Python、EC2 format、Cloud config。具体参看<a href="https://cloudbase-init.readthedocs.io/en/latest/userdata.html#">官方文档</a></p>
+<ul>
+<li>重启策略：根据脚本返回值决定</li>
+<li>代码逻辑<ul>
+<li>UserDataPlugin核心代码是excute方法。首先通过成功加载的第一个service获取userdata数据，路径是：：<code>http://169.254.169.254/openstack/latest/user_data</code></li>
+<li>如果设置了<code>userdata_save_path</code>保存user_data到本地</li>
+<li>读取user_data header，识别user data的格式，以及确定使用哪种方式执行。支持的方式有：<ul>
+<li>MIME multi-part类型，可以使用jinja2模板渲染内容</li>
+<li><code>-----BEGIN CERTIFICATE-----</code>开头的PEM certificate类型</li>
+<li><code>#cloud-config</code>开头的类型</li>
+<li>其他类型<ul>
+<li>先另存user_data数据到临时目录（临时目录根据环境变量’TMPDIR’, ‘TEMP’, ‘TMP’依次获取），并使用一个uuid作为名字，文件名的后缀根据user_data获取，user_data临时文件绝对路径为：<code>$TEMP/$uuid.&lt;后缀&gt;</code>：<ul>
+<li><code>rem cmd</code>使用<code>.cmd</code>后缀</li>
+<li><code>python</code>使用<code>.py</code>后缀</li>
+<li><code>PowerShell</code>使用<code>.ps1</code>后缀</li>
+<li>其他的以<code>#!</code>开头的使用<code>.sh</code>后缀</li>
+<li>EC2 format无后缀</li>
+</ul>
+</li>
+<li>使用<code>subprocess.Popen</code>来执行具体的命令</li>
+<li><strong>策略模式</strong>获取当前类型以及对应的执行该类型脚本的命令。按照以下顺序依次匹配：<ul>
+<li>开头有<code>rem cmd</code>执行<code>subprocess.Popen($TEMP/$uuid.cmd, shell=True)</code></li>
+<li>开头有<code>#!/usr/bin/env python</code>执行<code>subprocess.Popen(python $TEMP/$uuid.py, shell=False)</code></li>
+<li>开头有<code>#!</code>使用<code>subprocess.Popen</code>执行<code>subprocess.Popen(bash $TEMP/$uuid.sh, shell=False)</code></li>
+<li>开头有<code>#ps1</code>或者<code>#ps1_sysnative</code>使用<code>subprocess.Popen</code>执行<code>subprocess.Popen(&#39;powershell.exe路径&#39; $TEMP/$uuid.ps1, shell=False)</code></li>
+<li>开头有<code>#ps1_x86</code>(Windows On Windows 32bit)使用<code>subprocess.Popen</code>执行<code>subprocess.Popen(&#39;powershell.exe路径&#39; $TEMP/$uuid.ps1, shell=False)</code></li>
+<li>user_data内容有<code>&lt;script&gt;一些内容&lt;/script&gt;</code>和<code>&lt;powershell&gt;一些内容&lt;/powershell&gt;</code>这样的标记，使用EC2 format处理。EC2 format其实还是解析内容，再分成bash 和powershell_sysnative方式处理。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>cloudbaseinit.plugins.windows.azureguestagent.AzureGuestAgentPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.bootconfig.BCDConfigPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.bootconfig.BootStatusPolicyPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.certificates.ServerCertificatesPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.createuser.CreateUserPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.displayidletimeout.DisplayIdleTimeoutConfigPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin</p>
+<p>自动扩容磁盘。当磁盘的容量有变更时，虚机开机会自动扩容。比如虚机创建时设置的磁盘为40G, 在虚拟化平台扩容为100G，那么虚机开机之后，会自动扩容磁盘为100G。否则的话，磁盘设备会有一个60G的数据空间为未分配。</p>
+<ul>
+<li>重启策略：每次开机执行</li>
+</ul>
+</li>
+<li><p>cloudbaseinit.plugins.windows.licensing.WindowsLicensingPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.pagefiles.PageFilesPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.rdp.RDPPostCertificateThumbprintPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.rdp.RDPSettingsPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.sanpolicy.SANPolicyPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.updates.WindowsAutoUpdatesPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.winrmcertificateauth.ConfigWinRMCertificateAuthPlugin</p>
+</li>
+<li><p>cloudbaseinit.plugins.windows.winrmlistener.ConfigWinRMListenerPlugin</p>
+</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>cloudbase-init 善于使用抽象/继承、策略模式、简单工厂模式来组织项目代码。代码看起来井井有条，值得借鉴。</li>
+<li>封装了很多windows系统上使用python实现的一些方法，比如获取网络信息/设置MTU/设置计算机名等。与windows的交互使用的是ctypes这个第三方库，它提供了与 C 兼容的数据类型，并允许调用 DLL 或共享库中的函数。可使用该模块以纯 Python 形式对这些库进行封装。</li>
+<li>pbr/setuptools等打包方式也可以借鉴。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>技术积累</category>
+      </categories>
+      <tags>
+        <tag>cloudbase-init</tag>
       </tags>
   </entry>
   <entry>
@@ -561,6 +961,46 @@
       </tags>
   </entry>
   <entry>
+    <title>hexo-Next + Github Page制作个人网站使用记录</title>
+    <url>/2020/10/20/hexo/</url>
+    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
+<li>在github上创建仓库</li>
+<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
+<li>仓库新建分支gh-page</li>
+<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
+<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
+</ol>
+<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
+<li><p>修改内容自动重载并启动server</p>
+<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
+<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
+<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
+</li>
+</ol>
+<a id="more"></a>
+
+<ol start="2">
+<li><p>背景动画</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>其他可以参考</p>
+<ul>
+<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
+<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
+<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>Next</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>IO模型</title>
     <url>/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</url>
     <content><![CDATA[<h1 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h1><p>在Linux(UNIX)操作系统中，共有五种IO模型，分别是：阻塞IO模型、非阻塞IO模型、IO复用模型、信号驱动IO模型以及异步IO模型。</p>
@@ -744,46 +1184,6 @@
       <tags>
         <tag>mysql</tag>
         <tag>大小写敏感</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>hexo-Next + Github Page制作个人网站使用记录</title>
-    <url>/2020/10/20/hexo/</url>
-    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
-<li>在github上创建仓库</li>
-<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
-<li>仓库新建分支gh-page</li>
-<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
-<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
-</ol>
-<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
-<li><p>修改内容自动重载并启动server</p>
-<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
-<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
-<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
-</li>
-</ol>
-<a id="more"></a>
-
-<ol start="2">
-<li><p>背景动画</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>其他可以参考</p>
-<ul>
-<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
-<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
-<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
-</ul>
-</li>
-</ol>
-]]></content>
-      <categories>
-        <category>hexo</category>
-      </categories>
-      <tags>
-        <tag>hexo</tag>
-        <tag>Next</tag>
       </tags>
   </entry>
   <entry>
