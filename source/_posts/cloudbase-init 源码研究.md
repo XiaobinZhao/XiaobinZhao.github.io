@@ -10,6 +10,7 @@ categories:
 # cloudbase-init 源码研究
 
 cloudbase-init是cloud-init的windows版本实现，与cloudinit有一些区别，官方文档请参看[https://cloudbase-init.readthedocs.io/](https://cloudbase-init.readthedocs.io/)
+<!-- more -->
 
 以下以window10 64位+cloudbase-init 1.1.2为例。
 
