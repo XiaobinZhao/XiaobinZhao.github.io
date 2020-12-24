@@ -646,13 +646,9 @@ backend 服务启动2个容器：python FastAPI应用和celery应用。
 #### python FastAPI应用
 
 1. 使用python3.7
-
-2. 泛型和类型提示（type hits）
-
+2. 泛型和类型提示（type hints）
 3. fastAPI官方出品docker容器：tiangolo/uvicorn-gunicorn-fastapi:python3.7
-
 4. 使用Poetry来做包管理工具，代替Pipenv。
-
    1. python 与java/JavaScript等语言的project隔离是不一样的。python的项目依赖包都是统一安装到site-packages目录下，如果不同project依赖了不同版本的同一模块，那么后安装的会卸载掉先安装的。所以python需要为每一个项目进行单独隔离，所以virtualenv应运而生。
    2. 那么讨论python的依赖管理一般就指 依赖管理+虚拟环境。最初的工具就是pip+virtualenv，pip用来做包管理，virtualenv用来做虚拟环境。那么就带来问题：
       1. 需要同时使用2个工具
@@ -664,9 +660,7 @@ backend 服务启动2个容器：python FastAPI应用和celery应用。
       3. 依赖处理效果较差。
    5. `当当~当~当~~~`！Poetry出现了
    6. poetry是一款可以管理Python依赖、环境，同時可以用于Python工程打包和发布的一款第三方工具包。poetry通过配置文件pyproject.toml来完成依赖管理、环境配置、基本信息配置等功能。相当于把Python項目中的Pipfile、setup.py、setup.cfg、requirements.txt、MANIFEST.in融合到一起。通过pyproject.toml文件，不仅可以配置依赖包，还可以用于区分开发、测试、生产环境、配置源路径。
-
 5. 使用Tenacity做重试，判断DB是否就绪。[Tenacity](https://tenacity.readthedocs.io/)不兼容[retry](https://github.com/invl/retry)的api并且做了一些重要的功能和bug 修复。
-
    ```python
    import logging
    from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
@@ -698,7 +692,6 @@ backend 服务启动2个容器：python FastAPI应用和celery应用。
 2. 容器启动之前使用Tenacity重试DB是否就绪
 
 ### frontend: vue
-
 1. typescript
 2. tslint
 3. 测试使用vue-test-utils单元测试

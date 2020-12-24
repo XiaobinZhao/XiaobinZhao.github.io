@@ -545,6 +545,8 @@ asgi与wsgi的区别之处就在于，asgi扩展了wsgi,可以支持WebSocket，
   2. flask
   3. bottle
   4. webpy
+  5. CherryPy
+  6. web2py
 - wsgi server有以下代表：
   1. uWSGI
   2. gunicorn
@@ -557,6 +559,7 @@ asgi与wsgi的区别之处就在于，asgi扩展了wsgi,可以支持WebSocket，
   5. Snaic
   6. Quart
   7. twisted
+  8. APIStar
 - asgi server有以下代表
   1. uvicorn 
   
