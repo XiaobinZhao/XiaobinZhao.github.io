@@ -105,7 +105,7 @@ VNC客户端（或Viewer） 观察控制服务端，与服务端交互。 VNC �
 
 一个典型的从客户端浏览器到 VNC 服务器，中间经过 Websockify 转换的网络如下，注意其中 noVNC 作为一个 HTML5 的客户端，虽然一开始是存放在 websockify 所在的代理服务器上，但其主体 js 代码会在客户端浏览器访问 websockify 服务时被下载到客户端的浏览器中执行。
 
-![](http://tinylab.org/wp-content/uploads/2019/09/novnc-guide/network.png)
+   ![vnc-network](/images/vnc-network.png)
 
 参考http://tinylab.org/guide-to-novnc/
 
