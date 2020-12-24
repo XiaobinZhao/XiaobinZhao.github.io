@@ -33,9 +33,9 @@
 <meta property="og:image" content="https://songtianyi.info/images/004-vdi-03.png">
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/spice-arc.png">
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/spice-agent.png">
-<meta property="og:image" content="http://tinylab.org/wp-content/uploads/2019/09/novnc-guide/network.png">
+<meta property="og:image" content="https://xiaobinzhao.github.io/images/vnc-network.png">
 <meta property="article:published_time" content="2020-12-24T10:40:01.000Z">
-<meta property="article:modified_time" content="2020-12-24T08:00:16.394Z">
+<meta property="article:modified_time" content="2020-12-24T08:04:41.926Z">
 <meta property="article:author" content="琢灵">
 <meta property="article:tag" content="VDI">
 <meta property="article:tag" content="spice">
@@ -227,7 +227,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-12-24 18:40:01 / 修改时间：16:00:16" itemprop="dateCreated datePublished" datetime="2020-12-24T18:40:01+08:00">2020-12-24</time>
+              <time title="创建时间：2020-12-24 18:40:01 / 修改时间：16:04:41" itemprop="dateCreated datePublished" datetime="2020-12-24T18:40:01+08:00">2020-12-24</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -410,7 +410,7 @@
 <p><a target="_blank" rel="noopener" href="https://novnc.com/info.html">noVNC</a> 是一个 HTML5 的 VNC 客户端，采用 JavaScript 编程实现。其主要功能是和远端的 VNC Server 互通，通过对 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/RFB_protocol">RFB（Remote Frame Buffer）协议</a> 数据的编解码，一方面接收远端 VNC Server 发送的数据，解码后通过 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Canvas_element">Canvas</a> 技术绘制在客户端侧，另一方面将客户端侧的终端输入编码成 RFB 数据发送给远端的 VNC Server。也就是说有了 noVNC，我们可以直接使用支持 HTML5 的 Web 浏览器，譬如 Chrome，就可以访问远端的安装了 VNC Server 的机器的桌面，而不用另外安装原生的 VNC 客户端（譬如我们经常在 Windows 上安装的 <a target="_blank" rel="noopener" href="https://www.realvnc.com/download/viewer/">RealVNC Viewer</a>）。</p>
 <p>但需要注意的是，具体传输时，和原生的 VNC 客户端不同，原生的客户端的 RFB 数据是直接承载在 TCP （Raw TCP）上，而 noVNC 处理的 RFB 数据是承载在 Websocket 之上。由于目前大多数 VNC 服务器都不支持 WebSockets，所以 noVNC 是不能直接连接 VNC 服务器的，怎么办呢？这就需要一个代理来实现 Websockets 和 Raw TCP 之间的转换，这个代理就是 Websockify。</p>
 <p>一个典型的从客户端浏览器到 VNC 服务器，中间经过 Websockify 转换的网络如下，注意其中 noVNC 作为一个 HTML5 的客户端，虽然一开始是存放在 websockify 所在的代理服务器上，但其主体 js 代码会在客户端浏览器访问 websockify 服务时被下载到客户端的浏览器中执行。</p>
-<p><img src="http://tinylab.org/wp-content/uploads/2019/09/novnc-guide/network.png"></p>
+<p>   <img src="/images/vnc-network.png" alt="vnc-network"></p>
 <p>参考<a target="_blank" rel="noopener" href="http://tinylab.org/guide-to-novnc/">http://tinylab.org/guide-to-novnc/</a></p>
 <h1 id="spice图像处理"><a href="#spice图像处理" class="headerlink" title="spice图像处理"></a>spice图像处理</h1><h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ul>
 <li><p>JPEG/MJPEG(MotionJPEG)</p>
