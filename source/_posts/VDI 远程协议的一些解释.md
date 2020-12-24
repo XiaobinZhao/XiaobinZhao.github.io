@@ -1,9 +1,19 @@
-# VDI 远程协议的一些解释
+---
+title: VDI 远程协议的一些解释
+date: 2020-12-24 18:40:01
+tags:
+- VDI
+- spice
+- vnc
+categories:
+- VDI
+---
+
 
 # 桌面协议
 
 虚拟桌面架构（VDI）中，协议是非常关键的一环，其定义了将服务器虚拟出的客户机系统从服务器传输到各类终端的规则，涉及到安全，图像处理，数据压缩，网络传输协议等多个方面，直接决定着虚拟桌面的终端体验。
-
+<!-- more -->
 常用的虚拟桌面协议有：
 
 1. RDP(remote desktop protocol)协议：远程桌面协议，大部分 Windows 系统都默认支持此协议。Windows系统中的远程桌面管理就是基于该协议的。据说也是由思杰开发，支持的功能较少，且主要应用在windows环境中，现在也有[Mac下的RDP客户端](http://www.microsoft.com/mac/remote-desktop-client)和linux下的RDP客户端[rdesktop](http://www.rdesktop.org/). 历经多个版本的开发，RDP最新版也支持了打印机重定向，音频重定向，剪贴板共享等功能。
@@ -54,11 +64,11 @@ spice/vnc/rdp, 三者的对比如下：
 
 SPICE架构包括客户端、SPICE服务端和相应的QXL设备、QXL驱动等，如下图所示。客户端运行在用户终端设备上，为用户提供桌面环境。SPICE服务端以动态连接库的形式与KVM虚拟机整合，通过SPICE协议与客户端进行通信。
 
-![这里写图片描述](https://img-blog.csdn.net/20170803114014696?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveGlhbmd4aWFuZ2hlaGU=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![spice架构](/images/spice-arc.png)
 
 Spice agent运行在客户机（虚拟机）操作系统中。Spice server和Spice client利用spice agent来执行一些需要在虚拟机里执行的任务，如配置分辨率，另外还有通过剪贴板来拷贝文件等。从上图可以看出，Spice client与server与Spice Agent的通信需要借助一些其他的软件模块，如在客户机里面，Spice Agent需要通过VDIPort Driver与主机上 QEMU的VDIPort Device进行交互，他们的交互通过一种叫做输入/输出的环进行。Spice Client和Server产生的消息被写入到设备的输出环中，由VDI Port Driver读取；而Spice Agent发出的消息则通过VDI Port Driver先写入到VDI Port Device输入环中,被QEMU读入到Spice server的缓冲区中，然后再根据消息决定由Spice Server直接处理，还是被发往Spice Client中。
 
-![这里写图片描述](https://img-blog.csdn.net/20170803114616306?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveGlhbmd4aWFuZ2hlaGU=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![spice agent通信](/images/spice-agent.png)
 
 SPICE协议最大的特点是其架构中增加的位于Hypervisor中的QXL设备，本质上是KVM虚拟化平台中通过软件实现的PCI显示设备，利用循环队列等数据结构供虚拟化平台上的多个虚拟机共享实现了设备的虚拟化。但是，这种架构使得SPICE协议紧密地依赖于服务器虚拟化软／硬件基础设施，SPICE必须与KVM虚拟化环境绑定。传统的远程桌面传输协议工作在虚拟机Guest OS中，而SPICE协议本身运行在虚拟机服务器中，可以直接使用服务器的硬件资源。
 
@@ -95,7 +105,7 @@ VNC客户端（或Viewer） 观察控制服务端，与服务端交互。 VNC �
 
 一个典型的从客户端浏览器到 VNC 服务器，中间经过 Websockify 转换的网络如下，注意其中 noVNC 作为一个 HTML5 的客户端，虽然一开始是存放在 websockify 所在的代理服务器上，但其主体 js 代码会在客户端浏览器访问 websockify 服务时被下载到客户端的浏览器中执行。
 
-![img](http://tinylab.org/wp-content/uploads/2019/09/novnc-guide/network.png)
+![](http://tinylab.org/wp-content/uploads/2019/09/novnc-guide/network.png)
 
 参考http://tinylab.org/guide-to-novnc/
 
@@ -159,15 +169,6 @@ VDI传输的图像画面有2种处理方式：图片和视频。
   | Citrix 无损构建（H.264/H.265） | 极低 | 低   | 支持                |                           | 0.9999           | 一般办公（office 等）,不适合2D/3D设计等(过程画面有损，最终清晰，锐化现象) |
   | Citrix 混合编码                | 极低 | 高   | 视频编码时支持      |                           | 0.9999           | 结合了位图编解码和视频编解码优点。热点区域使用视频编码，非热点使用位图。无法将硬件编码用于位图编解码所以延迟大。 |
 
-## xView player的参数设置
-
-在xView player使用中，和图像传输相关的主要参数为`--spice-video-param={desktop_type,quality_level,encode_type,fps,CRF,VBR Min,VBR Max,CBR,QP}`总共9个参数，具体可以参看[xView player参数说明]( https://www.tapd.cn/56574401/markdown_wikis/show/#1156574401001000231) （yuv 444计划再添加第10个参数（或者扩展encode_type），1或者0,1代表yuv 444）.
-
-1. 画面质量为无损。等同于上一节提到的Citrix Bitmap。此时将不再关注除了desktop_type,quality_level之外的参数，并且添加无损压缩算法参数`--spice-prefered-compression=glz`
-2. 非GPU桌面，画面质量为高中低以及自定义，可以设置详细的参数来控制画面传输，包括h264/h265
-3. 非GPU桌面使用CPU来进行图像编解码，也可以在服务器上调用GPU，加速编码，节省CPU资源
-4. GPU直通、vGPU桌面，是由运行在虚机桌面里的agent调用GPU来进行编码；xview-player在客户端使用CPU或者本机GPU进行解码
-5. 混合编码，动态调整，xView 应该还是没有实现的。
 
 
 
