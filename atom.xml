@@ -220,28 +220,6 @@
   </entry>
   
   <entry>
-    <title>FastAPI</title>
-    <link href="https://xiaobinzhao.github.io/2020/10/20/FastAPI/"/>
-    <id>https://xiaobinzhao.github.io/2020/10/20/FastAPI/</id>
-    <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2020-12-08T09:02:42.385Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。&lt;/li&gt;
-&lt;/ol&gt;</summary>
-    
-    
-    
-    <category term="FastAPI" scheme="https://xiaobinzhao.github.io/categories/FastAPI/"/>
-    
-    
-    <category term="FastAPI" scheme="https://xiaobinzhao.github.io/tags/FastAPI/"/>
-    
-  </entry>
-  
-  <entry>
     <title>并发和锁</title>
     <link href="https://xiaobinzhao.github.io/2020/10/20/%E5%B9%B6%E5%8F%91%E5%92%8C%E9%94%81/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/%E5%B9%B6%E5%8F%91%E5%92%8C%E9%94%81/</id>
@@ -277,6 +255,28 @@
     <category term="redis lock" scheme="https://xiaobinzhao.github.io/tags/redis-lock/"/>
     
     <category term="etcd lock" scheme="https://xiaobinzhao.github.io/tags/etcd-lock/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>FastAPI</title>
+    <link href="https://xiaobinzhao.github.io/2020/10/20/FastAPI/"/>
+    <id>https://xiaobinzhao.github.io/2020/10/20/FastAPI/</id>
+    <published>2020-10-20T01:49:01.000Z</published>
+    <updated>2020-12-08T09:02:42.385Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。&lt;/li&gt;
+&lt;/ol&gt;</summary>
+    
+    
+    
+    <category term="FastAPI" scheme="https://xiaobinzhao.github.io/categories/FastAPI/"/>
+    
+    
+    <category term="FastAPI" scheme="https://xiaobinzhao.github.io/tags/FastAPI/"/>
     
   </entry>
   

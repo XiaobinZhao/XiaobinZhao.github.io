@@ -1458,271 +1458,6 @@
       </tags>
   </entry>
   <entry>
-    <title>FastAPI</title>
-    <url>/2020/10/20/FastAPI/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：</p>
-<ol>
-<li>自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。</li>
-</ol>
-<a id="more"></a>
-
-<ol start="2">
-<li><p>支持websock。目前xView项目需要单独开启socket服务</p>
-</li>
-<li><p>支持ORM。支持集成sqlAlchemy+alembic</p>
-</li>
-<li><p>支持plugin方式拦截请求。在FastAPI叫MiddleWare</p>
-</li>
-<li><p>异步io</p>
-</li>
-</ol>
-<p>让我惊喜的是：</p>
-<ol>
-<li>可以同时支持FastAPI+Django[Flask/bottle等]并存</li>
-<li>可以支持root-url设置代理，这样文档生成就不会需要特别修改</li>
-<li>可以设置API CallBack 文档，这样我们的API文档就会非常友好</li>
-<li>集成很多MiddleWare，比如<ul>
-<li>SentryMiddleware，做日志重定向并管理</li>
-<li>TimingMiddleware，统计每一个API请求耗时</li>
-</ul>
-</li>
-</ol>
-<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="type-hints-类型提示"><a href="#type-hints-类型提示" class="headerlink" title="type hints(类型提示)"></a>type hints(类型提示)</h2><ul>
-<li>python3.0 引入 <strong>函数注释</strong> <a href="http://www.python.org/dev/peps/pep-3107">PEP 3107</a>.这提供了注释函数参数和返回值的标准化方法。除了可以在运行时使用 <code>__annotations__</code>属性对它们进行自省外，这些注释没有附加任何语义。目的是鼓励通过元类，装饰器或框架进行实验。</li>
-<li>Python3.5.0 开始支持 <strong>类型提示</strong>，见<a href="https://docs.python.org/3.5/whatsnew/3.5.html#whatsnew-pep-484">PEP 484</a>。<br>python3.0支持函数注释，但是对注释的语义没有做定义。经验表明，大多数函数注释用法都是为函数参数和返回值提供<strong>类型提示</strong>。显而易见的是，如果标准库包含基本定义和用于类型注释的工具，则对Python用户将是有益的。它的主要作用<strong>是方便开发，供IDE和各种开发工具使用</strong>，对代码运行不产生影响，运行时会过滤类型信息。<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span>(<span class="params">x: int, y:int</span>) -&gt; int:</span></span><br><span class="line">    <span class="keyword">return</span> x+y</span><br></pre></td></tr></table></figure>
-运行如下命令：<br><code>print(add(1,2))</code> 和 <code>print(add(1,2))</code> 结果分别是：<code>3</code> 和 <code>helloworld</code>。<br>也就是说，python3.5版本的type hint就是一个文档标识作用，便于IDE编辑和代码维护，不能进行代码层面的自动校验。</li>
-<li>python3.6 开始支持<strong>变量注释</strong>语法，见 <a href="https://www.python.org/dev/peps/pep-0484">PEP 484</a>.与3.0/3.5不同之处是：添加了变量注释，之前版本是方法返回值注释和方法参数注释。<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">primes: List[int] = []</span><br><span class="line"></span><br><span class="line">captain: str  <span class="comment"># Note: no initial value!</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Starship</span>:</span></span><br><span class="line">    stats: Dict[str, int] = &#123;&#125;</span><br></pre></td></tr></table></figure>
-就像函数注释一样，Python解释器不会在变量注释中附加任何特殊含义，而仅将它们存储在__annotations__类或模块的属性中。</li>
-<li>3.7 支持优化类型提示。因为引入类型提示带来了一些问题：<ul>
-<li>批注只能使用当前范围内已经可用的名称，换句话说，它们不支持任何形式的正向引用；和</li>
-<li>注释源代码会对Python程序的启动时间产生不利影响。<br>所以，3.7版本进行优化，使用方式是：<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations  <span class="comment"># 在模块中导入，Python 4.0中的默认设置</span></span><br></pre></td></tr></table></figure>
-所以想要实现fastAPI的功能，需要支持python3.6+，如果需要优化类型提示需要python3.7+<br>想了解有关类型的更多信息，来自 <a href="https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html">mypy 的”速查表”</a>是不错的资源。</li>
-</ul>
-</li>
-</ul>
-<h1 id="OpenAPI与FastAPI"><a href="#OpenAPI与FastAPI" class="headerlink" title="OpenAPI与FastAPI"></a>OpenAPI与FastAPI</h1><h2 id="Request"><a href="#Request" class="headerlink" title="Request"></a>Request</h2><p>Request参数校验主要包含三种情况：</p>
-<ol>
-<li>请求url中的path包含的参数，比如： <code>/users/&#123;user_id&#125;</code>这样的url,user_id就是path param; </li>
-<li>而形如：<code>/users?name=aaa</code>这样的url, name是query param;</li>
-<li>以上2中情况多出现于GET请求，而PUT/PATCH/POST这样的请求会包含request body,body内的参数为就是第三种情况<h3 id="path-param"><a href="#path-param" class="headerlink" title="path param"></a>path param</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.get(&quot;/items/&#123;item_id&#125;&quot;)</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">read_item</span>(<span class="params">item_id: int</span>):</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;item_id&quot;</span>: item_id&#125;</span><br></pre></td></tr></table></figure>
-代码如上。</li>
-<li>使用pydantic声明式命名</li>
-<li>数据转换，fastAPI 通过上面的类型声明,自动转换item_id为int型</li>
-<li>数据校验，如果item_id不是整形数字，比如字符串或者浮点型，都将报错</li>
-<li>API 标注和自动生成的文档<h3 id="query-param"><a href="#query-param" class="headerlink" title="query param"></a>query param</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line">fake_items_db = [&#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Foo&quot;</span>&#125;, &#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Bar&quot;</span>&#125;, &#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Baz&quot;</span>&#125;]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.get(&quot;/items/&quot;)</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">read_item</span>(<span class="params">skip: int = <span class="number">0</span>, limit: int = <span class="number">10</span></span>):</span></span><br><span class="line">    <span class="keyword">return</span> fake_items_db[skip : skip + limit]</span><br></pre></td></tr></table></figure>
-代码如上，如果请求的url如：<code>http://127.0.0.1:8000/items/?skip=0&amp;limit=10</code>,那么skip：对应的值为 0，limit：对应的值为 10。<br>和path param 一样，你可以得到：</li>
-</ol>
-<ul>
-<li>数据”解析”</li>
-<li>数据校验</li>
-<li>自动生成文档</li>
-</ul>
-<h3 id="path-param-query-param"><a href="#path-param-query-param" class="headerlink" title="path param + query param"></a>path param + query param</h3><p>你可以同时声明多个路径参数和查询参数，FastAPI 能够识别它们。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;users&#x2F;&#123;user_id&#125;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def read_user_item(</span><br><span class="line">    user_id: int, item_id: str, q: Optional[str] &#x3D; None, short: bool &#x3D; False</span><br><span class="line">):</span><br><span class="line">    item &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;owner_id&quot;: user_id&#125;</span><br><span class="line">    if q:</span><br><span class="line">        item.update(&#123;&quot;q&quot;: q&#125;)</span><br><span class="line">    if not short:</span><br><span class="line">        item.update(</span><br><span class="line">            &#123;&quot;description&quot;: &quot;This is an amazing item that has a long description&quot;&#125;</span><br><span class="line">        )</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
-<p>以上无论是 path param， 还是query param，还是2者并存，都可以设置参数为：</p>
-<ul>
-<li>可选/必填</li>
-<li>默认值</li>
-<li>参数的一些额外校验<ul>
-<li>字符串参数长度(最长/最短)，比如  <code>q: Optional[str] = Query(None, max_length=50)</code></li>
-<li>字符串参数正则<code>q: Optional[str] = Query(None, regex=&quot;^fixedquery$&quot;)</code> </li>
-<li>数字参数范围控制，比如：大于，小于，大于等于等</li>
-<li>查询参数是一个列表， 比如：<code>http://localhost:8000/items/?q=foo&amp;q=bar</code></li>
-</ul>
-</li>
-<li>设置更多参数，可以用为OpenAPI文档，比如：<ul>
-<li>title</li>
-<li>description</li>
-</ul>
-</li>
-<li>别名参数</li>
-<li>弃用设置</li>
-</ul>
-<h3 id="Request-body"><a href="#Request-body" class="headerlink" title="Request body"></a>Request body</h3><p>需要先创建数据模型，这里的数据模型就是request的body的数据声明，</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def create_item(item: Item):</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
-<p>按照以上方式，你将得到：</p>
-<ul>
-<li>将请求体作为 JSON 读取。</li>
-<li>转换为相应的类型（在需要时）。</li>
-<li>校验数据。<br>如果数据无效，将返回一条清晰易读的错误信息，指出不正确数据的确切位置和内容。</li>
-<li>将接收的数据赋值到参数 item 中。<br>由于你已经在函数中将它声明为 Item 类型，你还将获得对于所有属性及其类型的一切编辑器支持（代码补全等）。</li>
-<li>为你的模型生成 JSON 模式 定义，你还可以在其他任何对你的项目有意义的地方使用它们。</li>
-<li>这些模式将成为生成的 OpenAPI 模式的一部分，并且被自动化文档 UI 所使用。</li>
-</ul>
-<p>当然你可以随意组合query parm、path param、request body.FastAPI能够正确的识别他们。</p>
-<p>如果request body是一个复杂类型，比如：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;item&quot;: &#123;</span><br><span class="line">        &quot;name&quot;: &quot;Foo&quot;,</span><br><span class="line">        &quot;description&quot;: &quot;The pretender&quot;,</span><br><span class="line">        &quot;price&quot;: 42.0,</span><br><span class="line">        &quot;tax&quot;: 3.2</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;user&quot;: &#123;</span><br><span class="line">        &quot;username&quot;: &quot;dave&quot;,</span><br><span class="line">        &quot;full_name&quot;: &quot;Dave Grohl&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>你可以这么写：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class User(BaseModel):</span><br><span class="line">    username: str</span><br><span class="line">    full_name: Optional[str] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.put(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def update_item(item_id: int, item: Item, user: User):</span><br><span class="line">    results &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;item&quot;: item, &quot;user&quot;: user&#125;</span><br><span class="line">    return results</span><br></pre></td></tr></table></figure>
-<p>在以上示例中，所有的属性或者变量的声明类型都是简单类型：int/str/bool/float, 还可以有复杂类型比如：List/Set/嵌套类型，或者直接使用Optional。pydantic还提供了一些特殊领域的声明，比如：HttpUrl。</p>
-<h2 id="Request-Filed"><a href="#Request-Filed" class="headerlink" title="Request Filed"></a>Request Filed</h2><p>以上request path param/query param/requet  body其实都是Pydantic 的 Field的字段的实例。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import Body, FastAPI</span><br><span class="line">from pydantic import BaseModel, Field</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; Field(</span><br><span class="line">        None, title&#x3D;&quot;The description of the item&quot;, max_length&#x3D;300</span><br><span class="line">    )</span><br><span class="line">    price: float &#x3D; Field(..., gt&#x3D;0, description&#x3D;&quot;The price must be greater than zero&quot;)</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.put(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def update_item(item_id: int, item: Item &#x3D; Body(..., embed&#x3D;True)):</span><br><span class="line">    results &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;item&quot;: item&#125;</span><br><span class="line">    return results</span><br></pre></td></tr></table></figure>
-<p>实际上，Query、Path 和其他你将在之后看到的类，创建的是由一个共同的 Params 类派生的子类的对象，该共同类本身又是 Pydantic 的 FieldInfo 类的子类。<br>Pydantic 的 Field 也会返回一个 FieldInfo 的实例。<br>Body 也直接返回 FieldInfo 的一个子类的对象。还有其他一些你之后会看到的类是 Body 类的子类。<br>请记住当你从 fastapi 导入 Query、Path 等对象时，他们实际上是返回特殊类的函数。</p>
-<p>除了通过字段声明来控制一个属性的校验规则之外，还可以显式的指定。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line">    class Config:</span><br><span class="line">        schema_extra &#x3D; &#123;</span><br><span class="line">            &quot;example&quot;: &#123;</span><br><span class="line">                &quot;name&quot;: &quot;Foo&quot;,</span><br><span class="line">                &quot;description&quot;: &quot;A very nice Item&quot;,</span><br><span class="line">                &quot;price&quot;: 35.4,</span><br><span class="line">                &quot;tax&quot;: 3.2,</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
-<p>这里是增加了example属性，可以在openAPI 文档中看到。</p>
-<h2 id="Response"><a href="#Response" class="headerlink" title="Response"></a>Response</h2><p>与request不同的是，response的参数声明式在路径装饰器.</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import List, Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line">    tags: List[str] &#x3D; []</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;items&#x2F;&quot;, response_model&#x3D;Item)</span><br><span class="line">async def create_item(item: Item):</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
-<p>你将得到：</p>
-<ul>
-<li>转换输出数据为声明类型。这里之所以把<code>response_model</code>声明放在路径装饰器上，是因为路径方法(比如上边示例的<code>create_item</code>)的返回值可能是字典/对象甚至没有返回值。使用装饰器来控制和序列化路径方法的返回值。</li>
-<li>验证数据</li>
-<li>响应api路径</li>
-<li>自动文档</li>
-</ul>
-<p>fastAPI可以自动转换SqlAlchemy ORM Model 到Schema Model。这样API就可以直接返回SqlAlchemy对象，例如：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def get_db():</span><br><span class="line">    db &#x3D; SessionLocal()</span><br><span class="line">    try:</span><br><span class="line">        yield db</span><br><span class="line">    finally:</span><br><span class="line">        db.close()</span><br><span class="line"></span><br><span class="line">class Item(ItemBase):</span><br><span class="line">    id: int</span><br><span class="line">    owner_id: int</span><br><span class="line"></span><br><span class="line">    class Config:</span><br><span class="line">        orm_mode &#x3D; True</span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;users&#x2F;&#123;user_id&#125;&#x2F;items&#x2F;&quot;, response_model&#x3D;Item)</span><br><span class="line">def create_item_for_user(</span><br><span class="line">    user_id: int, item: Item, db: Session &#x3D; Depends(get_db)</span><br><span class="line">):</span><br><span class="line">    db_item &#x3D; models.Item(**item.dict(), owner_id&#x3D;user_id)</span><br><span class="line">    db.add(db_item)</span><br><span class="line">    db.commit()</span><br><span class="line">    db.refresh(db_item)</span><br><span class="line">    return db_item</span><br></pre></td></tr></table></figure>
-<p>上例子中， <code>db_item</code>是SqlAlchemy ORM对象，response_model是schema对象。这里会自动进行转化，前提是需要schema class 定义<code>orm_mode</code>为true</p>
-<h2 id="Header"><a href="#Header" class="headerlink" title="Header"></a>Header</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI, Header</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def read_items(user_agent: Optional[str] &#x3D; Header(None)):</span><br><span class="line">    return &#123;&quot;User-Agent&quot;: user_agent&#125;</span><br></pre></td></tr></table></figure>
-<p>需要注意的是：</p>
-<ul>
-<li>不区分大小写</li>
-<li>header中的连字符<code>-</code>会自动换成下划线<code>_</code><h2 id="Cookie等"><a href="#Cookie等" class="headerlink" title="Cookie等"></a>Cookie等</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import Cookie, FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def read_items(ads_id: Optional[str] &#x3D; Cookie(None)):</span><br><span class="line">    return &#123;&quot;ads_id&quot;: ads_id&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h1>FastAPi的Dependency类似于提取公共方法，然后被多处调用，原理跟装饰器差不多。比如你有如下需求：</li>
-</ul>
-<ol>
-<li>具有共享逻辑（一次又一次地使用相同的代码逻辑）。</li>
-<li>共享数据库连接。</li>
-<li>强制执行安全性，身份验证，角色要求等。<br>所有这些，同时最大程度地减少了代码重复。</li>
-</ol>
-<p>依赖可以互相嵌套，即：子依赖</p>
-<h1 id="中间件"><a href="#中间件" class="headerlink" title="中间件"></a>中间件</h1><p>中间件（MiddleWare）可以拦截每一个request，处理请求前和response前的一些行为。</p>
-<ul>
-<li>它接受应用程序中的每个请求。</li>
-<li>然后，它可以对该请求执行某些操作或运行任何需要的代码。</li>
-<li>然后，它传递要由应用程序其余部分（通过某些路径操作）处理的请求。</li>
-<li>然后，它将获取应用程序生成的响应（通过某些路径操作）。</li>
-<li>它可以对响应做出响应或运行任何需要的代码。</li>
-<li>然后返回响应。<br>类似于xView bottle中的plugin。</li>
-</ul>
-<h1 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h1><p>可以使用SqlAlchemy或者peewee(peewee是一个微型的ORM框架)。并且FastAPi支持自动转化SqlAlchemy对象和schema对象。</p>
-<h1 id="后台任务和Celery"><a href="#后台任务和Celery" class="headerlink" title="后台任务和Celery"></a>后台任务和Celery</h1><p>如果返回response之后要运行一些操作，可以使用后台任务。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import BackgroundTasks, FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def write_notification(email: str, message&#x3D;&quot;&quot;):</span><br><span class="line">    with open(&quot;log.txt&quot;, mode&#x3D;&quot;w&quot;) as email_file:</span><br><span class="line">        content &#x3D; f&quot;notification for &#123;email&#125;: &#123;message&#125;&quot;</span><br><span class="line">        email_file.write(content)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;send-notification&#x2F;&#123;email&#125;&quot;)</span><br><span class="line">async def send_notification(email: str, background_tasks: BackgroundTasks):</span><br><span class="line">    background_tasks.add_task(write_notification, email, message&#x3D;&quot;some notification&quot;)</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Notification sent in the background&quot;&#125;</span><br></pre></td></tr></table></figure>
-<p>response也可以返回202，然后任务继续在后台执行。<br>与之类似的是Celery:一个分布式多任务处理队列。</p>
-<h1 id="静态资源"><a href="#静态资源" class="headerlink" title="静态资源"></a>静态资源</h1><p>FastAPi也可以返回静态资源，比如：图片/文件。需要 单独安装<code>aiofiles</code>.</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line">from fastapi.staticfiles import StaticFiles</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;static&quot;, StaticFiles(directory&#x3D;&quot;static&quot;), name&#x3D;&quot;static&quot;)</span><br></pre></td></tr></table></figure>
-<p>mount 是指在特定路径中添加完整的“独立”应用程序，然后负责处理所有子路径。<br>这与使用APIRouter完全独立的已安装应用程序不同。主应用程序中的OpenAPI和文档不会包含mount应用程序等中的任何内容。</p>
-<h1 id="子应用"><a href="#子应用" class="headerlink" title="子应用"></a>子应用</h1><p>如果需要两个独立的FastAPI应用程序，以及它们各自的独立OpenAPI和文档ui，则可以拥有一个主应用程序并“装载”一个（或多个）子应用程序。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;app&quot;)</span><br><span class="line">def read_main():</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Hello World from main app&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">subapi &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@subapi.get(&quot;&#x2F;sub&quot;)</span><br><span class="line">def read_sub():</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Hello World from sub API&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;subapi&quot;, subapi)</span><br></pre></td></tr></table></figure>
-<p>子应用是以mount方式挂载到主应用中的。子应用与主应用区别之处就是文档是分开的，其他都一样。文档访问的时候，主应用默认地址： <code>http://127.0.0.1:8000/docs</code>, 子应用默认地址: <code>http://127.0.0.1:8000/subapi/docs</code></p>
-<h1 id="websocket"><a href="#websocket" class="headerlink" title="websocket"></a>websocket</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI, WebSocket</span><br><span class="line">from fastapi.responses import HTMLResponse</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">html &#x3D; &quot;&quot;&quot;</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;title&gt;Chat&lt;&#x2F;title&gt;</span><br><span class="line">    &lt;&#x2F;head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">        &lt;h1&gt;WebSocket Chat&lt;&#x2F;h1&gt;</span><br><span class="line">        &lt;form action&#x3D;&quot;&quot; onsubmit&#x3D;&quot;sendMessage(event)&quot;&gt;</span><br><span class="line">            &lt;input type&#x3D;&quot;text&quot; id&#x3D;&quot;messageText&quot; autocomplete&#x3D;&quot;off&quot;&#x2F;&gt;</span><br><span class="line">            &lt;button&gt;Send&lt;&#x2F;button&gt;</span><br><span class="line">        &lt;&#x2F;form&gt;</span><br><span class="line">        &lt;ul id&#x3D;&#39;messages&#39;&gt;</span><br><span class="line">        &lt;&#x2F;ul&gt;</span><br><span class="line">        &lt;script&gt;</span><br><span class="line">            var ws &#x3D; new WebSocket(&quot;ws:&#x2F;&#x2F;localhost:8000&#x2F;ws&quot;);</span><br><span class="line">            ws.onmessage &#x3D; function(event) &#123;</span><br><span class="line">                var messages &#x3D; document.getElementById(&#39;messages&#39;)</span><br><span class="line">                var message &#x3D; document.createElement(&#39;li&#39;)</span><br><span class="line">                var content &#x3D; document.createTextNode(event.data)</span><br><span class="line">                message.appendChild(content)</span><br><span class="line">                messages.appendChild(message)</span><br><span class="line">            &#125;;</span><br><span class="line">            function sendMessage(event) &#123;</span><br><span class="line">                var input &#x3D; document.getElementById(&quot;messageText&quot;)</span><br><span class="line">                ws.send(input.value)</span><br><span class="line">                input.value &#x3D; &#39;&#39;</span><br><span class="line">                event.preventDefault()</span><br><span class="line">            &#125;</span><br><span class="line">        &lt;&#x2F;script&gt;</span><br><span class="line">    &lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&quot;&quot;&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">async def get():</span><br><span class="line">    return HTMLResponse(html)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.websocket(&quot;&#x2F;ws&quot;)</span><br><span class="line">async def websocket_endpoint(websocket: WebSocket):</span><br><span class="line">    await websocket.accept()</span><br><span class="line">    while True:</span><br><span class="line">        data &#x3D; await websocket.receive_text()</span><br><span class="line">        await websocket.send_text(f&quot;Message text was: &#123;data&#125;&quot;)</span><br></pre></td></tr></table></figure>
-
-<h1 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h1><p>您可以定义在应用程序启动之前或关闭应用程序时需要执行的事件处理程序（函数）。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">items &#x3D; &#123;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.on_event(&quot;startup&quot;)</span><br><span class="line">async def startup_event():</span><br><span class="line">    items[&quot;foo&quot;] &#x3D; &#123;&quot;name&quot;: &quot;Fighters&quot;&#125;</span><br><span class="line">    items[&quot;bar&quot;] &#x3D; &#123;&quot;name&quot;: &quot;Tenders&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.on_event(&quot;shutdown&quot;)</span><br><span class="line">def shutdown_event():</span><br><span class="line">    with open(&quot;log.txt&quot;, mode&#x3D;&quot;a&quot;) as log:</span><br><span class="line">        log.write(&quot;Application shutdown&quot;)</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def read_items(item_id: str):</span><br><span class="line">    return items[item_id]</span><br></pre></td></tr></table></figure>
-<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><p>fastAPI测试基于pytest. fastAPi继承了starlette的testClient, testClient又包装了requests.</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line">from fastapi.testclient import TestClient</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">async def read_main():</span><br><span class="line">    return &#123;&quot;msg&quot;: &quot;Hello World&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">client &#x3D; TestClient(app)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def test_read_main():</span><br><span class="line">    response &#x3D; client.get(&quot;&#x2F;&quot;)</span><br><span class="line">    assert response.status_code &#x3D;&#x3D; 200</span><br><span class="line">    assert response.json() &#x3D;&#x3D; &#123;&quot;msg&quot;: &quot;Hello World&quot;&#125;</span><br></pre></td></tr></table></figure>
-<p>另外，testClient还可以用于：</p>
-<ul>
-<li>测试websocket。<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def test_websocket():</span><br><span class="line">    client &#x3D; TestClient(app)</span><br><span class="line">    with client.websocket_connect(&quot;&#x2F;ws&quot;) as websocket:</span><br><span class="line">        data &#x3D; websocket.receive_json()</span><br><span class="line">        assert data &#x3D;&#x3D; &#123;&quot;msg&quot;: &quot;Hello WebSocket&quot;&#125;</span><br></pre></td></tr></table></figure></li>
-<li>测试事件：启动和关闭</li>
-<li>override 依赖</li>
-<li>单独出测试数据库</li>
-</ul>
-<h1 id="模板"><a href="#模板" class="headerlink" title="模板"></a>模板</h1><p>fastAPI没有提供template，如果要用需要可以使用：jinja2。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI, Request</span><br><span class="line">from fastapi.responses import HTMLResponse</span><br><span class="line">from fastapi.staticfiles import StaticFiles</span><br><span class="line">from fastapi.templating import Jinja2Templates</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;static&quot;, StaticFiles(directory&#x3D;&quot;static&quot;), name&#x3D;&quot;static&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">templates &#x3D; Jinja2Templates(directory&#x3D;&quot;templates&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&#123;id&#125;&quot;, response_class&#x3D;HTMLResponse)</span><br><span class="line">async def read_item(request: Request, id: str):</span><br><span class="line">    return templates.TemplateResponse(&quot;item.html&quot;, &#123;&quot;request&quot;: request, &quot;id&quot;: id&#125;)</span><br></pre></td></tr></table></figure>
-<h1 id="部署-Server"><a href="#部署-Server" class="headerlink" title="部署/Server"></a>部署/Server</h1><p>一般情况下，fastAPi只作为应用的载体，需要一个server容器来部署应用，这个server我们建议使用uvicorn, 比如：<br><code>uvicorn main:app --reload</code><br>这样的命令行方式适合部署时使用，如果要进行debug,可以使用以下方式部署：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import uvicorn</span><br><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">def root():</span><br><span class="line">    a &#x3D; &quot;a&quot;</span><br><span class="line">    b &#x3D; &quot;b&quot; + a</span><br><span class="line">    return &#123;&quot;hello world&quot;: b&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &quot;__main__&quot;:</span><br><span class="line">    uvicorn.run(app, host&#x3D;&quot;0.0.0.0&quot;, port&#x3D;8000)</span><br></pre></td></tr></table></figure>
-<h1 id="项目生成器"><a href="#项目生成器" class="headerlink" title="项目生成器"></a>项目生成器</h1><p>可以使用项目生成器来进行一键初始化：<br>GitHub：https : //github.com/tiangolo/full-stack-fastapi-postgresql</p>
-<p>全栈FastAPI PostgreSQL-功能</p>
-<ol>
-<li>完全Docker集成（基于Docker）。</li>
-<li>Docker Swarm模式部署。</li>
-<li>Docker用于本地开发的集成和优化。</li>
-<li>使用Uvicorn和Gunicorn的可投入生产的 Python Web服务器。</li>
-<li>Python FastAPI后端：<ul>
-<li>快速：非常高的性能，看齐的NodeJS和围棋（感谢Starlette和Pydantic）。</li>
-<li>直观：强大的编辑器支持。完成无处不在。调试时间更少。</li>
-<li>简易：旨在易于使用和学习。减少阅读文档的时间。</li>
-<li>短：最小化代码重复。每个参数声明中的多个功能。</li>
-<li>健壮：获取可用于生产的代码。具有自动交互式文档。</li>
-<li>基于标准：基于（并完全兼容）API的开放标准：OpenAPI和JSON Schema。</li>
-<li>许多其他功能包括自动验证，序列化，交互式文档，使用OAuth2 JWT令牌进行身份验证等。</li>
-<li>默认情况下，安全密码哈希。</li>
-</ul>
-</li>
-<li>JWT令牌认证。</li>
-<li>SQLAlchemy模型（独立于Flask扩展，因此可以直接与Celery工作者一起使用）。</li>
-<li>用户的基本启动模型（根据需要修改和删除）。</li>
-<li>alembic迁移。</li>
-<li>CORS（跨源资源共享）。</li>
-<li>可以选择性地从后端的其余部分导入和使用模型和代码的celery。</li>
-<li>基于Pytest的 REST后端测试，与Docker集成在一起，因此您可以独立于数据库测试完整的API交互。由于它在Docker中运行，因此每次都可以从头开始构建新的数据存储（因此您可以使用ElasticSearch，MongoDB，CouchDB或任何您想要的东西，只需测试API是否有效）。</li>
-<li>与Jupyter Kernels轻松实现Python集成，可通过 Atom Hydrogen或Visual Studio Code Jupyter之类的扩展来进行远程或Docker内部开发。</li>
-<li>Vue前端：<ul>
-<li>用Vue CLI生成。</li>
-<li>JWT认证处理。</li>
-<li>登录视图。</li>
-<li>登录后，进入主仪表板视图。</li>
-<li>具有用户创建和版本的主仪表板。</li>
-<li>自我用户版。</li>
-<li>Vuex。</li>
-<li>Vue路由器。</li>
-<li>Vuetify提供精美的材料设计组件。</li>
-<li>TypeScript。</li>
-<li>基于Nginx的 Docker服务器（配置为与Vue-router完美配合）。</li>
-<li>Docker多阶段构建，因此您无需保存或提交已编译的代码。</li>
-<li>前端测试在构建时运行（也可以禁用）。</li>
-<li>尽可能采用模块化设计，因此可以立即使用，但是您可以使用Vue - CLI重新生成或根据需要创建它，然后重新使用所需的内容。</li>
-</ul>
-</li>
-<li>PGAdmin for PostgreSQL数据库，您可以对其进行修改以轻松使用PHPMyAdmin和MySQL。</li>
-<li>Flower为celery工作监视。</li>
-<li>使用Traefik可以在前端和后端之间实现负载平衡，因此您可以将两者都放在同一个域中，以路径分隔，但可以通过不同的容器进行服务。</li>
-<li>Traefik集成，包括让我们加密HTTPS证书自动生成。</li>
-<li>GitLab CI（连续集成），包括前端和后端测试。</li>
-</ol>
-<h2 id="项目生成器使用"><a href="#项目生成器使用" class="headerlink" title="项目生成器使用"></a>项目生成器使用</h2><p>按照生成器的说明步骤，输入适当参数即可得到一个 full-stack的项目，包含后端api、前端vue、docker 部署。</p>
-<h3 id="backend-fastAPI"><a href="#backend-fastAPI" class="headerlink" title="backend: fastAPI"></a>backend: fastAPI</h3><p>backend 服务启动2个容器：python FastAPI应用和celery应用。</p>
-<h4 id="python-FastAPI应用"><a href="#python-FastAPI应用" class="headerlink" title="python FastAPI应用"></a>python FastAPI应用</h4><ol>
-<li><p>使用python3.7</p>
-</li>
-<li><p>泛型和类型提示（type hints）</p>
-</li>
-<li><p>fastAPI官方出品docker容器：tiangolo/uvicorn-gunicorn-fastapi:python3.7</p>
-</li>
-<li><p>使用Poetry来做包管理工具，代替Pipenv。</p>
-<ol>
-<li>python 与java/JavaScript等语言的project隔离是不一样的。python的项目依赖包都是统一安装到site-packages目录下，如果不同project依赖了不同版本的同一模块，那么后安装的会卸载掉先安装的。所以python需要为每一个项目进行单独隔离，所以virtualenv应运而生。</li>
-<li>那么讨论python的依赖管理一般就指 依赖管理+虚拟环境。最初的工具就是pip+virtualenv，pip用来做包管理，virtualenv用来做虚拟环境。那么就带来问题：<ol>
-<li>需要同时使用2个工具</li>
-<li>不能动态更新requirements.txt，这点尤其突出。这种文本格式的文件只能记录依赖包的名称，不能像yaml/json/xml一样记录更多的环境信息和参数。每次更新都是需要手动执行<code>pip freeze &gt; requirements.txt</code>，如果那次遗漏，那么后患无穷。</li>
-</ol>
-</li>
-<li>因此，pipenv诞生了。</li>
-<li>pipenv可以看成是pip+virtualenv两款工具的合体，它集合了pip的依赖包管理和virtualenv虚拟环境 管理于一身。另外，在依赖包记录方面使用Pipfile替代原来的requirements.txt。而且，它能够自动记录并更新记录文件，这样就不在需要手动执行命令来更新requirements.txt。但是他依然有很多缺陷：<ol>
-<li>Lock速度缓慢</li>
-<li>强行更新不相干依赖</li>
-<li>依赖处理效果较差。</li>
-</ol>
-</li>
-<li><code>当当~当~当~~~</code>！Poetry出现了</li>
-<li>poetry是一款可以管理Python依赖、环境，同時可以用于Python工程打包和发布的一款第三方工具包。poetry通过配置文件pyproject.toml来完成依赖管理、环境配置、基本信息配置等功能。相当于把Python項目中的Pipfile、setup.py、setup.cfg、requirements.txt、MANIFEST.in融合到一起。通过pyproject.toml文件，不仅可以配置依赖包，还可以用于区分开发、测试、生产环境、配置源路径。</li>
-</ol>
-</li>
-<li><p>使用Tenacity做重试，判断DB是否就绪。<a href="https://tenacity.readthedocs.io/">Tenacity</a>不兼容<a href="https://github.com/invl/retry">retry</a>的api并且做了一些重要的功能和bug 修复。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">from</span> tenacity <span class="keyword">import</span> after_log, before_log, retry, stop_after_attempt, wait_fixed</span><br><span class="line"></span><br><span class="line">logging.basicConfig(level=logging.INFO)</span><br><span class="line">logger = logging.getLogger(__name__)</span><br><span class="line"></span><br><span class="line">max_tries = <span class="number">60</span> * <span class="number">5</span>  <span class="comment"># 5 minutes</span></span><br><span class="line">wait_seconds = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@retry(</span></span><br><span class="line">    stop=stop_after_attempt(max_tries),</span><br><span class="line">    wait=wait_fixed(wait_seconds),</span><br><span class="line">    before=before_log(logger, logging.INFO),</span><br><span class="line">    after=after_log(logger, logging.WARN),</span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init</span>() -&gt; <span class="keyword">None</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># Try to create session to check if DB is awake</span></span><br><span class="line">        db = SessionLocal()</span><br><span class="line">        db.execute(<span class="string">&quot;SELECT 1&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        logger.error(e)</span><br><span class="line">        <span class="keyword">raise</span> e</span><br></pre></td></tr></table></figure>
-<h4 id="celery应用"><a href="#celery应用" class="headerlink" title="celery应用"></a>celery应用</h4></li>
-<li><p>使用”uvicorn.workers.UvicornWorker” </p>
-</li>
-<li><p>容器启动之前使用Tenacity重试DB是否就绪</p>
-</li>
-</ol>
-<h3 id="frontend-vue"><a href="#frontend-vue" class="headerlink" title="frontend: vue"></a>frontend: vue</h3><ol>
-<li>typescript</li>
-<li>tslint</li>
-<li>测试使用vue-test-utils单元测试</li>
-<li>Vue.js 的验证库VeeValidate</li>
-<li>vuetify，是一个基于vue2.0，为移动而生的组件框架，一个渐进式的UI框架</li>
-</ol>
-]]></content>
-      <categories>
-        <category>FastAPI</category>
-      </categories>
-      <tags>
-        <tag>FastAPI</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>并发和锁</title>
     <url>/2020/10/20/%E5%B9%B6%E5%8F%91%E5%92%8C%E9%94%81/</url>
     <content><![CDATA[<p>在web开过程中，经常会遇到高并发和资源共享的问题，这些问题的本质是：并行的请求转成串行。我们应该考虑的是怎么在尽可能提高吞吐量的情况下，保证资源的合理生产和消耗。</p>
@@ -2073,6 +1808,271 @@
         <tag>cap</tag>
         <tag>redis lock</tag>
         <tag>etcd lock</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>FastAPI</title>
+    <url>/2020/10/20/FastAPI/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：</p>
+<ol>
+<li>自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。</li>
+</ol>
+<a id="more"></a>
+
+<ol start="2">
+<li><p>支持websock。目前xView项目需要单独开启socket服务</p>
+</li>
+<li><p>支持ORM。支持集成sqlAlchemy+alembic</p>
+</li>
+<li><p>支持plugin方式拦截请求。在FastAPI叫MiddleWare</p>
+</li>
+<li><p>异步io</p>
+</li>
+</ol>
+<p>让我惊喜的是：</p>
+<ol>
+<li>可以同时支持FastAPI+Django[Flask/bottle等]并存</li>
+<li>可以支持root-url设置代理，这样文档生成就不会需要特别修改</li>
+<li>可以设置API CallBack 文档，这样我们的API文档就会非常友好</li>
+<li>集成很多MiddleWare，比如<ul>
+<li>SentryMiddleware，做日志重定向并管理</li>
+<li>TimingMiddleware，统计每一个API请求耗时</li>
+</ul>
+</li>
+</ol>
+<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="type-hints-类型提示"><a href="#type-hints-类型提示" class="headerlink" title="type hints(类型提示)"></a>type hints(类型提示)</h2><ul>
+<li>python3.0 引入 <strong>函数注释</strong> <a href="http://www.python.org/dev/peps/pep-3107">PEP 3107</a>.这提供了注释函数参数和返回值的标准化方法。除了可以在运行时使用 <code>__annotations__</code>属性对它们进行自省外，这些注释没有附加任何语义。目的是鼓励通过元类，装饰器或框架进行实验。</li>
+<li>Python3.5.0 开始支持 <strong>类型提示</strong>，见<a href="https://docs.python.org/3.5/whatsnew/3.5.html#whatsnew-pep-484">PEP 484</a>。<br>python3.0支持函数注释，但是对注释的语义没有做定义。经验表明，大多数函数注释用法都是为函数参数和返回值提供<strong>类型提示</strong>。显而易见的是，如果标准库包含基本定义和用于类型注释的工具，则对Python用户将是有益的。它的主要作用<strong>是方便开发，供IDE和各种开发工具使用</strong>，对代码运行不产生影响，运行时会过滤类型信息。<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span>(<span class="params">x: int, y:int</span>) -&gt; int:</span></span><br><span class="line">    <span class="keyword">return</span> x+y</span><br></pre></td></tr></table></figure>
+运行如下命令：<br><code>print(add(1,2))</code> 和 <code>print(add(1,2))</code> 结果分别是：<code>3</code> 和 <code>helloworld</code>。<br>也就是说，python3.5版本的type hint就是一个文档标识作用，便于IDE编辑和代码维护，不能进行代码层面的自动校验。</li>
+<li>python3.6 开始支持<strong>变量注释</strong>语法，见 <a href="https://www.python.org/dev/peps/pep-0484">PEP 484</a>.与3.0/3.5不同之处是：添加了变量注释，之前版本是方法返回值注释和方法参数注释。<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">primes: List[int] = []</span><br><span class="line"></span><br><span class="line">captain: str  <span class="comment"># Note: no initial value!</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Starship</span>:</span></span><br><span class="line">    stats: Dict[str, int] = &#123;&#125;</span><br></pre></td></tr></table></figure>
+就像函数注释一样，Python解释器不会在变量注释中附加任何特殊含义，而仅将它们存储在__annotations__类或模块的属性中。</li>
+<li>3.7 支持优化类型提示。因为引入类型提示带来了一些问题：<ul>
+<li>批注只能使用当前范围内已经可用的名称，换句话说，它们不支持任何形式的正向引用；和</li>
+<li>注释源代码会对Python程序的启动时间产生不利影响。<br>所以，3.7版本进行优化，使用方式是：<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> annotations  <span class="comment"># 在模块中导入，Python 4.0中的默认设置</span></span><br></pre></td></tr></table></figure>
+所以想要实现fastAPI的功能，需要支持python3.6+，如果需要优化类型提示需要python3.7+<br>想了解有关类型的更多信息，来自 <a href="https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html">mypy 的”速查表”</a>是不错的资源。</li>
+</ul>
+</li>
+</ul>
+<h1 id="OpenAPI与FastAPI"><a href="#OpenAPI与FastAPI" class="headerlink" title="OpenAPI与FastAPI"></a>OpenAPI与FastAPI</h1><h2 id="Request"><a href="#Request" class="headerlink" title="Request"></a>Request</h2><p>Request参数校验主要包含三种情况：</p>
+<ol>
+<li>请求url中的path包含的参数，比如： <code>/users/&#123;user_id&#125;</code>这样的url,user_id就是path param; </li>
+<li>而形如：<code>/users?name=aaa</code>这样的url, name是query param;</li>
+<li>以上2中情况多出现于GET请求，而PUT/PATCH/POST这样的请求会包含request body,body内的参数为就是第三种情况<h3 id="path-param"><a href="#path-param" class="headerlink" title="path param"></a>path param</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.get(&quot;/items/&#123;item_id&#125;&quot;)</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">read_item</span>(<span class="params">item_id: int</span>):</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;item_id&quot;</span>: item_id&#125;</span><br></pre></td></tr></table></figure>
+代码如上。</li>
+<li>使用pydantic声明式命名</li>
+<li>数据转换，fastAPI 通过上面的类型声明,自动转换item_id为int型</li>
+<li>数据校验，如果item_id不是整形数字，比如字符串或者浮点型，都将报错</li>
+<li>API 标注和自动生成的文档<h3 id="query-param"><a href="#query-param" class="headerlink" title="query param"></a>query param</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line"></span><br><span class="line">fake_items_db = [&#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Foo&quot;</span>&#125;, &#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Bar&quot;</span>&#125;, &#123;<span class="string">&quot;item_name&quot;</span>: <span class="string">&quot;Baz&quot;</span>&#125;]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.get(&quot;/items/&quot;)</span></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">read_item</span>(<span class="params">skip: int = <span class="number">0</span>, limit: int = <span class="number">10</span></span>):</span></span><br><span class="line">    <span class="keyword">return</span> fake_items_db[skip : skip + limit]</span><br></pre></td></tr></table></figure>
+代码如上，如果请求的url如：<code>http://127.0.0.1:8000/items/?skip=0&amp;limit=10</code>,那么skip：对应的值为 0，limit：对应的值为 10。<br>和path param 一样，你可以得到：</li>
+</ol>
+<ul>
+<li>数据”解析”</li>
+<li>数据校验</li>
+<li>自动生成文档</li>
+</ul>
+<h3 id="path-param-query-param"><a href="#path-param-query-param" class="headerlink" title="path param + query param"></a>path param + query param</h3><p>你可以同时声明多个路径参数和查询参数，FastAPI 能够识别它们。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;users&#x2F;&#123;user_id&#125;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def read_user_item(</span><br><span class="line">    user_id: int, item_id: str, q: Optional[str] &#x3D; None, short: bool &#x3D; False</span><br><span class="line">):</span><br><span class="line">    item &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;owner_id&quot;: user_id&#125;</span><br><span class="line">    if q:</span><br><span class="line">        item.update(&#123;&quot;q&quot;: q&#125;)</span><br><span class="line">    if not short:</span><br><span class="line">        item.update(</span><br><span class="line">            &#123;&quot;description&quot;: &quot;This is an amazing item that has a long description&quot;&#125;</span><br><span class="line">        )</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
+<p>以上无论是 path param， 还是query param，还是2者并存，都可以设置参数为：</p>
+<ul>
+<li>可选/必填</li>
+<li>默认值</li>
+<li>参数的一些额外校验<ul>
+<li>字符串参数长度(最长/最短)，比如  <code>q: Optional[str] = Query(None, max_length=50)</code></li>
+<li>字符串参数正则<code>q: Optional[str] = Query(None, regex=&quot;^fixedquery$&quot;)</code> </li>
+<li>数字参数范围控制，比如：大于，小于，大于等于等</li>
+<li>查询参数是一个列表， 比如：<code>http://localhost:8000/items/?q=foo&amp;q=bar</code></li>
+</ul>
+</li>
+<li>设置更多参数，可以用为OpenAPI文档，比如：<ul>
+<li>title</li>
+<li>description</li>
+</ul>
+</li>
+<li>别名参数</li>
+<li>弃用设置</li>
+</ul>
+<h3 id="Request-body"><a href="#Request-body" class="headerlink" title="Request body"></a>Request body</h3><p>需要先创建数据模型，这里的数据模型就是request的body的数据声明，</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def create_item(item: Item):</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
+<p>按照以上方式，你将得到：</p>
+<ul>
+<li>将请求体作为 JSON 读取。</li>
+<li>转换为相应的类型（在需要时）。</li>
+<li>校验数据。<br>如果数据无效，将返回一条清晰易读的错误信息，指出不正确数据的确切位置和内容。</li>
+<li>将接收的数据赋值到参数 item 中。<br>由于你已经在函数中将它声明为 Item 类型，你还将获得对于所有属性及其类型的一切编辑器支持（代码补全等）。</li>
+<li>为你的模型生成 JSON 模式 定义，你还可以在其他任何对你的项目有意义的地方使用它们。</li>
+<li>这些模式将成为生成的 OpenAPI 模式的一部分，并且被自动化文档 UI 所使用。</li>
+</ul>
+<p>当然你可以随意组合query parm、path param、request body.FastAPI能够正确的识别他们。</p>
+<p>如果request body是一个复杂类型，比如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;item&quot;: &#123;</span><br><span class="line">        &quot;name&quot;: &quot;Foo&quot;,</span><br><span class="line">        &quot;description&quot;: &quot;The pretender&quot;,</span><br><span class="line">        &quot;price&quot;: 42.0,</span><br><span class="line">        &quot;tax&quot;: 3.2</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;user&quot;: &#123;</span><br><span class="line">        &quot;username&quot;: &quot;dave&quot;,</span><br><span class="line">        &quot;full_name&quot;: &quot;Dave Grohl&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>你可以这么写：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class User(BaseModel):</span><br><span class="line">    username: str</span><br><span class="line">    full_name: Optional[str] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.put(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def update_item(item_id: int, item: Item, user: User):</span><br><span class="line">    results &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;item&quot;: item, &quot;user&quot;: user&#125;</span><br><span class="line">    return results</span><br></pre></td></tr></table></figure>
+<p>在以上示例中，所有的属性或者变量的声明类型都是简单类型：int/str/bool/float, 还可以有复杂类型比如：List/Set/嵌套类型，或者直接使用Optional。pydantic还提供了一些特殊领域的声明，比如：HttpUrl。</p>
+<h2 id="Request-Filed"><a href="#Request-Filed" class="headerlink" title="Request Filed"></a>Request Filed</h2><p>以上request path param/query param/requet  body其实都是Pydantic 的 Field的字段的实例。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import Body, FastAPI</span><br><span class="line">from pydantic import BaseModel, Field</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; Field(</span><br><span class="line">        None, title&#x3D;&quot;The description of the item&quot;, max_length&#x3D;300</span><br><span class="line">    )</span><br><span class="line">    price: float &#x3D; Field(..., gt&#x3D;0, description&#x3D;&quot;The price must be greater than zero&quot;)</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.put(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def update_item(item_id: int, item: Item &#x3D; Body(..., embed&#x3D;True)):</span><br><span class="line">    results &#x3D; &#123;&quot;item_id&quot;: item_id, &quot;item&quot;: item&#125;</span><br><span class="line">    return results</span><br></pre></td></tr></table></figure>
+<p>实际上，Query、Path 和其他你将在之后看到的类，创建的是由一个共同的 Params 类派生的子类的对象，该共同类本身又是 Pydantic 的 FieldInfo 类的子类。<br>Pydantic 的 Field 也会返回一个 FieldInfo 的实例。<br>Body 也直接返回 FieldInfo 的一个子类的对象。还有其他一些你之后会看到的类是 Body 类的子类。<br>请记住当你从 fastapi 导入 Query、Path 等对象时，他们实际上是返回特殊类的函数。</p>
+<p>除了通过字段声明来控制一个属性的校验规则之外，还可以显式的指定。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line"></span><br><span class="line">    class Config:</span><br><span class="line">        schema_extra &#x3D; &#123;</span><br><span class="line">            &quot;example&quot;: &#123;</span><br><span class="line">                &quot;name&quot;: &quot;Foo&quot;,</span><br><span class="line">                &quot;description&quot;: &quot;A very nice Item&quot;,</span><br><span class="line">                &quot;price&quot;: 35.4,</span><br><span class="line">                &quot;tax&quot;: 3.2,</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>这里是增加了example属性，可以在openAPI 文档中看到。</p>
+<h2 id="Response"><a href="#Response" class="headerlink" title="Response"></a>Response</h2><p>与request不同的是，response的参数声明式在路径装饰器.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import List, Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI</span><br><span class="line">from pydantic import BaseModel</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Item(BaseModel):</span><br><span class="line">    name: str</span><br><span class="line">    description: Optional[str] &#x3D; None</span><br><span class="line">    price: float</span><br><span class="line">    tax: Optional[float] &#x3D; None</span><br><span class="line">    tags: List[str] &#x3D; []</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;items&#x2F;&quot;, response_model&#x3D;Item)</span><br><span class="line">async def create_item(item: Item):</span><br><span class="line">    return item</span><br></pre></td></tr></table></figure>
+<p>你将得到：</p>
+<ul>
+<li>转换输出数据为声明类型。这里之所以把<code>response_model</code>声明放在路径装饰器上，是因为路径方法(比如上边示例的<code>create_item</code>)的返回值可能是字典/对象甚至没有返回值。使用装饰器来控制和序列化路径方法的返回值。</li>
+<li>验证数据</li>
+<li>响应api路径</li>
+<li>自动文档</li>
+</ul>
+<p>fastAPI可以自动转换SqlAlchemy ORM Model 到Schema Model。这样API就可以直接返回SqlAlchemy对象，例如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def get_db():</span><br><span class="line">    db &#x3D; SessionLocal()</span><br><span class="line">    try:</span><br><span class="line">        yield db</span><br><span class="line">    finally:</span><br><span class="line">        db.close()</span><br><span class="line"></span><br><span class="line">class Item(ItemBase):</span><br><span class="line">    id: int</span><br><span class="line">    owner_id: int</span><br><span class="line"></span><br><span class="line">    class Config:</span><br><span class="line">        orm_mode &#x3D; True</span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;users&#x2F;&#123;user_id&#125;&#x2F;items&#x2F;&quot;, response_model&#x3D;Item)</span><br><span class="line">def create_item_for_user(</span><br><span class="line">    user_id: int, item: Item, db: Session &#x3D; Depends(get_db)</span><br><span class="line">):</span><br><span class="line">    db_item &#x3D; models.Item(**item.dict(), owner_id&#x3D;user_id)</span><br><span class="line">    db.add(db_item)</span><br><span class="line">    db.commit()</span><br><span class="line">    db.refresh(db_item)</span><br><span class="line">    return db_item</span><br></pre></td></tr></table></figure>
+<p>上例子中， <code>db_item</code>是SqlAlchemy ORM对象，response_model是schema对象。这里会自动进行转化，前提是需要schema class 定义<code>orm_mode</code>为true</p>
+<h2 id="Header"><a href="#Header" class="headerlink" title="Header"></a>Header</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import FastAPI, Header</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def read_items(user_agent: Optional[str] &#x3D; Header(None)):</span><br><span class="line">    return &#123;&quot;User-Agent&quot;: user_agent&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是：</p>
+<ul>
+<li>不区分大小写</li>
+<li>header中的连字符<code>-</code>会自动换成下划线<code>_</code><h2 id="Cookie等"><a href="#Cookie等" class="headerlink" title="Cookie等"></a>Cookie等</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from typing import Optional</span><br><span class="line"></span><br><span class="line">from fastapi import Cookie, FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&quot;)</span><br><span class="line">async def read_items(ads_id: Optional[str] &#x3D; Cookie(None)):</span><br><span class="line">    return &#123;&quot;ads_id&quot;: ads_id&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h1>FastAPi的Dependency类似于提取公共方法，然后被多处调用，原理跟装饰器差不多。比如你有如下需求：</li>
+</ul>
+<ol>
+<li>具有共享逻辑（一次又一次地使用相同的代码逻辑）。</li>
+<li>共享数据库连接。</li>
+<li>强制执行安全性，身份验证，角色要求等。<br>所有这些，同时最大程度地减少了代码重复。</li>
+</ol>
+<p>依赖可以互相嵌套，即：子依赖</p>
+<h1 id="中间件"><a href="#中间件" class="headerlink" title="中间件"></a>中间件</h1><p>中间件（MiddleWare）可以拦截每一个request，处理请求前和response前的一些行为。</p>
+<ul>
+<li>它接受应用程序中的每个请求。</li>
+<li>然后，它可以对该请求执行某些操作或运行任何需要的代码。</li>
+<li>然后，它传递要由应用程序其余部分（通过某些路径操作）处理的请求。</li>
+<li>然后，它将获取应用程序生成的响应（通过某些路径操作）。</li>
+<li>它可以对响应做出响应或运行任何需要的代码。</li>
+<li>然后返回响应。<br>类似于xView bottle中的plugin。</li>
+</ul>
+<h1 id="ORM"><a href="#ORM" class="headerlink" title="ORM"></a>ORM</h1><p>可以使用SqlAlchemy或者peewee(peewee是一个微型的ORM框架)。并且FastAPi支持自动转化SqlAlchemy对象和schema对象。</p>
+<h1 id="后台任务和Celery"><a href="#后台任务和Celery" class="headerlink" title="后台任务和Celery"></a>后台任务和Celery</h1><p>如果返回response之后要运行一些操作，可以使用后台任务。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import BackgroundTasks, FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def write_notification(email: str, message&#x3D;&quot;&quot;):</span><br><span class="line">    with open(&quot;log.txt&quot;, mode&#x3D;&quot;w&quot;) as email_file:</span><br><span class="line">        content &#x3D; f&quot;notification for &#123;email&#125;: &#123;message&#125;&quot;</span><br><span class="line">        email_file.write(content)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.post(&quot;&#x2F;send-notification&#x2F;&#123;email&#125;&quot;)</span><br><span class="line">async def send_notification(email: str, background_tasks: BackgroundTasks):</span><br><span class="line">    background_tasks.add_task(write_notification, email, message&#x3D;&quot;some notification&quot;)</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Notification sent in the background&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>response也可以返回202，然后任务继续在后台执行。<br>与之类似的是Celery:一个分布式多任务处理队列。</p>
+<h1 id="静态资源"><a href="#静态资源" class="headerlink" title="静态资源"></a>静态资源</h1><p>FastAPi也可以返回静态资源，比如：图片/文件。需要 单独安装<code>aiofiles</code>.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line">from fastapi.staticfiles import StaticFiles</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;static&quot;, StaticFiles(directory&#x3D;&quot;static&quot;), name&#x3D;&quot;static&quot;)</span><br></pre></td></tr></table></figure>
+<p>mount 是指在特定路径中添加完整的“独立”应用程序，然后负责处理所有子路径。<br>这与使用APIRouter完全独立的已安装应用程序不同。主应用程序中的OpenAPI和文档不会包含mount应用程序等中的任何内容。</p>
+<h1 id="子应用"><a href="#子应用" class="headerlink" title="子应用"></a>子应用</h1><p>如果需要两个独立的FastAPI应用程序，以及它们各自的独立OpenAPI和文档ui，则可以拥有一个主应用程序并“装载”一个（或多个）子应用程序。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;app&quot;)</span><br><span class="line">def read_main():</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Hello World from main app&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">subapi &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@subapi.get(&quot;&#x2F;sub&quot;)</span><br><span class="line">def read_sub():</span><br><span class="line">    return &#123;&quot;message&quot;: &quot;Hello World from sub API&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;subapi&quot;, subapi)</span><br></pre></td></tr></table></figure>
+<p>子应用是以mount方式挂载到主应用中的。子应用与主应用区别之处就是文档是分开的，其他都一样。文档访问的时候，主应用默认地址： <code>http://127.0.0.1:8000/docs</code>, 子应用默认地址: <code>http://127.0.0.1:8000/subapi/docs</code></p>
+<h1 id="websocket"><a href="#websocket" class="headerlink" title="websocket"></a>websocket</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI, WebSocket</span><br><span class="line">from fastapi.responses import HTMLResponse</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">html &#x3D; &quot;&quot;&quot;</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;title&gt;Chat&lt;&#x2F;title&gt;</span><br><span class="line">    &lt;&#x2F;head&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">        &lt;h1&gt;WebSocket Chat&lt;&#x2F;h1&gt;</span><br><span class="line">        &lt;form action&#x3D;&quot;&quot; onsubmit&#x3D;&quot;sendMessage(event)&quot;&gt;</span><br><span class="line">            &lt;input type&#x3D;&quot;text&quot; id&#x3D;&quot;messageText&quot; autocomplete&#x3D;&quot;off&quot;&#x2F;&gt;</span><br><span class="line">            &lt;button&gt;Send&lt;&#x2F;button&gt;</span><br><span class="line">        &lt;&#x2F;form&gt;</span><br><span class="line">        &lt;ul id&#x3D;&#39;messages&#39;&gt;</span><br><span class="line">        &lt;&#x2F;ul&gt;</span><br><span class="line">        &lt;script&gt;</span><br><span class="line">            var ws &#x3D; new WebSocket(&quot;ws:&#x2F;&#x2F;localhost:8000&#x2F;ws&quot;);</span><br><span class="line">            ws.onmessage &#x3D; function(event) &#123;</span><br><span class="line">                var messages &#x3D; document.getElementById(&#39;messages&#39;)</span><br><span class="line">                var message &#x3D; document.createElement(&#39;li&#39;)</span><br><span class="line">                var content &#x3D; document.createTextNode(event.data)</span><br><span class="line">                message.appendChild(content)</span><br><span class="line">                messages.appendChild(message)</span><br><span class="line">            &#125;;</span><br><span class="line">            function sendMessage(event) &#123;</span><br><span class="line">                var input &#x3D; document.getElementById(&quot;messageText&quot;)</span><br><span class="line">                ws.send(input.value)</span><br><span class="line">                input.value &#x3D; &#39;&#39;</span><br><span class="line">                event.preventDefault()</span><br><span class="line">            &#125;</span><br><span class="line">        &lt;&#x2F;script&gt;</span><br><span class="line">    &lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&quot;&quot;&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">async def get():</span><br><span class="line">    return HTMLResponse(html)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.websocket(&quot;&#x2F;ws&quot;)</span><br><span class="line">async def websocket_endpoint(websocket: WebSocket):</span><br><span class="line">    await websocket.accept()</span><br><span class="line">    while True:</span><br><span class="line">        data &#x3D; await websocket.receive_text()</span><br><span class="line">        await websocket.send_text(f&quot;Message text was: &#123;data&#125;&quot;)</span><br></pre></td></tr></table></figure>
+
+<h1 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h1><p>您可以定义在应用程序启动之前或关闭应用程序时需要执行的事件处理程序（函数）。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">items &#x3D; &#123;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.on_event(&quot;startup&quot;)</span><br><span class="line">async def startup_event():</span><br><span class="line">    items[&quot;foo&quot;] &#x3D; &#123;&quot;name&quot;: &quot;Fighters&quot;&#125;</span><br><span class="line">    items[&quot;bar&quot;] &#x3D; &#123;&quot;name&quot;: &quot;Tenders&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.on_event(&quot;shutdown&quot;)</span><br><span class="line">def shutdown_event():</span><br><span class="line">    with open(&quot;log.txt&quot;, mode&#x3D;&quot;a&quot;) as log:</span><br><span class="line">        log.write(&quot;Application shutdown&quot;)</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&#123;item_id&#125;&quot;)</span><br><span class="line">async def read_items(item_id: str):</span><br><span class="line">    return items[item_id]</span><br></pre></td></tr></table></figure>
+<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><p>fastAPI测试基于pytest. fastAPi继承了starlette的testClient, testClient又包装了requests.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI</span><br><span class="line">from fastapi.testclient import TestClient</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">async def read_main():</span><br><span class="line">    return &#123;&quot;msg&quot;: &quot;Hello World&quot;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">client &#x3D; TestClient(app)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def test_read_main():</span><br><span class="line">    response &#x3D; client.get(&quot;&#x2F;&quot;)</span><br><span class="line">    assert response.status_code &#x3D;&#x3D; 200</span><br><span class="line">    assert response.json() &#x3D;&#x3D; &#123;&quot;msg&quot;: &quot;Hello World&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>另外，testClient还可以用于：</p>
+<ul>
+<li>测试websocket。<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">def test_websocket():</span><br><span class="line">    client &#x3D; TestClient(app)</span><br><span class="line">    with client.websocket_connect(&quot;&#x2F;ws&quot;) as websocket:</span><br><span class="line">        data &#x3D; websocket.receive_json()</span><br><span class="line">        assert data &#x3D;&#x3D; &#123;&quot;msg&quot;: &quot;Hello WebSocket&quot;&#125;</span><br></pre></td></tr></table></figure></li>
+<li>测试事件：启动和关闭</li>
+<li>override 依赖</li>
+<li>单独出测试数据库</li>
+</ul>
+<h1 id="模板"><a href="#模板" class="headerlink" title="模板"></a>模板</h1><p>fastAPI没有提供template，如果要用需要可以使用：jinja2。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from fastapi import FastAPI, Request</span><br><span class="line">from fastapi.responses import HTMLResponse</span><br><span class="line">from fastapi.staticfiles import StaticFiles</span><br><span class="line">from fastapi.templating import Jinja2Templates</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line">app.mount(&quot;&#x2F;static&quot;, StaticFiles(directory&#x3D;&quot;static&quot;), name&#x3D;&quot;static&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">templates &#x3D; Jinja2Templates(directory&#x3D;&quot;templates&quot;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;items&#x2F;&#123;id&#125;&quot;, response_class&#x3D;HTMLResponse)</span><br><span class="line">async def read_item(request: Request, id: str):</span><br><span class="line">    return templates.TemplateResponse(&quot;item.html&quot;, &#123;&quot;request&quot;: request, &quot;id&quot;: id&#125;)</span><br></pre></td></tr></table></figure>
+<h1 id="部署-Server"><a href="#部署-Server" class="headerlink" title="部署/Server"></a>部署/Server</h1><p>一般情况下，fastAPi只作为应用的载体，需要一个server容器来部署应用，这个server我们建议使用uvicorn, 比如：<br><code>uvicorn main:app --reload</code><br>这样的命令行方式适合部署时使用，如果要进行debug,可以使用以下方式部署：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import uvicorn</span><br><span class="line">from fastapi import FastAPI</span><br><span class="line"></span><br><span class="line">app &#x3D; FastAPI()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.get(&quot;&#x2F;&quot;)</span><br><span class="line">def root():</span><br><span class="line">    a &#x3D; &quot;a&quot;</span><br><span class="line">    b &#x3D; &quot;b&quot; + a</span><br><span class="line">    return &#123;&quot;hello world&quot;: b&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &quot;__main__&quot;:</span><br><span class="line">    uvicorn.run(app, host&#x3D;&quot;0.0.0.0&quot;, port&#x3D;8000)</span><br></pre></td></tr></table></figure>
+<h1 id="项目生成器"><a href="#项目生成器" class="headerlink" title="项目生成器"></a>项目生成器</h1><p>可以使用项目生成器来进行一键初始化：<br>GitHub：https : //github.com/tiangolo/full-stack-fastapi-postgresql</p>
+<p>全栈FastAPI PostgreSQL-功能</p>
+<ol>
+<li>完全Docker集成（基于Docker）。</li>
+<li>Docker Swarm模式部署。</li>
+<li>Docker用于本地开发的集成和优化。</li>
+<li>使用Uvicorn和Gunicorn的可投入生产的 Python Web服务器。</li>
+<li>Python FastAPI后端：<ul>
+<li>快速：非常高的性能，看齐的NodeJS和围棋（感谢Starlette和Pydantic）。</li>
+<li>直观：强大的编辑器支持。完成无处不在。调试时间更少。</li>
+<li>简易：旨在易于使用和学习。减少阅读文档的时间。</li>
+<li>短：最小化代码重复。每个参数声明中的多个功能。</li>
+<li>健壮：获取可用于生产的代码。具有自动交互式文档。</li>
+<li>基于标准：基于（并完全兼容）API的开放标准：OpenAPI和JSON Schema。</li>
+<li>许多其他功能包括自动验证，序列化，交互式文档，使用OAuth2 JWT令牌进行身份验证等。</li>
+<li>默认情况下，安全密码哈希。</li>
+</ul>
+</li>
+<li>JWT令牌认证。</li>
+<li>SQLAlchemy模型（独立于Flask扩展，因此可以直接与Celery工作者一起使用）。</li>
+<li>用户的基本启动模型（根据需要修改和删除）。</li>
+<li>alembic迁移。</li>
+<li>CORS（跨源资源共享）。</li>
+<li>可以选择性地从后端的其余部分导入和使用模型和代码的celery。</li>
+<li>基于Pytest的 REST后端测试，与Docker集成在一起，因此您可以独立于数据库测试完整的API交互。由于它在Docker中运行，因此每次都可以从头开始构建新的数据存储（因此您可以使用ElasticSearch，MongoDB，CouchDB或任何您想要的东西，只需测试API是否有效）。</li>
+<li>与Jupyter Kernels轻松实现Python集成，可通过 Atom Hydrogen或Visual Studio Code Jupyter之类的扩展来进行远程或Docker内部开发。</li>
+<li>Vue前端：<ul>
+<li>用Vue CLI生成。</li>
+<li>JWT认证处理。</li>
+<li>登录视图。</li>
+<li>登录后，进入主仪表板视图。</li>
+<li>具有用户创建和版本的主仪表板。</li>
+<li>自我用户版。</li>
+<li>Vuex。</li>
+<li>Vue路由器。</li>
+<li>Vuetify提供精美的材料设计组件。</li>
+<li>TypeScript。</li>
+<li>基于Nginx的 Docker服务器（配置为与Vue-router完美配合）。</li>
+<li>Docker多阶段构建，因此您无需保存或提交已编译的代码。</li>
+<li>前端测试在构建时运行（也可以禁用）。</li>
+<li>尽可能采用模块化设计，因此可以立即使用，但是您可以使用Vue - CLI重新生成或根据需要创建它，然后重新使用所需的内容。</li>
+</ul>
+</li>
+<li>PGAdmin for PostgreSQL数据库，您可以对其进行修改以轻松使用PHPMyAdmin和MySQL。</li>
+<li>Flower为celery工作监视。</li>
+<li>使用Traefik可以在前端和后端之间实现负载平衡，因此您可以将两者都放在同一个域中，以路径分隔，但可以通过不同的容器进行服务。</li>
+<li>Traefik集成，包括让我们加密HTTPS证书自动生成。</li>
+<li>GitLab CI（连续集成），包括前端和后端测试。</li>
+</ol>
+<h2 id="项目生成器使用"><a href="#项目生成器使用" class="headerlink" title="项目生成器使用"></a>项目生成器使用</h2><p>按照生成器的说明步骤，输入适当参数即可得到一个 full-stack的项目，包含后端api、前端vue、docker 部署。</p>
+<h3 id="backend-fastAPI"><a href="#backend-fastAPI" class="headerlink" title="backend: fastAPI"></a>backend: fastAPI</h3><p>backend 服务启动2个容器：python FastAPI应用和celery应用。</p>
+<h4 id="python-FastAPI应用"><a href="#python-FastAPI应用" class="headerlink" title="python FastAPI应用"></a>python FastAPI应用</h4><ol>
+<li><p>使用python3.7</p>
+</li>
+<li><p>泛型和类型提示（type hints）</p>
+</li>
+<li><p>fastAPI官方出品docker容器：tiangolo/uvicorn-gunicorn-fastapi:python3.7</p>
+</li>
+<li><p>使用Poetry来做包管理工具，代替Pipenv。</p>
+<ol>
+<li>python 与java/JavaScript等语言的project隔离是不一样的。python的项目依赖包都是统一安装到site-packages目录下，如果不同project依赖了不同版本的同一模块，那么后安装的会卸载掉先安装的。所以python需要为每一个项目进行单独隔离，所以virtualenv应运而生。</li>
+<li>那么讨论python的依赖管理一般就指 依赖管理+虚拟环境。最初的工具就是pip+virtualenv，pip用来做包管理，virtualenv用来做虚拟环境。那么就带来问题：<ol>
+<li>需要同时使用2个工具</li>
+<li>不能动态更新requirements.txt，这点尤其突出。这种文本格式的文件只能记录依赖包的名称，不能像yaml/json/xml一样记录更多的环境信息和参数。每次更新都是需要手动执行<code>pip freeze &gt; requirements.txt</code>，如果那次遗漏，那么后患无穷。</li>
+</ol>
+</li>
+<li>因此，pipenv诞生了。</li>
+<li>pipenv可以看成是pip+virtualenv两款工具的合体，它集合了pip的依赖包管理和virtualenv虚拟环境 管理于一身。另外，在依赖包记录方面使用Pipfile替代原来的requirements.txt。而且，它能够自动记录并更新记录文件，这样就不在需要手动执行命令来更新requirements.txt。但是他依然有很多缺陷：<ol>
+<li>Lock速度缓慢</li>
+<li>强行更新不相干依赖</li>
+<li>依赖处理效果较差。</li>
+</ol>
+</li>
+<li><code>当当~当~当~~~</code>！Poetry出现了</li>
+<li>poetry是一款可以管理Python依赖、环境，同時可以用于Python工程打包和发布的一款第三方工具包。poetry通过配置文件pyproject.toml来完成依赖管理、环境配置、基本信息配置等功能。相当于把Python項目中的Pipfile、setup.py、setup.cfg、requirements.txt、MANIFEST.in融合到一起。通过pyproject.toml文件，不仅可以配置依赖包，还可以用于区分开发、测试、生产环境、配置源路径。</li>
+</ol>
+</li>
+<li><p>使用Tenacity做重试，判断DB是否就绪。<a href="https://tenacity.readthedocs.io/">Tenacity</a>不兼容<a href="https://github.com/invl/retry">retry</a>的api并且做了一些重要的功能和bug 修复。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">from</span> tenacity <span class="keyword">import</span> after_log, before_log, retry, stop_after_attempt, wait_fixed</span><br><span class="line"></span><br><span class="line">logging.basicConfig(level=logging.INFO)</span><br><span class="line">logger = logging.getLogger(__name__)</span><br><span class="line"></span><br><span class="line">max_tries = <span class="number">60</span> * <span class="number">5</span>  <span class="comment"># 5 minutes</span></span><br><span class="line">wait_seconds = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@retry(</span></span><br><span class="line">    stop=stop_after_attempt(max_tries),</span><br><span class="line">    wait=wait_fixed(wait_seconds),</span><br><span class="line">    before=before_log(logger, logging.INFO),</span><br><span class="line">    after=after_log(logger, logging.WARN),</span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init</span>() -&gt; <span class="keyword">None</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># Try to create session to check if DB is awake</span></span><br><span class="line">        db = SessionLocal()</span><br><span class="line">        db.execute(<span class="string">&quot;SELECT 1&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        logger.error(e)</span><br><span class="line">        <span class="keyword">raise</span> e</span><br></pre></td></tr></table></figure>
+<h4 id="celery应用"><a href="#celery应用" class="headerlink" title="celery应用"></a>celery应用</h4></li>
+<li><p>使用”uvicorn.workers.UvicornWorker” </p>
+</li>
+<li><p>容器启动之前使用Tenacity重试DB是否就绪</p>
+</li>
+</ol>
+<h3 id="frontend-vue"><a href="#frontend-vue" class="headerlink" title="frontend: vue"></a>frontend: vue</h3><ol>
+<li>typescript</li>
+<li>tslint</li>
+<li>测试使用vue-test-utils单元测试</li>
+<li>Vue.js 的验证库VeeValidate</li>
+<li>vuetify，是一个基于vue2.0，为移动而生的组件框架，一个渐进式的UI框架</li>
+</ol>
+]]></content>
+      <categories>
+        <category>FastAPI</category>
+      </categories>
+      <tags>
+        <tag>FastAPI</tag>
       </tags>
   </entry>
   <entry>
