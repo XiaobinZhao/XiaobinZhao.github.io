@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>琢灵的笔记</title>
+  <title>路漫漫其修远兮</title>
   
   <subtitle>灵自天生，用心雕琢</subtitle>
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
@@ -285,7 +285,7 @@
     <link href="https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/</id>
     <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2020-12-14T10:28:04.547Z</updated>
+    <updated>2021-04-23T03:34:47.699Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;什么是异步编程&quot;&gt;&lt;a href=&quot;#什么是异步编程&quot; class=&quot;headerlink&quot; title=&quot;什么是异步编程&quot;&gt;&lt;/a&gt;什么是异步编程&lt;/h1&gt;&lt;p&gt;提到异步，那么就有同步。需要了解一下几个名词：同步/异步、阻塞/非阻塞。&lt;/p&gt;</summary>
