@@ -600,4 +600,7 @@ uvicorn 支持的loop有3种，auto/asyncio/uvloop, 默认是auto. auto会尝试
 
 # 参考文献
 
-- {% link  '深入理解Python异步编程'  https://mp.weixin.qq.com/s?__biz=MzIxMjY5NTE0MA==&mid=2247483720&idx=1&sn=f016c06ddd17765fd50b705fed64429c  %}
+- [深入理解Python异步编程](https://mp.weixin.qq.com/s?__biz=MzIxMjY5NTE0MA==&mid=2247483720&idx=1&sn=f016c06ddd17765fd50b705fed64429c)
+- [小白的 asyncio ：原理、源码 到实现](https://zhuanlan.zhihu.com/p/64991670)
+
+  
