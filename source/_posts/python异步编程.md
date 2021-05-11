@@ -530,10 +530,13 @@ if __name__ == '__main__':
 
 到此为止，我们已经深入地学习了异步编程是什么、为什么、在Python里是怎么样发展的。我们找到了一种让代码看起来跟同步代码一样简单，而效率却提升N倍（具体提升情况取决于项目规模、网络环境、实现细节）的异步编程方法。它也没有回调的那些缺点。
 
-# WSGI/ASGI
+# python web中的异步
+
 经过以上对异步编程的学习，接下来我们要把这些异步运用到python web中。
 
 在python web编程中，有很多流行的框架，大体分为2类：wsgi、asgi.
+
+## WSGI/ASGI
 
 这里需要特别解释一下几个名词：
 wsgi server (比如uWSGI/gunicorn） 要和 wsgi   application（比如django/flask）交互，uwsgi需要将过来的请求转给django 处理，那么uWSGI 和 django的交互和调用就需要一个统一的规范，这个规范就是WSGI（Web Server Gateway Interface）
@@ -562,7 +565,6 @@ asgi与wsgi的区别之处就在于，asgi扩展了wsgi,可以支持WebSocket，
   8. APIStar
 - asgi server有以下代表
   1. uvicorn 
-  
   
 
 那么如果已经是wsgi的同步框架能不能无缝转成异步呢？no problem ---> greenlet/gevent
@@ -596,7 +598,21 @@ uvicorn 支持的loop有3种，auto/asyncio/uvloop, 默认是auto. auto会尝试
 
 > 值得一说的是，可以使用uvicorn + gunicorn部署python asgi服务。uvicorn实现了gunicorn的worker接口，所以gunicorn启动服务的时候可以指定使用uvicorn的worker，比如：`gunicorn -k uvicorn.workers.UvicornWorker`
 
+## python web中的io阻塞
 
+web项目最常见的就是 CRUD操作。在这类操作中一般出现的io阻塞场景为：
+
+1. restful API基于网络，http是基于tcp的可靠传输协议，建立/断开连接的过程也是耗时的io操作。
+2. 数据库的连接是网络连接或套接字文件读写类的链接，也是io耗时的。
+3. 数据库/缓存的增删改查操作，这一步主要是数据库/缓存的io，是io耗时的。
+4. 数据的处理，比如数据库数据和model对象的转化等，主要是ORM，需要进行内存读写，是io耗时的。
+
+针对以上场景的处理方法是：
+
+1. restful API请求的处理，主要依靠asgi/wsgi server来处理，asgi server支持异步的方式让出io，提高web应用的响应速度
+2. 数据库连接和数据库的增删改查当然也有异步io的数据库driver可以支持，比如：SQLAlchemy1.4版本及以上/peewee/python databases等
+3. 缓存以redis为例，可以使用aioredis来支持异步io
+4. orm 处理可以如第二条的SQLAlchemy1.4和peewee等
 
 # 参考文献
 
