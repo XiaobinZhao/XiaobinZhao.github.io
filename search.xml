@@ -302,7 +302,7 @@
     <content><![CDATA[<p>敏捷开发是一种以人为核心、迭代、循序渐进的开发方法。在敏捷开发中，软件的构建被切分成多个子项目，各个子项目的成果都经过测试，具备集成和可运行的特征。换言之，就是把一个大项目分为多个相互联系，但也可独立运行的小项目，并分别完成，在此过程中软件一直处于可使用状态。</p>
 <a id="more"></a>
 
-<p><img src="https://blog.mingdao.com/wp-content/uploads/2018/06/12123123.png" alt="agile"></p>
+<p><img src="/images/%E6%95%8F%E6%8D%B7.png" alt="agile"></p>
 <h2 id="什么是敏捷开发"><a href="#什么是敏捷开发" class="headerlink" title="什么是敏捷开发"></a>什么是敏捷开发</h2><p>从本质上讲，敏捷（Agile）并不是开发方法，而是一种理念。对于项目管理而言，敏捷是一个全新的术语，敏捷强调在软件研发过程中持续性的根据用户反馈和需求优先级来发布新版本，不断进行迭代，让产品逐渐完善。</p>
 <p>在数十年前，瀑布式项目管理是软件研发的主流方法，在研发过程中，团队成员将会花大把的时间和精力在项目前期去收集资源和信息，然后基于这些去做产品设想和研发规划。</p>
 <p>相比瀑布基于线性、可预测性地去开发产品，研发人员更想要能够灵活管理用户反馈、Bug和需求的方法。这也就是敏捷方法出来以后受欢迎的原因。</p>
@@ -396,7 +396,7 @@
 </ol>
 <p>用敏捷来管理项目能够帮我们逐渐进步的同时也督促我们将产品做得更好。如果因为突发灵感而放弃正在执行的任务，那么敏捷将毫无意义。我们先花些时间来看看团队是怎么看待进步和成功。然后再来看我们是不是离最终目标一步步的更近了？</p>
 <h2 id="敏捷开发方法论"><a href="#敏捷开发方法论" class="headerlink" title="敏捷开发方法论"></a>敏捷开发方法论</h2><p>敏捷开发有很多方法论，以下讨论一些比较常用的，包括scrum、kanban、srumban和TDD。</p>
-<h3 id="scrum"><a href="#scrum" class="headerlink" title="scrum"></a>scrum</h3><p><img src="https://img.51wendang.com/pic/61c6a358704dc3145d443b93/1-822-png_6_0_0_85_235_728_344_893.25_1263.375-1740-0-8-1740.jpg" alt="scrum开发过程"></p>
+<h3 id="scrum"><a href="#scrum" class="headerlink" title="scrum"></a>scrum</h3><p><img src="/images/scrum%E5%BC%80%E5%8F%91%E8%BF%87%E7%A8%8B.jfif" alt="scrum开发过程"></p>
 <p>不同于瀑布模型将开发过程划分为需求、设计、编码、测试等阶段，Scrum将整个开发过程分为多次迭代（称为Sprint，冲刺），一般为期2～4周，最常见的为<strong>2周</strong>。Scrum并非以一段时间集中完成一个过程，而是将所有过程中必须的每一部分集中在这段时间内完成。需求、设计、编码、测试、上线都必须在一个迭代中完成，每个迭代必须产生一个可以工作的软件。</p>
 <p>Scrum有一套其独特且固定管理方式，从角色、工件和不同形式的会议三个维度出发，来保证执行过程更高效。例如在每次sprints开始前会确立整个过程：迭代规划、每日站会、迭代演示和回顾。并在sprint期间用可视化工件（看板kanban或燃尽图burndown）确认进度和收集客户反馈。</p>
 <h4 id="三个角色"><a href="#三个角色" class="headerlink" title="三个角色"></a>三个角色</h4><p>在Scrum中有三个特定的角色。他们是：</p>
@@ -426,7 +426,7 @@
 <p>小组向产品负责人展示迭代工作结果，产品负责人给出评价和反馈。以用户故事是否能成功交付来评价任务完成情况。整个团队都需要参加，ScrumMaster、产品所有者、团队，可能还有客户，时间控制在1-2小时内。</p>
 <p>5）反思会（Retrospective Meeting）</p>
 <p>在每个迭代后召开简短的反思会，总结哪些事情做得好，哪些事情做得不好。做得好的保留，不好的摒弃。会议得出这样的结论：开始做什么、继续做什么、停止做什么，一般控制在15-30分钟。</p>
-<h4 id="Scrum过程中的步骤"><a href="#Scrum过程中的步骤" class="headerlink" title="Scrum过程中的步骤"></a>Scrum过程中的步骤</h4><p><img src="https://th.bing.com/th/id/Rd7de085f70e9ff2133032b0c35216982?rik=Bv1pI/FbP+MWCQ&riu=http://ian.wang/f/2016/01/19/101042362S8s1gyu.jpg&ehk=qrTCjW93xLRTLTe1iP1eV3fB+Odg4E3v37zXflTHmco=&risl=&pid=ImgRaw" alt="查看源图像"></p>
+<h4 id="Scrum过程中的步骤"><a href="#Scrum过程中的步骤" class="headerlink" title="Scrum过程中的步骤"></a>Scrum过程中的步骤</h4><p><img src="/images/scrum%E5%BC%80%E5%8F%91%E6%A8%A1%E5%9E%8B.jfif" alt="查看源图像"></p>
 <pre class="mermaid">graph TB
 
 项目启动会议(项目启动会议 <br/>  组织人:Product Owner <br/> 参与人: Product Owner/Scrum Master/客户 <br/> 整理产品需求清单,产生 product backlog)
@@ -465,18 +465,18 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 <h3 id="kanban看板"><a href="#kanban看板" class="headerlink" title="kanban看板"></a>kanban看板</h3><p>kanban是一种可视化的管理系统， 目的是对生产过程做出持续，渐进的改善。</p>
 <h4 id="名词释义"><a href="#名词释义" class="headerlink" title="名词释义"></a>名词释义</h4><p>看板方法的英文为kanban，和中文的看板正好音同，这个当然不是巧合了，看板起源于日本，它的日文注音也正好是’kanban’，在日文中它也可以写作汉字“看板”，当然也可以写成日本假名。但是这两个意思完全不同，写作看板时接近“可视化的板”，而日文假名则为“信号卡”。</p>
 <p>软件开发中的看板应该更接近于信号卡，但是在国内，大家往往因名生义，把它看做可视化的板，所以往往忽略了其本质的意义，这也是看板系统在国内被普遍误解的一个重要原因。但是在国外，英语有对应的可视化的板—“kanban board”。所以我们称其为看板墙。</p>
-<h4 id="kanban-模型和实践"><a href="#kanban-模型和实践" class="headerlink" title="kanban 模型和实践"></a>kanban 模型和实践</h4><p><img src="http://ww4.sinaimg.cn/large/5381716fjw1f14dshyj1fj20um0j4dht.jpg" alt="img"></p>
+<h4 id="kanban-模型和实践"><a href="#kanban-模型和实践" class="headerlink" title="kanban 模型和实践"></a>kanban 模型和实践</h4><p><img src="/images/%E5%A6%82%E4%BD%95%E5%AE%9E%E6%96%BD%E7%9C%8B%E6%9D%BF.jpg" alt="img"></p>
 <p>kanban最简单的模型是：一般由3列构成，从左到右依次是，<strong>TODO</strong>，<strong>DOING</strong>和<strong>DONE</strong>。</p>
-<p><img src="https://raw.githubusercontent.com/thzt/hexo-blog/master/source/images/_posts/2018-08-22-kanban/1023733-af3970852ef2553d.png" alt="img"></p>
+<p><img src="/images/%E7%AE%80%E5%8D%95kanban%E6%A8%A1%E5%9E%8B.jpg" alt="img"></p>
 <p>这样的看板存在一些缺陷：</p>
 <ol>
 <li>没有在制品（work-in-progress, WIP）显示，不能反映出工序之间在制品的<strong>积压</strong>情况。</li>
 <li>无法确定瓶颈</li>
 </ol>
 <p>为了优化和解决以上问题，比较完善的看板模型设计如下：</p>
-<p><img src="http://ww3.sinaimg.cn/large/5381716fjw1f14dsfz9x6j20uk0j6abu.jpg" alt="img"></p>
-<p><img src="http://ww4.sinaimg.cn/large/5381716fjw1f14dsgirzvj20ul0j8wg2.jpg" alt="img"></p>
-<p><img src="http://ww2.sinaimg.cn/large/5381716fjw1f14dsgv8efj20uq0j8dhm.jpg" alt="img"></p>
+<p><img src="/images/%E5%8F%AF%E8%A7%86%E5%8C%96%E5%B7%A5%E4%BD%9C%E6%B5%81.jpg" alt="img"></p>
+<p><img src="/images/%E6%B5%81%E7%A8%8B%E8%A7%84%E5%88%99.jpg" alt="img"></p>
+<p><img src="/images/wip.jpg" alt="img"></p>
 <ul>
 <li><p>在制品（WIP）指的是在某一环节内所有的工作–包括进行和等待的（上图中红色数字就是在制品）。</p>
 </li>
@@ -485,10 +485,10 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 <li><p>控制在制品数量可以使环节内并行工作降低，单个工作项的完成加等待时间缩短，工作项从进入看板到交付的时间也会缩短。因此，加速用户价值的流动。而且更重要的是，控制在制品数量可以帮助团队暴露问题和瓶颈。举个例子，上图中如果测试的在制品数目达到上限，就不能在拉入新的工作了，团队应该聚焦于完成当前的工作，及时处理出现问题，如果测试这里长期积压，那么说明这个地方已经成为了团队工作的瓶颈，更早的 暴露问题所在。</p>
 </li>
 </ul>
-<p><img src="http://ww1.sinaimg.cn/large/5381716fjw1f14dsh6jejj20uo0j340k.jpg" alt="img"></p>
-<p><img src="http://ww4.sinaimg.cn/large/5381716fjw1f14dshla5sj20us0j7jt2.jpg" alt="img"></p>
+<p><img src="/images/kanban%E5%9B%BE%E8%A1%A8.jpg" alt="img"></p>
+<p><img src="/images/%E5%8D%8F%E5%90%8C%E6%94%B9%E8%BF%9B.jpg" alt="img"></p>
 <p>那么，软件开发中kanban的一般实践是什么呢？</p>
-<p><img src="http://ww4.sinaimg.cn/large/5381716fjw1f14dsiclr3j20ul0j5go4.jpg" alt="img"></p>
+<p><img src="/images/%E7%9C%8B%E6%9D%BF%E7%A4%BA%E4%BE%8B.jpg" alt="img"></p>
 <table>
 <thead>
 <tr>
@@ -578,7 +578,7 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 </ul>
 </li>
 </ul>
-<p><img src="http://ww1.sinaimg.cn/large/5381716fjw1f1ciaz54fdj20xc0kwjub.jpg" alt="img"></p>
+<p><img src="/images/scrum%E5%92%8Ckanban%E5%AF%B9%E6%AF%94.jpg" alt="img"></p>
 <h3 id="scrumBan"><a href="#scrumBan" class="headerlink" title="scrumBan"></a>scrumBan</h3><p>结合scrum+kanban,就有了scrumBan。</p>
 <ol>
 <li>工作可视化：物理看板或者在线</li>
@@ -1552,46 +1552,6 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
       </tags>
   </entry>
   <entry>
-    <title>hexo-Next + Github Page制作个人网站使用记录</title>
-    <url>/2020/10/20/hexo/</url>
-    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
-<li>在github上创建仓库</li>
-<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
-<li>仓库新建分支gh-page</li>
-<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
-<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
-</ol>
-<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
-<li><p>修改内容自动重载并启动server</p>
-<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
-<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
-<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
-</li>
-</ol>
-<a id="more"></a>
-
-<ol start="2">
-<li><p>背景动画</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>其他可以参考</p>
-<ul>
-<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
-<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
-<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
-</ul>
-</li>
-</ol>
-]]></content>
-      <categories>
-        <category>hexo</category>
-      </categories>
-      <tags>
-        <tag>hexo</tag>
-        <tag>Next</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>IO模型</title>
     <url>/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</url>
     <content><![CDATA[<h1 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h1><p>在Linux(UNIX)操作系统中，共有五种IO模型，分别是：阻塞IO模型、非阻塞IO模型、IO复用模型、信号驱动IO模型以及异步IO模型。</p>
@@ -1647,6 +1607,46 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
         <tag>非阻塞</tag>
         <tag>同步</tag>
         <tag>异步</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo-Next + Github Page制作个人网站使用记录</title>
+    <url>/2020/10/20/hexo/</url>
+    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
+<li>在github上创建仓库</li>
+<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
+<li>仓库新建分支gh-page</li>
+<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
+<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
+</ol>
+<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
+<li><p>修改内容自动重载并启动server</p>
+<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
+<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
+<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
+</li>
+</ol>
+<a id="more"></a>
+
+<ol start="2">
+<li><p>背景动画</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>其他可以参考</p>
+<ul>
+<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
+<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
+<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>Next</tag>
       </tags>
   </entry>
   <entry>
