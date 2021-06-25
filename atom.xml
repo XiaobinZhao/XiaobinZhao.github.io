@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2021-06-25T06:12:10.374Z</updated>
+  <updated>2021-06-25T06:17:05.525Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -17,23 +17,38 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
+    <title>敏捷开发（Agile）</title>
     <link href="https://xiaobinzhao.github.io/2021/06/25/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91/"/>
     <id>https://xiaobinzhao.github.io/2021/06/25/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91/</id>
-    <published>2021-06-25T06:12:42.369Z</published>
-    <updated>2021-06-25T06:12:10.374Z</updated>
+    <published>2021-06-25T10:40:01.000Z</published>
+    <updated>2021-06-25T06:17:05.525Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;h1 id=&quot;敏捷开发（Agile）&quot;&gt;&lt;a href=&quot;#敏捷开发（Agile）&quot; class=&quot;headerlink&quot; title=&quot;敏捷开发（Agile）&quot;&gt;&lt;/a&gt;敏捷开发（Agile）&lt;/h1&gt;&lt;p&gt;&lt;img</summary>
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://blog.mingdao.com/wp-content/uploads/2018/06/12123123.png&quot; alt=&quot;agile&quot;&gt;&lt;/p&gt;
+&lt;h2 id=&quot;什么是敏捷开发&quot;&gt;&lt;a href=&quot;#什么是敏捷开发&quot;</summary>
         
       
     
     
     
+    <category term="技术积累" scheme="https://xiaobinzhao.github.io/categories/%E6%8A%80%E6%9C%AF%E7%A7%AF%E7%B4%AF/"/>
+    
+    <category term="敏捷开发" scheme="https://xiaobinzhao.github.io/categories/%E6%8A%80%E6%9C%AF%E7%A7%AF%E7%B4%AF/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91/"/>
+    
+    
+    <category term="敏捷开发" scheme="https://xiaobinzhao.github.io/tags/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91/"/>
+    
+    <category term="agile" scheme="https://xiaobinzhao.github.io/tags/agile/"/>
+    
+    <category term="scrum" scheme="https://xiaobinzhao.github.io/tags/scrum/"/>
+    
+    <category term="KanBan" scheme="https://xiaobinzhao.github.io/tags/KanBan/"/>
+    
+    <category term="ScrumBan" scheme="https://xiaobinzhao.github.io/tags/ScrumBan/"/>
     
   </entry>
   
