@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2020-12-24T08:04:41.926Z</updated>
+  <updated>2021-06-25T06:12:10.374Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title></title>
+    <link href="https://xiaobinzhao.github.io/2021/06/25/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91/"/>
+    <id>https://xiaobinzhao.github.io/2021/06/25/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91/</id>
+    <published>2021-06-25T06:12:42.369Z</published>
+    <updated>2021-06-25T06:12:10.374Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;敏捷开发（Agile）&quot;&gt;&lt;a href=&quot;#敏捷开发（Agile）&quot; class=&quot;headerlink&quot; title=&quot;敏捷开发（Agile）&quot;&gt;&lt;/a&gt;敏捷开发（Agile）&lt;/h1&gt;&lt;p&gt;&lt;img</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>VDI 远程协议的一些解释</title>
@@ -220,6 +241,28 @@
   </entry>
   
   <entry>
+    <title>FastAPI</title>
+    <link href="https://xiaobinzhao.github.io/2020/10/20/FastAPI/"/>
+    <id>https://xiaobinzhao.github.io/2020/10/20/FastAPI/</id>
+    <published>2020-10-20T01:49:01.000Z</published>
+    <updated>2020-12-08T09:02:42.385Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。&lt;/li&gt;
+&lt;/ol&gt;</summary>
+    
+    
+    
+    <category term="FastAPI" scheme="https://xiaobinzhao.github.io/categories/FastAPI/"/>
+    
+    
+    <category term="FastAPI" scheme="https://xiaobinzhao.github.io/tags/FastAPI/"/>
+    
+  </entry>
+  
+  <entry>
     <title>并发和锁</title>
     <link href="https://xiaobinzhao.github.io/2020/10/20/%E5%B9%B6%E5%8F%91%E5%92%8C%E9%94%81/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/%E5%B9%B6%E5%8F%91%E5%92%8C%E9%94%81/</id>
@@ -259,33 +302,11 @@
   </entry>
   
   <entry>
-    <title>FastAPI</title>
-    <link href="https://xiaobinzhao.github.io/2020/10/20/FastAPI/"/>
-    <id>https://xiaobinzhao.github.io/2020/10/20/FastAPI/</id>
-    <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2020-12-08T09:02:42.385Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;学习了一下FastAPI，感觉其实现了目前python-web需要的大部分功能，可以说是这些python web框架的集大成者。我所关注的特性如下：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;自动化文档。文档标准是OpenAPI，也就是swagger。目前xView项目实现了与FastAPI类似的自动化文档，但是欠缺了一点是：没有使用Pydantic这样的声明类型。request参数的构造也咩有FastAPI灵活便捷。&lt;/li&gt;
-&lt;/ol&gt;</summary>
-    
-    
-    
-    <category term="FastAPI" scheme="https://xiaobinzhao.github.io/categories/FastAPI/"/>
-    
-    
-    <category term="FastAPI" scheme="https://xiaobinzhao.github.io/tags/FastAPI/"/>
-    
-  </entry>
-  
-  <entry>
     <title>python异步编程</title>
     <link href="https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/</id>
     <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2021-04-23T03:34:47.699Z</updated>
+    <updated>2021-05-11T03:51:51.990Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;什么是异步编程&quot;&gt;&lt;a href=&quot;#什么是异步编程&quot; class=&quot;headerlink&quot; title=&quot;什么是异步编程&quot;&gt;&lt;/a&gt;什么是异步编程&lt;/h1&gt;&lt;p&gt;提到异步，那么就有同步。需要了解一下几个名词：同步/异步、阻塞/非阻塞。&lt;/p&gt;</summary>
@@ -308,7 +329,7 @@
     <link href="https://xiaobinzhao.github.io/2020/10/19/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%EF%BC%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/"/>
     <id>https://xiaobinzhao.github.io/2020/10/19/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%EF%BC%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/</id>
     <published>2020-10-19T01:49:01.000Z</published>
-    <updated>2020-10-20T04:03:16.680Z</updated>
+    <updated>2021-06-23T01:34:53.527Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h1&gt;&lt;p&gt;设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。&lt;/p&gt;</summary>
