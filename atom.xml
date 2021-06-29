@@ -275,7 +275,7 @@
     <link href="https://xiaobinzhao.github.io/2020/10/20/%E5%B9%B6%E5%8F%91%E5%92%8C%E9%94%81/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/%E5%B9%B6%E5%8F%91%E5%92%8C%E9%94%81/</id>
     <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2021-06-28T05:41:25.451Z</updated>
+    <updated>2021-06-29T01:02:00.981Z</updated>
     
     
     <summary type="html">&lt;p&gt;在web开过程中，经常会遇到高并发和资源共享的问题，这些问题的本质是：并行的请求转成串行。我们应该考虑的是怎么在尽可能提高吞吐量的情况下，保证资源的合理生产和消耗。&lt;/p&gt;</summary>
