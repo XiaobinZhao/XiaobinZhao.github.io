@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/scrum%E5%BC%80%E5%8F%91%E8%BF%87%E7%A8%8B.jfif">
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/scrum%E5%BC%80%E5%8F%91%E6%A8%A1%E5%9E%8B.jfif">
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/%E5%A6%82%E4%BD%95%E5%AE%9E%E6%96%BD%E7%9C%8B%E6%9D%BF.jpg">
-<meta property="og:image" content="https://xiaobinzhao.github.io/images/%E7%AE%80%E5%8D%95kanban%E6%A8%A1%E5%9E%8B.jpg">
+<meta property="og:image" content="https://xiaobinzhao.github.io/images/%E7%AE%80%E5%8D%95kanban%E6%A8%A1%E5%9E%8B.png">
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/%E5%8F%AF%E8%A7%86%E5%8C%96%E5%B7%A5%E4%BD%9C%E6%B5%81.jpg">
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/%E6%B5%81%E7%A8%8B%E8%A7%84%E5%88%99.jpg">
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/wip.jpg">
@@ -43,7 +43,7 @@
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/%E7%9C%8B%E6%9D%BF%E7%A4%BA%E4%BE%8B.jpg">
 <meta property="og:image" content="https://xiaobinzhao.github.io/images/scrum%E5%92%8Ckanban%E5%AF%B9%E6%AF%94.jpg">
 <meta property="article:published_time" content="2021-06-25T10:40:01.000Z">
-<meta property="article:modified_time" content="2021-06-25T06:43:03.168Z">
+<meta property="article:modified_time" content="2021-06-30T08:36:23.751Z">
 <meta property="article:author" content="琢灵">
 <meta property="article:tag" content="敏捷开发">
 <meta property="article:tag" content="agile">
@@ -235,10 +235,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-06-25 18:40:01 / 修改时间：14:43:03" itemprop="dateCreated datePublished" datetime="2021-06-25T18:40:01+08:00">2021-06-25</time>
+              <time title="创建时间：2021-06-25 18:40:01" itemprop="dateCreated datePublished" datetime="2021-06-25T18:40:01+08:00">2021-06-25</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-30 16:36:23" itemprop="dateModified" datetime="2021-06-30T16:36:23+08:00">2021-06-30</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -452,19 +458,19 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 <h4 id="名词释义"><a href="#名词释义" class="headerlink" title="名词释义"></a>名词释义</h4><p>看板方法的英文为kanban，和中文的看板正好音同，这个当然不是巧合了，看板起源于日本，它的日文注音也正好是’kanban’，在日文中它也可以写作汉字“看板”，当然也可以写成日本假名。但是这两个意思完全不同，写作看板时接近“可视化的板”，而日文假名则为“信号卡”。</p>
 <p>软件开发中的看板应该更接近于信号卡，但是在国内，大家往往因名生义，把它看做可视化的板，所以往往忽略了其本质的意义，这也是看板系统在国内被普遍误解的一个重要原因。但是在国外，英语有对应的可视化的板—“kanban board”。所以我们称其为看板墙。</p>
 <h4 id="kanban-模型和实践"><a href="#kanban-模型和实践" class="headerlink" title="kanban 模型和实践"></a>kanban 模型和实践</h4><p><img src="/images/%E5%A6%82%E4%BD%95%E5%AE%9E%E6%96%BD%E7%9C%8B%E6%9D%BF.jpg" alt="img"></p>
-<p>kanban最简单的模型是：一般由3列构成，从左到右依次是，<strong>TODO</strong>，<strong>DOING</strong>和<strong>DONE</strong>。</p>
-<p><img src="/images/%E7%AE%80%E5%8D%95kanban%E6%A8%A1%E5%9E%8B.jpg" alt="img"></p>
+<h5 id="kanban简单模型"><a href="#kanban简单模型" class="headerlink" title="kanban简单模型"></a>kanban简单模型</h5><p>kanban最简单的模型是：一般由3列构成，从左到右依次是，<strong>TODO</strong>，<strong>DOING</strong>和<strong>DONE</strong>。</p>
+<p><img src="/images/%E7%AE%80%E5%8D%95kanban%E6%A8%A1%E5%9E%8B.png" alt="img"></p>
 <p>这样的看板存在一些缺陷：</p>
 <ol>
 <li>没有在制品（work-in-progress, WIP）显示，不能反映出工序之间在制品的<strong>积压</strong>情况。</li>
 <li>无法确定瓶颈</li>
 </ol>
-<p>为了优化和解决以上问题，比较完善的看板模型设计如下：</p>
+<h5 id="kanban完善模型和准则"><a href="#kanban完善模型和准则" class="headerlink" title="kanban完善模型和准则"></a>kanban完善模型和准则</h5><p>为了优化和解决以上问题，比较完善的看板模型设计如下：</p>
 <p><img src="/images/%E5%8F%AF%E8%A7%86%E5%8C%96%E5%B7%A5%E4%BD%9C%E6%B5%81.jpg" alt="img"></p>
 <p><img src="/images/%E6%B5%81%E7%A8%8B%E8%A7%84%E5%88%99.jpg" alt="img"></p>
 <p><img src="/images/wip.jpg" alt="img"></p>
 <ul>
-<li><p>在制品（WIP）指的是在某一环节内所有的工作–包括进行和等待的（上图中红色数字就是在制品）。</p>
+<li><p>在制品（WIP）指的是在某一环节内所有的工作（这里是指定的一整个环节的，而不是一个人的）–包括进行和等待的（上图中红色数字就是在制品）。</p>
 </li>
 <li><p>环节内在制品数目小于这个数目的，可以从上一个环节拉入新的工作，否则不允许拉入。</p>
 </li>
@@ -473,7 +479,7 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 </ul>
 <p><img src="/images/kanban%E5%9B%BE%E8%A1%A8.jpg" alt="img"></p>
 <p><img src="/images/%E5%8D%8F%E5%90%8C%E6%94%B9%E8%BF%9B.jpg" alt="img"></p>
-<p>那么，软件开发中kanban的一般实践是什么呢？</p>
+<h5 id="kanban实践"><a href="#kanban实践" class="headerlink" title="kanban实践"></a>kanban实践</h5><p>那么，软件开发中kanban的一般实践是什么呢？</p>
 <p><img src="/images/%E7%9C%8B%E6%9D%BF%E7%A4%BA%E4%BE%8B.jpg" alt="img"></p>
 <table>
 <thead>
@@ -482,21 +488,23 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 <th>设计/分析 WIP</th>
 <th align="left">待开发 WIP</th>
 <th>开发中 WIP</th>
-<th>已完成 WIP</th>
+<th>已完成（可选）</th>
+<th>待测试WIP</th>
 <th>测试中 WIP</th>
 <th>测试完成WIP</th>
 <th>发布 WIP</th>
 </tr>
 </thead>
 <tbody><tr>
-<td></td>
-<td></td>
-<td align="left"></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>需求描述（story），常用的格式为：<code>作为&lt;角色&gt;，在&lt;时间/地点&gt;，我想&lt;做什么&gt;，是为了&lt;商业价值/什么目的&gt;， 于是，我&lt;怎么做/操作&gt;,最后 &lt;怎么验证&gt;</code></td>
+<td>1. 需求澄清：得到客户认可的，各方关系人达成一致的（产品/研发/测试/客户）<br/>2. UI设计<br/>3. 技术调研、难点分析<br/>4. 任务分解。</td>
+<td align="left">经过分析之后等待开发的（story/task/bug）</td>
+<td>开发中（story/task/bug）</td>
+<td>如果不能全栈开发，那么该环节可以放入完成的任务，该任务关联的需求的其他任务尚未完成，不具备可测试的条件; 这个环节的WIP限制可能是没有意义的</td>
+<td>需求的所有任务都完成了，经过了自测，可以进入测试环节的；等待测试的</td>
+<td>进行测试</td>
+<td>测试通过，等待发布</td>
+<td>集成，发布</td>
 </tr>
 <tr>
 <td></td>
@@ -507,20 +515,23 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 <td></td>
 <td></td>
 <td></td>
+<td></td>
 </tr>
 <tr>
 <td></td>
+<td>DoD：<br/>1. 可以进入编码开发的，没有技术障碍的<br/>2. 需求清晰的，没有模棱两可的，可预估工作量的（意思是可以估算的，不存在太多不确定的，但是我们一般不做明确的估点，因为没有必要，看板看中的是流动的效率）<br/>3. 有正确完备的原型和UI设计的<br/>4. 有明确的验证/交付标准的</td>
+<td align="left"></td>
+<td>DoD：<br/>1. 开发完成，代码入库（git/svn）并且经过审核（code review）以及自动化单元测试、自动集成等<br/>2. 自测通过的</td>
+<td>DoD：<br/>1. 一个需求的所有任务都完成，那么该需求可以进入待测试环节（该需求的所有任务到这里为截止点，不在继续流动）。<br/>2. 交叉测试通过的（可选）</td>
 <td></td>
-<td align="left">DoD(Definition of Done)</td>
+<td>DoD：<br/>1. 完成需求定义的交付标准<br/>2. 不存在bug的<br/>3. 经过预发布的（灰度发布）</td>
 <td></td>
-<td>DoD</td>
 <td></td>
-<td>DoD</td>
-<td>DoD</td>
 </tr>
 </tbody></table>
 <ul>
-<li>最好使用物理的看板，可以是一块白板或者任何干净的可以书写的墙壁；使用在线的看板工具进行备份和同步，在线工具可以提供一些统计数据，方便查看。<ul>
+<li><p>最好使用物理的看板，可以是一块白板或者任何干净的可以书写的墙壁；使用在线的看板工具进行备份和同步，在线工具可以提供一些统计数据，方便查看。</p>
+<ul>
 <li><strong>物理看板的优势</strong><ul>
 <li>启动快：只要团队统一意见，立刻就可以找一片“根据地”，花10分钟就可以布置好物理看板，立刻就可以把相关工作可视化。</li>
 <li>成本低：物理看板几乎不需要建设和维护成本，简单一点在某个墙上贴一些泳道条，买一些即时贴即可。100元能运行几个月。</li>
@@ -543,17 +554,53 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 </li>
 </ul>
 </li>
-<li>卡片可以有多个种类，如story、task、bug等，当然一些DoD/WIP/状态等也可以使用小纸条等来标记</li>
-<li>卡片的内容一般需要包含：责任人、优先级、标题、描述、起止时间、预估工作量等；可以根据卡片种类不同而不同<ul>
+<li><p>卡片可以有多个种类，如story、task、bug等，当然一些DoD/WIP/状态等也可以使用小纸条等来标记</p>
+</li>
+<li><p>卡片的内容一般需要包含：责任人、优先级、标题、描述、起止时间、预估工作量等；可以根据卡片种类不同而不同</p>
+<ul>
 <li>story： 故事卡片需要描述需求，需求=用户问题+应用场景+解决方案，可以使用这样的范式：<code>作为&lt;角色&gt;，在&lt;时间/地点&gt;，我想&lt;做什么&gt;，是为了&lt;商业价值/什么目的&gt;， 于是，我&lt;怎么做/操作&gt;,最后 &lt;怎么验证&gt;</code></li>
 <li>task：任务拆解，注意一个任务一般不要超过2天，应该尽可能小，以小时为单位</li>
 <li>bug</li>
 </ul>
 </li>
-<li>DoD(Definition of Done)：完成的定义，也是阶段之间流转的验收标准</li>
-<li>WIP = 2n-1(n为团队人员个数， -1 为鼓励沟通) 或者限制一个总数，而不是每个人只盯着自己的任务</li>
-<li>每日站会（同与scrum）</li>
-<li>回顾会（同与scrum）</li>
+<li><p>需求分解：一般会将需求分解成多个任务，分解方式一般有以下情况：</p>
+<ul>
+<li><p>需求包含内容过多，研发周期长，需拆分成更小粒度的任务/子需求来明确边界和把控</p>
+</li>
+<li><p>一个任务的边界/特性如下</p>
+<ul>
+<li>一个任务一般情况下只有一个责任人，如果需求需要多人合作，那么需要拆分成多个。</li>
+<li>任务能够比较精确的估算出时间，并且时间一般不要超过2天，以小时为单位，尽可能小</li>
+<li>任务相对独立，一个任务的延期尽量不影响其他任务</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>全栈开发</p>
+<p>  往往我们的团队组成都有明确的技术倾向，比如UI设计/前端web工程师/后端研发工程师/测试人员/集成部署人员，一个需求的完成，需要多方合作。这个时候需求的拆解就需要考虑到人员角色和功能对应，比如一个需求要拆解成：UI任务/前端任务/后端任务等，如果某一个任务过大，还需要继续拆分，如下例子：</p>
+<ul>
+<li><p>某复杂需求</p>
+<ul>
+<li>UI任务1</li>
+<li>前端任务1</li>
+<li>前端任务2</li>
+<li>后端任务1</li>
+<li>后端任务2</li>
+</ul>
+<p>那么只有等所有的任务都完成，这个需求才是可以测试的。这势必会影响WIP的设置以及影响任务的流动。解决方案就是：一个人可以完成一整个需求，包括前端/后端。这里的UI设计可以单独拉出来放在设计环节，如此开发人员技术栈主要就是涵盖前后端。</p>
+<p>全栈开发是美好的，但是实现起来还是需要具体情况具体分析。如果不能全栈，可以在kanban上添加<strong>已完成</strong>环节，用来放入完成的任务，一个需求的所有任务都完成了，在转入下一个环节：<strong>待测试</strong>。</p>
+<p>如果使用电子网页的kanban的话，可以以story流转，不显示task，task作为一个story的子项。这样的话就不用担心物理看板上卡片移动造成的关联关系混乱。</p>
+</li>
+</ul>
+</li>
+<li><p>DoD(Definition of Done)：完成的定义，也是阶段之间流转的验收标准</p>
+</li>
+<li><p>WIP = 2n-1(n为团队人员个数， -1 为鼓励沟通) 或者限制一个总数，而不是每个人只盯着自己的任务（推荐，这里也是需要全栈）</p>
+</li>
+<li><p>每日站会（同与scrum）</p>
+</li>
+<li><p>回顾会（同与scrum）</p>
+</li>
 </ul>
 <h4 id="kanban的优点"><a href="#kanban的优点" class="headerlink" title="kanban的优点"></a>kanban的优点</h4><ul>
 <li>拉式开发，从下游向上游传递信息，达到控制。<ul>
@@ -692,7 +739,7 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">什么是敏捷开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E5%AE%A3%E8%A8%80"><span class="nav-number">1.1.</span> <span class="nav-text">敏捷软件开发宣言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="nav-number">1.2.</span> <span class="nav-text">敏捷的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">1.3.</span> <span class="nav-text">敏捷的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91%E9%80%82%E5%90%88%E4%BB%80%E4%B9%88%E9%A1%B9%E7%9B%AE"><span class="nav-number">1.4.</span> <span class="nav-text">敏捷开发适合什么项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E8%83%BD%E5%A4%9F%E7%94%A8%E4%BA%8E%E9%9D%9EIT%E7%9A%84%E9%A1%B9%E7%9B%AE%EF%BC%9F"><span class="nav-number">1.5.</span> <span class="nav-text">敏捷能够用于非IT的项目？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%BC%80%E5%A7%8B%E7%9D%80%E6%89%8B%E4%BD%BF%E7%94%A8%E6%95%8F%E6%8D%B7"><span class="nav-number">1.6.</span> <span class="nav-text">如何开始着手使用敏捷</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E7%9F%A5%E9%81%93%E6%95%8F%E6%8D%B7%EF%BC%88Agile%EF%BC%89%E5%92%8C%E5%9B%A2%E9%98%9F%E6%88%90%E5%91%98%E6%98%AF%E5%90%A6%E4%B8%89%E8%A7%82%E7%9B%B8%E5%90%88"><span class="nav-number">2.</span> <span class="nav-text">怎么知道敏捷（Agile）和团队成员是否三观相合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91%E6%96%B9%E6%B3%95%E8%AE%BA"><span class="nav-number">3.</span> <span class="nav-text">敏捷开发方法论</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#scrum"><span class="nav-number">3.1.</span> <span class="nav-text">scrum</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E4%B8%AA%E8%A7%92%E8%89%B2"><span class="nav-number">3.1.1.</span> <span class="nav-text">三个角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%94%E4%B8%AA%E4%BC%9A%E8%AE%AE"><span class="nav-number">3.1.2.</span> <span class="nav-text">五个会议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Scrum%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.1.3.</span> <span class="nav-text">Scrum过程中的步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Scrum%E4%BC%98%E5%8A%BF"><span class="nav-number">3.1.4.</span> <span class="nav-text">Scrum优势</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Scrum%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">3.1.5.</span> <span class="nav-text">Scrum的缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kanban%E7%9C%8B%E6%9D%BF"><span class="nav-number">3.2.</span> <span class="nav-text">kanban看板</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E9%87%8A%E4%B9%89"><span class="nav-number">3.2.1.</span> <span class="nav-text">名词释义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kanban-%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.2.2.</span> <span class="nav-text">kanban 模型和实践</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kanban%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">3.2.3.</span> <span class="nav-text">kanban的优点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scrumBan"><span class="nav-number">3.3.</span> <span class="nav-text">scrumBan</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">什么是敏捷开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E5%AE%A3%E8%A8%80"><span class="nav-number">1.1.</span> <span class="nav-text">敏捷软件开发宣言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="nav-number">1.2.</span> <span class="nav-text">敏捷的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">1.3.</span> <span class="nav-text">敏捷的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91%E9%80%82%E5%90%88%E4%BB%80%E4%B9%88%E9%A1%B9%E7%9B%AE"><span class="nav-number">1.4.</span> <span class="nav-text">敏捷开发适合什么项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E8%83%BD%E5%A4%9F%E7%94%A8%E4%BA%8E%E9%9D%9EIT%E7%9A%84%E9%A1%B9%E7%9B%AE%EF%BC%9F"><span class="nav-number">1.5.</span> <span class="nav-text">敏捷能够用于非IT的项目？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%BC%80%E5%A7%8B%E7%9D%80%E6%89%8B%E4%BD%BF%E7%94%A8%E6%95%8F%E6%8D%B7"><span class="nav-number">1.6.</span> <span class="nav-text">如何开始着手使用敏捷</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E7%9F%A5%E9%81%93%E6%95%8F%E6%8D%B7%EF%BC%88Agile%EF%BC%89%E5%92%8C%E5%9B%A2%E9%98%9F%E6%88%90%E5%91%98%E6%98%AF%E5%90%A6%E4%B8%89%E8%A7%82%E7%9B%B8%E5%90%88"><span class="nav-number">2.</span> <span class="nav-text">怎么知道敏捷（Agile）和团队成员是否三观相合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91%E6%96%B9%E6%B3%95%E8%AE%BA"><span class="nav-number">3.</span> <span class="nav-text">敏捷开发方法论</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#scrum"><span class="nav-number">3.1.</span> <span class="nav-text">scrum</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E4%B8%AA%E8%A7%92%E8%89%B2"><span class="nav-number">3.1.1.</span> <span class="nav-text">三个角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%94%E4%B8%AA%E4%BC%9A%E8%AE%AE"><span class="nav-number">3.1.2.</span> <span class="nav-text">五个会议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Scrum%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.1.3.</span> <span class="nav-text">Scrum过程中的步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Scrum%E4%BC%98%E5%8A%BF"><span class="nav-number">3.1.4.</span> <span class="nav-text">Scrum优势</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Scrum%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">3.1.5.</span> <span class="nav-text">Scrum的缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kanban%E7%9C%8B%E6%9D%BF"><span class="nav-number">3.2.</span> <span class="nav-text">kanban看板</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E9%87%8A%E4%B9%89"><span class="nav-number">3.2.1.</span> <span class="nav-text">名词释义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kanban-%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.2.2.</span> <span class="nav-text">kanban 模型和实践</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#kanban%E7%AE%80%E5%8D%95%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">kanban简单模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#kanban%E5%AE%8C%E5%96%84%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%87%86%E5%88%99"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">kanban完善模型和准则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#kanban%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">kanban实践</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kanban%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">3.2.3.</span> <span class="nav-text">kanban的优点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scrumBan"><span class="nav-number">3.3.</span> <span class="nav-text">scrumBan</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
