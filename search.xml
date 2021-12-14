@@ -167,7 +167,7 @@
 <p>可选值一般有：i440fx(pc)和q35.具体可以根据命令查看：</p>
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@10-221-126-2 ~]# /usr/libexec/qemu-kvm -M  help </span><br><span class="line">Supported machines are:</span><br><span class="line">pc                   RHEL 7.6.0 PC (i440FX + PIIX, 1996) (alias of pc-i440fx-rhel7.6.0)</span><br><span class="line">pc-i440fx-rhel7.6.0  RHEL 7.6.0 PC (i440FX + PIIX, 1996) (default)</span><br><span class="line">pc-i440fx-rhel7.5.0  RHEL 7.5.0 PC (i440FX + PIIX, 1996)</span><br><span class="line">pc-i440fx-rhel7.4.0  RHEL 7.4.0 PC (i440FX + PIIX, 1996)</span><br><span class="line">pc-i440fx-rhel7.3.0  RHEL 7.3.0 PC (i440FX + PIIX, 1996)</span><br><span class="line">pc-i440fx-rhel7.2.0  RHEL 7.2.0 PC (i440FX + PIIX, 1996)</span><br><span class="line">pc-i440fx-rhel7.1.0  RHEL 7.1.0 PC (i440FX + PIIX, 1996)</span><br><span class="line">pc-i440fx-rhel7.0.0  RHEL 7.0.0 PC (i440FX + PIIX, 1996)</span><br><span class="line">rhel6.6.0            RHEL 6.6.0 PC</span><br><span class="line">rhel6.5.0            RHEL 6.5.0 PC</span><br><span class="line">rhel6.4.0            RHEL 6.4.0 PC</span><br><span class="line">rhel6.3.0            RHEL 6.3.0 PC</span><br><span class="line">rhel6.2.0            RHEL 6.2.0 PC</span><br><span class="line">rhel6.1.0            RHEL 6.1.0 PC</span><br><span class="line">rhel6.0.0            RHEL 6.0.0 PC</span><br><span class="line">q35                  RHEL-7.6.0 PC (Q35 + ICH9, 2009) (alias of pc-q35-rhel7.6.0)</span><br><span class="line">pc-q35-rhel7.6.0     RHEL-7.6.0 PC (Q35 + ICH9, 2009)</span><br><span class="line">pc-q35-rhel7.5.0     RHEL-7.5.0 PC (Q35 + ICH9, 2009)</span><br><span class="line">pc-q35-rhel7.4.0     RHEL-7.4.0 PC (Q35 + ICH9, 2009)</span><br><span class="line">pc-q35-rhel7.3.0     RHEL-7.3.0 PC (Q35 + ICH9, 2009)</span><br><span class="line">none                 empty machine</span><br></pre></td></tr></table></figure>
 
-<h2 id="i440fx-pc-和q35区别"><a href="#i440fx-pc-和q35区别" class="headerlink" title="i440fx(pc)和q35区别"></a>i440fx(pc)和q35区别</h2><p>[Q35-only features](<a href="https://wiki.qemu.org/images/4/4e/Q35.pdf">PowerPoint Presentation (qemu.org)</a>)</p>
+<h2 id="i440fx-pc-和q35区别"><a href="#i440fx-pc-和q35区别" class="headerlink" title="i440fx(pc)和q35区别"></a>i440fx(pc)和q35区别</h2><p><a href="https://wiki.qemu.org/images/4/4e/Q35.pdf">Q35-only features</a></p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">● PCIe “goodies”</span><br><span class="line">– Extended configuration space (MMCFG)</span><br><span class="line">– PCIe native hotplug</span><br><span class="line">– Advanced Error Reporting (AER)</span><br><span class="line">– Alternative Routing-ID Interpretation (ARI)</span><br><span class="line">– Native Power Management</span><br><span class="line">– Function Level Reset (FLR)</span><br><span class="line">– Address Translation Services (ATS) </span><br><span class="line">● AHCI storage controller</span><br><span class="line">● vIOMMU emulation</span><br><span class="line">● “Secure” Secure Boot</span><br></pre></td></tr></table></figure>
 
 <p><a href="https://remimin.github.io/2019/07/09/qemu_machine_type/">Q35 vs. I440FX</a></p>
@@ -362,142 +362,6 @@
       </tags>
   </entry>
   <entry>
-    <title>缓存穿透，缓存击穿，缓存雪崩</title>
-    <url>/2020/10/19/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%EF%BC%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。</p>
-<a id="more"></a>
-
-<h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><ul>
-<li><p>描述<br>缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。</p>
-</li>
-<li><p>解决方案<br>有很多种方法可以有效地解决缓存穿透问题，最常见的则是采用布隆过滤器，将所有可能存在的数据哈希到一个足够大的bitmap中，一个一定不存在的数据会被 这个bitmap拦截掉，从而避免了对底层存储系统的查询压力。另外也有一个更为简单粗暴的方法（我们采用的就是这种），如果一个查询返回的数据为空（不管是数 据不存在，还是系统故障），我们仍然把这个空结果进行缓存，但它的过期时间会很短，最长不超过五分钟。</p>
-</li>
-</ul>
-<h2 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h2><ul>
-<li><p>描述<br>缓存雪崩是指在我们设置缓存时采用了相同的过期时间，导致缓存在某一时刻同时失效，请求全部转发到DB，DB瞬时压力过重雪崩。</p>
-</li>
-<li><p>解决方案<br>缓存失效时的雪崩效应对底层系统的冲击非常可怕。大多数系统设计者考虑用加锁或者队列的方式保证缓存的单线 程（进程）写，从而避免失效时大量的并发请求落到底层存储系统上。这里分享一个简单方案就时讲缓存失效时间分散开，比如我们可以在原有的失效时间基础上增加一个随机值，比如1-5分钟随机，这样每一个缓存的过期时间的重复率就会降低，就很难引发集体失效的事件。</p>
-</li>
-</ul>
-<h2 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h2><ul>
-<li><p>描述<br>对于一些设置了过期时间的key，如果这些key可能会在某些时间点被超高并发地访问，是一种非常“热点”的数据。这个时候，需要考虑一个问题：缓存被“击穿”的问题，这个和缓存雪崩的区别在于这里针对某一key缓存，前者则是很多key。<br>缓存在某个时间点过期的时候，恰好在这个时间点对这个Key有大量的并发请求过来，这些请求发现缓存过期一般都会从后端DB加载数据并回设到缓存，这个时候大并发的请求可能会瞬间把后端DB压垮。</p>
-</li>
-<li><p>解决方案</p>
-</li>
-</ul>
-<ol>
-<li>使用互斥锁(mutex key)<br>业界比较常用的做法，是使用mutex。简单地来说，就是在缓存失效的时候（判断拿出来的值为空），不是立即去load db，而是先使用缓存工具的某些带成功操作返回值的操作（比如Redis的SETNX或者Memcache的ADD）去set一个mutex key，当操作返回成功时，再进行load db的操作并回设缓存；否则，就重试整个get缓存的方法。<br>SETNX，是「SET if Not eXists」的缩写，也就是只有不存在的时候才设置，可以利用它来实现锁的效果。在redis2.6.1之前版本未实现setnx的过期时间，所以这里给出两种版本代码参考：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//2.6.1前单机版本锁</span></span><br><span class="line"><span class="function">String <span class="title">get</span><span class="params">(String key)</span> </span>&#123; </span><br><span class="line">   String value = redis.get(key); </span><br><span class="line">   <span class="keyword">if</span> (value  == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="string">&quot;1&quot;</span>)) &#123;  </span><br><span class="line">        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">        redis.expire(key_mutex, <span class="number">3</span> * <span class="number">60</span>)  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        redis.set(key, value);  </span><br><span class="line">        redis.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        <span class="comment">//其他线程休息50毫秒后重试  </span></span><br><span class="line">        Thread.sleep(<span class="number">50</span>);  </span><br><span class="line">        get(key);  </span><br><span class="line">    &#125;  </span><br><span class="line">  &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-最新版本代码：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">get</span><span class="params">(key)</span> </span>&#123;</span><br><span class="line">      String value = redis.get(key);</span><br><span class="line">      <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123; <span class="comment">//代表缓存值过期</span></span><br><span class="line">          <span class="comment">//设置3min的超时，防止del操作失败的时候，下次缓存过期一直不能load db</span></span><br><span class="line">          <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="number">1</span>, <span class="number">3</span> * <span class="number">60</span>) == <span class="number">1</span>) &#123;  <span class="comment">//代表设置成功</span></span><br><span class="line">               value = db.get(key);</span><br><span class="line">                      redis.set(key, value, expire_secs);</span><br><span class="line">                      redis.del(key_mutex);</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;  <span class="comment">//这个时候代表同时候的其他线程已经load db并回设到缓存了，这时候重试获取缓存值即可</span></span><br><span class="line">                      sleep(<span class="number">50</span>);</span><br><span class="line">                      get(key);  <span class="comment">//重试</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> value;      </span><br><span class="line">          &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-memcache代码：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (memcache.get(key) == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
-<li>“提前”使用互斥锁(mutex key)：<br>在value内部设置1个超时值(timeout1), timeout1比实际的memcache timeout(timeout2)小。当从cache读取到timeout1发现它已经过期时候，马上延长timeout1并重新设置到cache。然后再从数据库加载数据并设置到cache中。伪代码如下：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">v = memcache.get(key);  </span><br><span class="line"><span class="keyword">if</span> (v == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">    <span class="keyword">if</span> (v.timeout &lt;= now()) &#123;  </span><br><span class="line">        <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">            <span class="comment">// extend the timeout for other threads  </span></span><br><span class="line">            v.timeout += <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>;  </span><br><span class="line">            memcache.set(key, v, KEY_TIMEOUT * <span class="number">2</span>);  </span><br><span class="line">  </span><br><span class="line">            <span class="comment">// load the latest value from db  </span></span><br><span class="line">            v = db.get(key);  </span><br><span class="line">            v.timeout = KEY_TIMEOUT;  </span><br><span class="line">            memcache.set(key, value, KEY_TIMEOUT * <span class="number">2</span>);  </span><br><span class="line">            memcache.delete(key_mutex);  </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">            sleep(<span class="number">50</span>);  </span><br><span class="line">            retry();  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
-<li>“永远不过期”  </li>
-<li>这里的“永远不过期”包含两层意思：</li>
-</ol>
-<ul>
-<li>(1) 从redis上看，确实没有设置过期时间，这就保证了，不会出现热点key过期问题，也就是“物理”不过期。</li>
-<li>(2) 从功能上看，如果不过期，那不就成静态的了吗？所以我们把过期时间存在key对应的value里，如果发现要过期了，通过一个后台的异步线程进行缓存的构建，也就是“逻辑”过期<br>从实战看，这种方法对于性能非常友好，唯一不足的就是构建缓存时候，其余线程(非构建缓存的线程)可能访问的是老数据，但是对于一般的互联网功能来说这个还是可以忍受。<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">String <span class="title">get</span><span class="params">(<span class="keyword">final</span> String key)</span> </span>&#123;  </span><br><span class="line">        V v = redis.get(key);  </span><br><span class="line">        String value = v.getValue();  </span><br><span class="line">        <span class="keyword">long</span> timeout = v.getTimeout();  </span><br><span class="line">        <span class="keyword">if</span> (v.timeout &lt;= System.currentTimeMillis()) &#123;  </span><br><span class="line">            <span class="comment">// 异步更新后台异常执行  </span></span><br><span class="line">            threadPool.execute(<span class="keyword">new</span> Runnable() &#123;  </span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">                    String keyMutex = <span class="string">&quot;mutex:&quot;</span> + key;  </span><br><span class="line">                    <span class="keyword">if</span> (redis.setnx(keyMutex, <span class="string">&quot;1&quot;</span>)) &#123;  </span><br><span class="line">                        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">                        redis.expire(keyMutex, <span class="number">3</span> * <span class="number">60</span>);  </span><br><span class="line">                        String dbValue = db.get(key);  </span><br><span class="line">                        redis.set(key, dbValue);  </span><br><span class="line">                        redis.delete(keyMutex);  </span><br><span class="line">                    &#125;  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;);  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">return</span> value;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<ol start="4">
-<li>资源保护<br>采用netflix的hystrix，可以做资源的隔离保护主线程池，如果把这个应用到缓存的构建也未尝不可。<br>四种解决方案：没有最佳只有最合适<table>
-<thead>
-<tr>
-<th>解决方案</th>
-<th>优点</th>
-<th>缺点</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>简单分布式互斥锁（mutex key）</td>
-<td>1. 思路简单  2. 保证一致性</td>
-<td>1. 代码复杂度增大  2. 存在死锁的风险  3. 存在线程池阻塞的风险</td>
-</tr>
-<tr>
-<td>“提前”使用互斥锁</td>
-<td>1. 保证一致性</td>
-<td>同上</td>
-</tr>
-<tr>
-<td>不过期(本文)</td>
-<td>1. 异步构建缓存，不会阻塞线程池</td>
-<td>1. 不保证一致性。  2. 代码复杂度增大(每个value都要维护一个timekey)。  3. 占用一定的内存空间(每个value都要维护一个timekey)。</td>
-</tr>
-<tr>
-<td>资源隔离组件hystrix(本文)</td>
-<td>1. hystrix技术成熟，有效保证后端。  2. hystrix监控强大。</td>
-<td>1. 部分访问存在降级策略。</td>
-</tr>
-</tbody></table>
-</li>
-</ol>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZf6AeSYo05YHWBXHrpibN5Psyx75Dqiaqw2tsX2g3AQaSp43E9R0oVHQ1Jy1xB8E8YOSeJgjUmgPX7Q/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="图片"><br>参考： <a href="https://mp.weixin.qq.com/s/rD6h874mPzUCRlE7l8CnUQ">https://mp.weixin.qq.com/s/rD6h874mPzUCRlE7l8CnUQ</a></p>
-<blockquote>
-<p>四种方案来源网络，详文请链接：<a href="http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io">http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io</a></p>
-</blockquote>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>针对业务系统，永远都是具体情况具体分析，没有最好，只有最合适。<br>最后，对于缓存系统常见的缓存满了和数据丢失问题，需要根据具体业务分析，通常我们采用LRU策略处理溢出，Redis的RDB和AOF持久化策略来保证一定情况下的数据安全。</p>
-]]></content>
-      <categories>
-        <category>架构</category>
-      </categories>
-      <tags>
-        <tag>缓存穿透</tag>
-        <tag>缓存击穿</tag>
-        <tag>缓存雪崩</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>mysql大小写敏感问题</title>
-    <url>/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Mysql/MariaDB 默认是大小写不敏感的，有时会比较影响业务，我们期望能够大小写敏感。</p>
-<a id="more"></a>
-
-<h1 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h1><p>python开发过程中会使用sqlalchemy 来做 ORM，但是发现常规做法会出现查询语句对查询条件大小写不敏感问题，比如：</p>
-<blockquote>
-<p><code>session.query(desktop_pool)filter_by(name=&#39;b3&#39;).one_or_none()</code><br><code>session.query(desktop_pool)filter_by(name=&#39;B3&#39;).one_or_none()</code></p>
-</blockquote>
-<p>查询的结果是一样的。这样对有些业务就会造成困扰， 那么怎么做到查询时能够 <strong>大小写敏感</strong> 呢</p>
-<h1 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a>排查过程</h1><ol>
-<li>首先想到是不是sqlalchemy本身的问题对大小写不敏感，查询sqlalchemy 中对字段的定义，比如name字段：</li>
-</ol>
-<blockquote>
-<p>name = Column(“name”, String(20), nullable=False,doc=”桌面池的名称”)</p>
-</blockquote>
-<p>查看sqlalchemy对String()方法定义：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class String(Concatenable, TypeEngine):</span><br><span class="line"></span><br><span class="line">    &quot;&quot;&quot;The base for all string and character types.</span><br><span class="line"></span><br><span class="line">    In SQL, corresponds to VARCHAR.  Can also take Python unicode objects</span><br><span class="line">    and encode to the database&#39;s encoding in bind params (and the reverse for</span><br><span class="line">    result sets.)</span><br><span class="line"></span><br><span class="line">    The &#96;length&#96; field is usually required when the &#96;String&#96; type is</span><br><span class="line">    used within a CREATE TABLE statement, as VARCHAR requires a length</span><br><span class="line">    on most databases.</span><br><span class="line"></span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line"></span><br><span class="line">    __visit_name__ &#x3D; &#39;string&#39;</span><br><span class="line"></span><br><span class="line">    def __init__(self, length&#x3D;None, collation&#x3D;None,</span><br><span class="line">                 convert_unicode&#x3D;False,</span><br><span class="line">                 unicode_error&#x3D;None,</span><br><span class="line">                 _warn_on_bytestring&#x3D;False</span><br><span class="line">                 ):</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        Create a string-holding type.</span><br><span class="line"></span><br><span class="line">        :param length: optional, a length for the column for use in</span><br><span class="line">          DDL and CAST expressions.  May be safely omitted if no &#96;&#96;CREATE</span><br><span class="line">          TABLE&#96;&#96; will be issued.  Certain databases may require a</span><br><span class="line">          &#96;&#96;length&#96;&#96; for use in DDL, and will raise an exception when</span><br><span class="line">          the &#96;&#96;CREATE TABLE&#96;&#96; DDL is issued if a &#96;&#96;VARCHAR&#96;&#96;</span><br><span class="line">          with no length is included.  Whether the value is</span><br><span class="line">          interpreted as bytes or characters is database specific.</span><br><span class="line"></span><br><span class="line">        :param collation: Optional, a column-level collation for</span><br><span class="line">          use in DDL and CAST expressions.  Renders using the</span><br><span class="line">          COLLATE keyword supported by SQLite, MySQL, and PostgreSQL.</span><br><span class="line">          E.g.::</span><br><span class="line"></span><br><span class="line">            &gt;&gt;&gt; from sqlalchemy import cast, select, String</span><br><span class="line">            &gt;&gt;&gt; print select([cast(&#39;some string&#39;, String(collation&#x3D;&#39;utf8&#39;))])</span><br><span class="line">            SELECT CAST(:param_1 AS VARCHAR COLLATE utf8) AS anon_1</span><br><span class="line"></span><br><span class="line">          .. versionadded:: 0.8 Added support for COLLATE to all</span><br><span class="line">             string types.</span><br><span class="line"></span><br><span class="line">        ...其他代码...</span><br></pre></td></tr></table></figure>
-<p>发现有一个collation属性可以设置，并且可以修改字段的DDL定义，也许可以试一下。<br>2. 在搜索引擎搜索<code>sqlalchemy 大小写敏感</code>问题，发现几个关键字：collation、binary<br>3. 查找<a href="https://www.osgeo.cn/sqlalchemy/core/type_basics.html">官方文档</a>，用关键字collation、binary搜索，在最后发现这样一段：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from sqlalchemy.dialects.mysql import VARCHAR, TEXT</span><br><span class="line"></span><br><span class="line">table &#x3D; Table(&#39;foo&#39;, meta,</span><br><span class="line">    Column(&#39;col1&#39;, VARCHAR(200, collation&#x3D;&#39;binary&#39;)),</span><br><span class="line">    Column(&#39;col2&#39;, TEXT(charset&#x3D;&#39;latin1&#39;))</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-<p>这样设置本质上是修改mysql属性，可能意味着 大小写敏感的问题不在 sqlalchemy， 而在mysql<br>4. 搜索引擎搜索<code>mysql大小写敏感</code>, 有以下结果：</p>
-<ol>
-<li>设置mysql大小写敏感参数<br><code>lower_case_table_names=0</code> 表名存储为给定的大小和比较是区分大小写的<br><code>lower_case_table_names = 1</code> 表名存储在磁盘是小写的，但是比较的时候是不区分大小写<br><code>lower_case_table_names=2</code> 表名存储为给定的大小写但是比较的时候是小写的<br><code>unix,linux下lower_case_table_names</code>默认值为 0 .Windows下默认值是 1 .Mac OS X下默认值是<br>查看mysql配置发现<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; show variables like &#39;lower_case%&#39;;</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| Variable_name          | Value |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| lower_case_file_system | OFF   |</span><br><span class="line">| lower_case_table_names | 0     |</span><br><span class="line">+------------------------+-------+</span><br></pre></td></tr></table></figure>
-我们的mysql 配置是对的，无需修改<ol start="2">
-<li>设置表或行的collation，使其为binary或case sensitive<br>collate规则：   </li>
-</ol>
-*_bin: 表示的是binary case sensitive collation，也就是说是区分大小写的<br>*_cs: case sensitive collation，区分大小写<br>*_ci: case insensitive collation，不区分大小写<br>查看mysql的默认collation   <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select * from information_schema.collations where IS_DEFAULT&#x3D;&#39;Yes&#39; and COLLATION_NAME like &#39;utf8%&#39;;</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br><span class="line">| COLLATION_NAME     | CHARACTER_SET_NAME | ID | IS_DEFAULT | IS_COMPILED | SORTLEN |</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br><span class="line">| utf8_general_ci    | utf8               | 33 | Yes        | Yes         |       1 |</span><br><span class="line">| utf8mb4_general_ci | utf8mb4            | 45 | Yes        | Yes         |       1 |</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br></pre></td></tr></table></figure>
-我们一般使用utf8编码的数据库，所以只关注utf8、utf8mb4编码的排序规则（collation）<br>按照collate规则分析<code>utf8_general_ci</code>是ci结尾，所以是不区分大小写的。<br>然后查看我们自己的数据库：   <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select * from information_schema.SCHEMATA where SCHEMA_NAME&#x3D;&#39;xview&#39;;</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br><span class="line">| CATALOG_NAME | SCHEMA_NAME | DEFAULT_CHARACTER_SET_NAME | DEFAULT_COLLATION_NAME | SQL_PATH |</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br><span class="line">| def          | xview       | utf8                       | utf8_general_ci               | NULL     |</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br></pre></td></tr></table></figure>
-查看表：   <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select TABLE_SCHEMA, TABLE_NAME, TABLE_COLLATION from information_schema.tables where TABLE_NAME&#x3D;&#39;desktop_pool&#39;;</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| TABLE_SCHEMA | TABLE_NAME   | TABLE_COLLATION |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| xview        | desktop_pool | utf8_general_ci |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-查看字段： <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select TABLE_SCHEMA, TABLE_NAME, COLLATION_NAME  from information_schema.columns where TABLE_NAME&#x3D;&#39;desktop_pool&#39; and COLUMN_NAME&#x3D;&#39;name&#39;;</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| TABLE_SCHEMA | TABLE_NAME   | COLLATION_NAME  |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| xview        | desktop_pool | utf8_general_ci |</span><br><span class="line">+--------------+--------------+-----------------+</span><br></pre></td></tr></table></figure>
-<strong>至此，我们已经找到根本原因是：字段设置的排序规则utf8_general_ci不区分大小写。</strong></li>
-</ol>
-<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>查询<a href="https://mariadb.com/kb/zh-cn/setting-character-sets-and-collations/">mariadb文档</a>中有关排序规则设置可以知道:   </p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">在MariaDB中，默认的字符集character set为latin1，默认的排序规则为latin1_swedish_ci(但不同的发行版可能会不同，例如Differences in MariaDB in Debian)。</span><br><span class="line">字符集和排序规则都可以**从server端一直指定到字段级别**，client到server连接时也可以指定。**</span><br><span class="line">当修改字符集但却没有指定排序规则时，将总是使用字符集的默认排序规则**。</span><br><span class="line"></span><br><span class="line">**字符集和排序规则总是级联向下的，所以当没有为字段指定排序规则时，将查找表的排序规则，同样对于表来说会上查到数据库，对数据库来说会上查到server级**。</span><br><span class="line">因此，可以使用极细粒度的字符集和排序规则来控制控制你的数据。</span><br></pre></td></tr></table></figure>
-<p>所以，为了能够区分大小写，请做以下配置：</p>
-<ol>
-<li>修改mysql/MariaDB的配置文件：<code>/etc/mysql/mariadb.conf.d/50-server.cnf</code>修改配置项：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">character-set-server  &#x3D; utf8</span><br><span class="line">collation-server      &#x3D; utf8_bin</span><br></pre></td></tr></table></figure></li>
-<li>创建数据库的时候最好指定排序规则：<code>create database xview character set utf8 collate utf8_bin;</code></li>
-<li>如果数据库已经存在，可以使用<code>alert</code>命令进行修改，参看<a href="https://mariadb.com/kb/zh-cn/setting-character-sets-and-collations/">mariadb文档</a></li>
-<li>你可以试试sqlalchemy用法，设置字段：<code>name = Column(&quot;name&quot;, String(20, collation=&#39;binary&#39;), nullable=False, doc=&quot;桌面池的名称&quot;)</code></li>
-</ol>
-<p><strong>以上</strong><br><strong>至此MySQL大小写问题搞定！</strong></p>
-<h1 id="遗留问题"><a href="#遗留问题" class="headerlink" title="遗留问题"></a>遗留问题</h1><p>查看mysql的可用的utf8编码的排序规则，其中区分大小写的只有utf8_bin/utf8mb4_bin/utf8mb4_nopad_bin/utf8_nopad_bin 没有 utf8_xxx_cs 很是神奇！</p>
-]]></content>
-      <categories>
-        <category>技术积累</category>
-      </categories>
-      <tags>
-        <tag>mysql</tag>
-        <tag>大小写敏感</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>遗留系统改造思路和方法论</title>
     <url>/2020/10/22/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E6%94%B9%E9%80%A0%E6%80%9D%E8%B7%AF%E5%92%8C%E6%96%B9%E6%B3%95%E8%AE%BA/</url>
     <content><![CDATA[<h1 id="遗留系统的定义"><a href="#遗留系统的定义" class="headerlink" title="遗留系统的定义"></a>遗留系统的定义</h1><ul>
@@ -636,6 +500,142 @@ memcache代码：<figure class="highlight java"><table><tr><td class="code"><pre
       </categories>
       <tags>
         <tag>遗留系统改造</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>缓存穿透，缓存击穿，缓存雪崩</title>
+    <url>/2020/10/19/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%EF%BC%8C%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%EF%BC%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>设计一个缓存系统，不得不要考虑的问题就是：缓存穿透、缓存击穿与失效时的雪崩效应。</p>
+<a id="more"></a>
+
+<h2 id="缓存穿透"><a href="#缓存穿透" class="headerlink" title="缓存穿透"></a>缓存穿透</h2><ul>
+<li><p>描述<br>缓存穿透是指查询一个一定不存在的数据，由于缓存是不命中时被动写的，并且出于容错考虑，如果从存储层查不到数据则不写入缓存，这将导致这个不存在的数据每次请求都要到存储层去查询，失去了缓存的意义。在流量大时，可能DB就挂掉了，要是有人利用不存在的key频繁攻击我们的应用，这就是漏洞。</p>
+</li>
+<li><p>解决方案<br>有很多种方法可以有效地解决缓存穿透问题，最常见的则是采用布隆过滤器，将所有可能存在的数据哈希到一个足够大的bitmap中，一个一定不存在的数据会被 这个bitmap拦截掉，从而避免了对底层存储系统的查询压力。另外也有一个更为简单粗暴的方法（我们采用的就是这种），如果一个查询返回的数据为空（不管是数 据不存在，还是系统故障），我们仍然把这个空结果进行缓存，但它的过期时间会很短，最长不超过五分钟。</p>
+</li>
+</ul>
+<h2 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h2><ul>
+<li><p>描述<br>缓存雪崩是指在我们设置缓存时采用了相同的过期时间，导致缓存在某一时刻同时失效，请求全部转发到DB，DB瞬时压力过重雪崩。</p>
+</li>
+<li><p>解决方案<br>缓存失效时的雪崩效应对底层系统的冲击非常可怕。大多数系统设计者考虑用加锁或者队列的方式保证缓存的单线 程（进程）写，从而避免失效时大量的并发请求落到底层存储系统上。这里分享一个简单方案就时讲缓存失效时间分散开，比如我们可以在原有的失效时间基础上增加一个随机值，比如1-5分钟随机，这样每一个缓存的过期时间的重复率就会降低，就很难引发集体失效的事件。</p>
+</li>
+</ul>
+<h2 id="缓存击穿"><a href="#缓存击穿" class="headerlink" title="缓存击穿"></a>缓存击穿</h2><ul>
+<li><p>描述<br>对于一些设置了过期时间的key，如果这些key可能会在某些时间点被超高并发地访问，是一种非常“热点”的数据。这个时候，需要考虑一个问题：缓存被“击穿”的问题，这个和缓存雪崩的区别在于这里针对某一key缓存，前者则是很多key。<br>缓存在某个时间点过期的时候，恰好在这个时间点对这个Key有大量的并发请求过来，这些请求发现缓存过期一般都会从后端DB加载数据并回设到缓存，这个时候大并发的请求可能会瞬间把后端DB压垮。</p>
+</li>
+<li><p>解决方案</p>
+</li>
+</ul>
+<ol>
+<li>使用互斥锁(mutex key)<br>业界比较常用的做法，是使用mutex。简单地来说，就是在缓存失效的时候（判断拿出来的值为空），不是立即去load db，而是先使用缓存工具的某些带成功操作返回值的操作（比如Redis的SETNX或者Memcache的ADD）去set一个mutex key，当操作返回成功时，再进行load db的操作并回设缓存；否则，就重试整个get缓存的方法。<br>SETNX，是「SET if Not eXists」的缩写，也就是只有不存在的时候才设置，可以利用它来实现锁的效果。在redis2.6.1之前版本未实现setnx的过期时间，所以这里给出两种版本代码参考：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//2.6.1前单机版本锁</span></span><br><span class="line"><span class="function">String <span class="title">get</span><span class="params">(String key)</span> </span>&#123; </span><br><span class="line">   String value = redis.get(key); </span><br><span class="line">   <span class="keyword">if</span> (value  == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="string">&quot;1&quot;</span>)) &#123;  </span><br><span class="line">        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">        redis.expire(key_mutex, <span class="number">3</span> * <span class="number">60</span>)  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        redis.set(key, value);  </span><br><span class="line">        redis.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        <span class="comment">//其他线程休息50毫秒后重试  </span></span><br><span class="line">        Thread.sleep(<span class="number">50</span>);  </span><br><span class="line">        get(key);  </span><br><span class="line">    &#125;  </span><br><span class="line">  &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+最新版本代码：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">get</span><span class="params">(key)</span> </span>&#123;</span><br><span class="line">      String value = redis.get(key);</span><br><span class="line">      <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123; <span class="comment">//代表缓存值过期</span></span><br><span class="line">          <span class="comment">//设置3min的超时，防止del操作失败的时候，下次缓存过期一直不能load db</span></span><br><span class="line">          <span class="keyword">if</span> (redis.setnx(key_mutex, <span class="number">1</span>, <span class="number">3</span> * <span class="number">60</span>) == <span class="number">1</span>) &#123;  <span class="comment">//代表设置成功</span></span><br><span class="line">               value = db.get(key);</span><br><span class="line">                      redis.set(key, value, expire_secs);</span><br><span class="line">                      redis.del(key_mutex);</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;  <span class="comment">//这个时候代表同时候的其他线程已经load db并回设到缓存了，这时候重试获取缓存值即可</span></span><br><span class="line">                      sleep(<span class="number">50</span>);</span><br><span class="line">                      get(key);  <span class="comment">//重试</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">return</span> value;      </span><br><span class="line">          &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+memcache代码：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (memcache.get(key) == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
+<li>“提前”使用互斥锁(mutex key)：<br>在value内部设置1个超时值(timeout1), timeout1比实际的memcache timeout(timeout2)小。当从cache读取到timeout1发现它已经过期时候，马上延长timeout1并重新设置到cache。然后再从数据库加载数据并设置到cache中。伪代码如下：<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">v = memcache.get(key);  </span><br><span class="line"><span class="keyword">if</span> (v == <span class="keyword">null</span>) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">        value = db.get(key);  </span><br><span class="line">        memcache.set(key, value);  </span><br><span class="line">        memcache.delete(key_mutex);  </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">        sleep(<span class="number">50</span>);  </span><br><span class="line">        retry();  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">    <span class="keyword">if</span> (v.timeout &lt;= now()) &#123;  </span><br><span class="line">        <span class="keyword">if</span> (memcache.add(key_mutex, <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>) == <span class="keyword">true</span>) &#123;  </span><br><span class="line">            <span class="comment">// extend the timeout for other threads  </span></span><br><span class="line">            v.timeout += <span class="number">3</span> * <span class="number">60</span> * <span class="number">1000</span>;  </span><br><span class="line">            memcache.set(key, v, KEY_TIMEOUT * <span class="number">2</span>);  </span><br><span class="line">  </span><br><span class="line">            <span class="comment">// load the latest value from db  </span></span><br><span class="line">            v = db.get(key);  </span><br><span class="line">            v.timeout = KEY_TIMEOUT;  </span><br><span class="line">            memcache.set(key, value, KEY_TIMEOUT * <span class="number">2</span>);  </span><br><span class="line">            memcache.delete(key_mutex);  </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">            sleep(<span class="number">50</span>);  </span><br><span class="line">            retry();  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
+<li>“永远不过期”  </li>
+<li>这里的“永远不过期”包含两层意思：</li>
+</ol>
+<ul>
+<li>(1) 从redis上看，确实没有设置过期时间，这就保证了，不会出现热点key过期问题，也就是“物理”不过期。</li>
+<li>(2) 从功能上看，如果不过期，那不就成静态的了吗？所以我们把过期时间存在key对应的value里，如果发现要过期了，通过一个后台的异步线程进行缓存的构建，也就是“逻辑”过期<br>从实战看，这种方法对于性能非常友好，唯一不足的就是构建缓存时候，其余线程(非构建缓存的线程)可能访问的是老数据，但是对于一般的互联网功能来说这个还是可以忍受。<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">String <span class="title">get</span><span class="params">(<span class="keyword">final</span> String key)</span> </span>&#123;  </span><br><span class="line">        V v = redis.get(key);  </span><br><span class="line">        String value = v.getValue();  </span><br><span class="line">        <span class="keyword">long</span> timeout = v.getTimeout();  </span><br><span class="line">        <span class="keyword">if</span> (v.timeout &lt;= System.currentTimeMillis()) &#123;  </span><br><span class="line">            <span class="comment">// 异步更新后台异常执行  </span></span><br><span class="line">            threadPool.execute(<span class="keyword">new</span> Runnable() &#123;  </span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">                    String keyMutex = <span class="string">&quot;mutex:&quot;</span> + key;  </span><br><span class="line">                    <span class="keyword">if</span> (redis.setnx(keyMutex, <span class="string">&quot;1&quot;</span>)) &#123;  </span><br><span class="line">                        <span class="comment">// 3 min timeout to avoid mutex holder crash  </span></span><br><span class="line">                        redis.expire(keyMutex, <span class="number">3</span> * <span class="number">60</span>);  </span><br><span class="line">                        String dbValue = db.get(key);  </span><br><span class="line">                        redis.set(key, dbValue);  </span><br><span class="line">                        redis.delete(keyMutex);  </span><br><span class="line">                    &#125;  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;);  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">return</span> value;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ol start="4">
+<li>资源保护<br>采用netflix的hystrix，可以做资源的隔离保护主线程池，如果把这个应用到缓存的构建也未尝不可。<br>四种解决方案：没有最佳只有最合适<table>
+<thead>
+<tr>
+<th>解决方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>简单分布式互斥锁（mutex key）</td>
+<td>1. 思路简单  2. 保证一致性</td>
+<td>1. 代码复杂度增大  2. 存在死锁的风险  3. 存在线程池阻塞的风险</td>
+</tr>
+<tr>
+<td>“提前”使用互斥锁</td>
+<td>1. 保证一致性</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>不过期(本文)</td>
+<td>1. 异步构建缓存，不会阻塞线程池</td>
+<td>1. 不保证一致性。  2. 代码复杂度增大(每个value都要维护一个timekey)。  3. 占用一定的内存空间(每个value都要维护一个timekey)。</td>
+</tr>
+<tr>
+<td>资源隔离组件hystrix(本文)</td>
+<td>1. hystrix技术成熟，有效保证后端。  2. hystrix监控强大。</td>
+<td>1. 部分访问存在降级策略。</td>
+</tr>
+</tbody></table>
+</li>
+</ol>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/J0g14CUwaZf6AeSYo05YHWBXHrpibN5Psyx75Dqiaqw2tsX2g3AQaSp43E9R0oVHQ1Jy1xB8E8YOSeJgjUmgPX7Q/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1" alt="图片"><br>参考： <a href="https://mp.weixin.qq.com/s/rD6h874mPzUCRlE7l8CnUQ">https://mp.weixin.qq.com/s/rD6h874mPzUCRlE7l8CnUQ</a></p>
+<blockquote>
+<p>四种方案来源网络，详文请链接：<a href="http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io">http://carlosfu.iteye.com/blog/2269687?hmsr=toutiao.io&amp;utm_medium=toutiao.io&amp;utm_source=toutiao.io</a></p>
+</blockquote>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>针对业务系统，永远都是具体情况具体分析，没有最好，只有最合适。<br>最后，对于缓存系统常见的缓存满了和数据丢失问题，需要根据具体业务分析，通常我们采用LRU策略处理溢出，Redis的RDB和AOF持久化策略来保证一定情况下的数据安全。</p>
+]]></content>
+      <categories>
+        <category>架构</category>
+      </categories>
+      <tags>
+        <tag>缓存穿透</tag>
+        <tag>缓存击穿</tag>
+        <tag>缓存雪崩</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>mysql大小写敏感问题</title>
+    <url>/2020/10/20/%E8%A7%A3%E5%86%B3mysql%E5%A4%A7%E5%B0%8F%E5%86%99%E4%B8%8D%E6%95%8F%E6%84%9F%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Mysql/MariaDB 默认是大小写不敏感的，有时会比较影响业务，我们期望能够大小写敏感。</p>
+<a id="more"></a>
+
+<h1 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h1><p>python开发过程中会使用sqlalchemy 来做 ORM，但是发现常规做法会出现查询语句对查询条件大小写不敏感问题，比如：</p>
+<blockquote>
+<p><code>session.query(desktop_pool)filter_by(name=&#39;b3&#39;).one_or_none()</code><br><code>session.query(desktop_pool)filter_by(name=&#39;B3&#39;).one_or_none()</code></p>
+</blockquote>
+<p>查询的结果是一样的。这样对有些业务就会造成困扰， 那么怎么做到查询时能够 <strong>大小写敏感</strong> 呢</p>
+<h1 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a>排查过程</h1><ol>
+<li>首先想到是不是sqlalchemy本身的问题对大小写不敏感，查询sqlalchemy 中对字段的定义，比如name字段：</li>
+</ol>
+<blockquote>
+<p>name = Column(“name”, String(20), nullable=False,doc=”桌面池的名称”)</p>
+</blockquote>
+<p>查看sqlalchemy对String()方法定义：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class String(Concatenable, TypeEngine):</span><br><span class="line"></span><br><span class="line">    &quot;&quot;&quot;The base for all string and character types.</span><br><span class="line"></span><br><span class="line">    In SQL, corresponds to VARCHAR.  Can also take Python unicode objects</span><br><span class="line">    and encode to the database&#39;s encoding in bind params (and the reverse for</span><br><span class="line">    result sets.)</span><br><span class="line"></span><br><span class="line">    The &#96;length&#96; field is usually required when the &#96;String&#96; type is</span><br><span class="line">    used within a CREATE TABLE statement, as VARCHAR requires a length</span><br><span class="line">    on most databases.</span><br><span class="line"></span><br><span class="line">    &quot;&quot;&quot;</span><br><span class="line"></span><br><span class="line">    __visit_name__ &#x3D; &#39;string&#39;</span><br><span class="line"></span><br><span class="line">    def __init__(self, length&#x3D;None, collation&#x3D;None,</span><br><span class="line">                 convert_unicode&#x3D;False,</span><br><span class="line">                 unicode_error&#x3D;None,</span><br><span class="line">                 _warn_on_bytestring&#x3D;False</span><br><span class="line">                 ):</span><br><span class="line">        &quot;&quot;&quot;</span><br><span class="line">        Create a string-holding type.</span><br><span class="line"></span><br><span class="line">        :param length: optional, a length for the column for use in</span><br><span class="line">          DDL and CAST expressions.  May be safely omitted if no &#96;&#96;CREATE</span><br><span class="line">          TABLE&#96;&#96; will be issued.  Certain databases may require a</span><br><span class="line">          &#96;&#96;length&#96;&#96; for use in DDL, and will raise an exception when</span><br><span class="line">          the &#96;&#96;CREATE TABLE&#96;&#96; DDL is issued if a &#96;&#96;VARCHAR&#96;&#96;</span><br><span class="line">          with no length is included.  Whether the value is</span><br><span class="line">          interpreted as bytes or characters is database specific.</span><br><span class="line"></span><br><span class="line">        :param collation: Optional, a column-level collation for</span><br><span class="line">          use in DDL and CAST expressions.  Renders using the</span><br><span class="line">          COLLATE keyword supported by SQLite, MySQL, and PostgreSQL.</span><br><span class="line">          E.g.::</span><br><span class="line"></span><br><span class="line">            &gt;&gt;&gt; from sqlalchemy import cast, select, String</span><br><span class="line">            &gt;&gt;&gt; print select([cast(&#39;some string&#39;, String(collation&#x3D;&#39;utf8&#39;))])</span><br><span class="line">            SELECT CAST(:param_1 AS VARCHAR COLLATE utf8) AS anon_1</span><br><span class="line"></span><br><span class="line">          .. versionadded:: 0.8 Added support for COLLATE to all</span><br><span class="line">             string types.</span><br><span class="line"></span><br><span class="line">        ...其他代码...</span><br></pre></td></tr></table></figure>
+<p>发现有一个collation属性可以设置，并且可以修改字段的DDL定义，也许可以试一下。<br>2. 在搜索引擎搜索<code>sqlalchemy 大小写敏感</code>问题，发现几个关键字：collation、binary<br>3. 查找<a href="https://www.osgeo.cn/sqlalchemy/core/type_basics.html">官方文档</a>，用关键字collation、binary搜索，在最后发现这样一段：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">from sqlalchemy.dialects.mysql import VARCHAR, TEXT</span><br><span class="line"></span><br><span class="line">table &#x3D; Table(&#39;foo&#39;, meta,</span><br><span class="line">    Column(&#39;col1&#39;, VARCHAR(200, collation&#x3D;&#39;binary&#39;)),</span><br><span class="line">    Column(&#39;col2&#39;, TEXT(charset&#x3D;&#39;latin1&#39;))</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这样设置本质上是修改mysql属性，可能意味着 大小写敏感的问题不在 sqlalchemy， 而在mysql<br>4. 搜索引擎搜索<code>mysql大小写敏感</code>, 有以下结果：</p>
+<ol>
+<li>设置mysql大小写敏感参数<br><code>lower_case_table_names=0</code> 表名存储为给定的大小和比较是区分大小写的<br><code>lower_case_table_names = 1</code> 表名存储在磁盘是小写的，但是比较的时候是不区分大小写<br><code>lower_case_table_names=2</code> 表名存储为给定的大小写但是比较的时候是小写的<br><code>unix,linux下lower_case_table_names</code>默认值为 0 .Windows下默认值是 1 .Mac OS X下默认值是<br>查看mysql配置发现<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; show variables like &#39;lower_case%&#39;;</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| Variable_name          | Value |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| lower_case_file_system | OFF   |</span><br><span class="line">| lower_case_table_names | 0     |</span><br><span class="line">+------------------------+-------+</span><br></pre></td></tr></table></figure>
+我们的mysql 配置是对的，无需修改<ol start="2">
+<li>设置表或行的collation，使其为binary或case sensitive<br>collate规则：   </li>
+</ol>
+*_bin: 表示的是binary case sensitive collation，也就是说是区分大小写的<br>*_cs: case sensitive collation，区分大小写<br>*_ci: case insensitive collation，不区分大小写<br>查看mysql的默认collation   <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select * from information_schema.collations where IS_DEFAULT&#x3D;&#39;Yes&#39; and COLLATION_NAME like &#39;utf8%&#39;;</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br><span class="line">| COLLATION_NAME     | CHARACTER_SET_NAME | ID | IS_DEFAULT | IS_COMPILED | SORTLEN |</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br><span class="line">| utf8_general_ci    | utf8               | 33 | Yes        | Yes         |       1 |</span><br><span class="line">| utf8mb4_general_ci | utf8mb4            | 45 | Yes        | Yes         |       1 |</span><br><span class="line">+--------------------+--------------------+----+------------+-------------+---------+</span><br></pre></td></tr></table></figure>
+我们一般使用utf8编码的数据库，所以只关注utf8、utf8mb4编码的排序规则（collation）<br>按照collate规则分析<code>utf8_general_ci</code>是ci结尾，所以是不区分大小写的。<br>然后查看我们自己的数据库：   <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select * from information_schema.SCHEMATA where SCHEMA_NAME&#x3D;&#39;xview&#39;;</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br><span class="line">| CATALOG_NAME | SCHEMA_NAME | DEFAULT_CHARACTER_SET_NAME | DEFAULT_COLLATION_NAME | SQL_PATH |</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br><span class="line">| def          | xview       | utf8                       | utf8_general_ci               | NULL     |</span><br><span class="line">+--------------+-------------+----------------------------+------------------------+----------+</span><br></pre></td></tr></table></figure>
+查看表：   <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select TABLE_SCHEMA, TABLE_NAME, TABLE_COLLATION from information_schema.tables where TABLE_NAME&#x3D;&#39;desktop_pool&#39;;</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| TABLE_SCHEMA | TABLE_NAME   | TABLE_COLLATION |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| xview        | desktop_pool | utf8_general_ci |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+查看字段： <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MariaDB [(none)]&gt; select TABLE_SCHEMA, TABLE_NAME, COLLATION_NAME  from information_schema.columns where TABLE_NAME&#x3D;&#39;desktop_pool&#39; and COLUMN_NAME&#x3D;&#39;name&#39;;</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| TABLE_SCHEMA | TABLE_NAME   | COLLATION_NAME  |</span><br><span class="line">+--------------+--------------+-----------------+</span><br><span class="line">| xview        | desktop_pool | utf8_general_ci |</span><br><span class="line">+--------------+--------------+-----------------+</span><br></pre></td></tr></table></figure>
+<strong>至此，我们已经找到根本原因是：字段设置的排序规则utf8_general_ci不区分大小写。</strong></li>
+</ol>
+<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>查询<a href="https://mariadb.com/kb/zh-cn/setting-character-sets-and-collations/">mariadb文档</a>中有关排序规则设置可以知道:   </p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">在MariaDB中，默认的字符集character set为latin1，默认的排序规则为latin1_swedish_ci(但不同的发行版可能会不同，例如Differences in MariaDB in Debian)。</span><br><span class="line">字符集和排序规则都可以**从server端一直指定到字段级别**，client到server连接时也可以指定。**</span><br><span class="line">当修改字符集但却没有指定排序规则时，将总是使用字符集的默认排序规则**。</span><br><span class="line"></span><br><span class="line">**字符集和排序规则总是级联向下的，所以当没有为字段指定排序规则时，将查找表的排序规则，同样对于表来说会上查到数据库，对数据库来说会上查到server级**。</span><br><span class="line">因此，可以使用极细粒度的字符集和排序规则来控制控制你的数据。</span><br></pre></td></tr></table></figure>
+<p>所以，为了能够区分大小写，请做以下配置：</p>
+<ol>
+<li>修改mysql/MariaDB的配置文件：<code>/etc/mysql/mariadb.conf.d/50-server.cnf</code>修改配置项：<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">character-set-server  &#x3D; utf8</span><br><span class="line">collation-server      &#x3D; utf8_bin</span><br></pre></td></tr></table></figure></li>
+<li>创建数据库的时候最好指定排序规则：<code>create database xview character set utf8 collate utf8_bin;</code></li>
+<li>如果数据库已经存在，可以使用<code>alert</code>命令进行修改，参看<a href="https://mariadb.com/kb/zh-cn/setting-character-sets-and-collations/">mariadb文档</a></li>
+<li>你可以试试sqlalchemy用法，设置字段：<code>name = Column(&quot;name&quot;, String(20, collation=&#39;binary&#39;), nullable=False, doc=&quot;桌面池的名称&quot;)</code></li>
+</ol>
+<p><strong>以上</strong><br><strong>至此MySQL大小写问题搞定！</strong></p>
+<h1 id="遗留问题"><a href="#遗留问题" class="headerlink" title="遗留问题"></a>遗留问题</h1><p>查看mysql的可用的utf8编码的排序规则，其中区分大小写的只有utf8_bin/utf8mb4_bin/utf8mb4_nopad_bin/utf8_nopad_bin 没有 utf8_xxx_cs 很是神奇！</p>
+]]></content>
+      <categories>
+        <category>技术积累</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+        <tag>大小写敏感</tag>
       </tags>
   </entry>
   <entry>
@@ -901,271 +901,6 @@ memcache代码：<figure class="highlight java"><table><tr><td class="code"><pre
       </categories>
       <tags>
         <tag>FastAPI</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>VDI 远程协议的一些解释</title>
-    <url>/2020/12/24/VDI%20%E8%BF%9C%E7%A8%8B%E5%8D%8F%E8%AE%AE%E7%9A%84%E4%B8%80%E4%BA%9B%E8%A7%A3%E9%87%8A/</url>
-    <content><![CDATA[<h1 id="桌面协议"><a href="#桌面协议" class="headerlink" title="桌面协议"></a>桌面协议</h1><p>虚拟桌面架构（VDI）中，协议是非常关键的一环，其定义了将服务器虚拟出的客户机系统从服务器传输到各类终端的规则，涉及到安全，图像处理，数据压缩，网络传输协议等多个方面，直接决定着虚拟桌面的终端体验。</p>
-<a id="more"></a>
-<p>常用的虚拟桌面协议有：</p>
-<ol>
-<li><p>RDP(remote desktop protocol)协议：远程桌面协议，大部分 Windows 系统都默认支持此协议。Windows系统中的远程桌面管理就是基于该协议的。据说也是由思杰开发，支持的功能较少，且主要应用在windows环境中，现在也有<a href="http://www.microsoft.com/mac/remote-desktop-client">Mac下的RDP客户端</a>和linux下的RDP客户端<a href="http://www.rdesktop.org/">rdesktop</a>. 历经多个版本的开发，RDP最新版也支持了打印机重定向，音频重定向，剪贴板共享等功能。</p>
-<p>RemoteFX是RDP的增强版，提供了vGPU,视频支持，多点触摸，USB重定向等功能。 </p>
-</li>
-<li><p>RFB(Remote FrameBuffer)协议：图形远程管理协议，<strong>VNC</strong>远程管理工具就是基于此协议。</p>
-</li>
-<li><p>SPICE，Simple Protocol for Independent Computing Environment（独立计算环境简单协议）是红帽企业虚拟化桌面版的主要技术组件之一，具有自适应能力的远程提交协议，能够提供与物理桌面完全相同的最终用户体验。借助支持SPICE协议的客户端（如remote-viewer）或者通过浏览器，用户可以访问自己的虚拟云桌面。</p>
-</li>
-<li><p>ICA/HDX：Citrix Independent Computing Architecture （ ICA ）应该是目前最成熟的虚拟桌面协议, 思杰十几年的耕耘使其难以在短时间内被完全超越。ICA除了功能齐全（支持windows areo）之外，还有广泛的移动端支持。ICA的网络协议无关性，使其可以支持TCP/IP 、 NetBIOS 和 IPX/SPX 。ICA不仅支持自家的虚拟化平台XenServer，还支持vSphere和Hyper-V。性能上比较突出的特点是较低的带宽占用，在网络环境差（延迟高）的情况下也能正常使用</p>
-<p>HDX（High Definition Experience）作为ICA的增强版，着力于改善用户体验，包括音视频，多媒体和3D，HDX支持H.264.</p>
-</li>
-<li><p>PCoIP最初由加拿大公司Teradici开发，早期定位于高端图形设计，2008年VMware宣布与Teradici共同开发PCoIP，以改进自己的VDI解决方案VMware View。</p>
-</li>
-<li><p>其他协议</p>
-<ol>
-<li><p><a href="http://systems.cs.columbia.edu/projects/thinc/">THINC</a>（Thin-Client Internet Computing）是哥伦比亚大学的一个研究项目，不太成熟，只找到一篇论文，可以拿来做学习研究用。</p>
-</li>
-<li><p>X11 <a href="http://en.wikipedia.org/wiki/X_Window_System">X windows system</a> 最初设计的时候就是client server的架构方式，因此也能远程访问主机的桌面。</p>
-</li>
-<li><p>ALP：Sun公司在1999年就推出了一款瘦终端产品Sun Ray，其采用的协议为Sun公司开发的ALP（Appliance Link Protocol），VMware view也支持该协议，不过最近Oracle宣布终止Sun Ray的开发。</p>
-</li>
-<li><p>EOP(Experience Optimization Protocol)协议是Quest Software的VDI协议，用在其自家的VDI产品vWorkspace（<a href="http://www.brianmadden.com/blogs/brianmadden/archive/2007/11/12/quest-software-buys-provision-networks-finally-a-real-challenger-to-citrix-in-the-app-delivery-space.aspx">收购了Provision-Networks</a>）中，Quest没有自己的hypervisor，所以vWorkspace支持Citrix VMware 微软等的hypervisor。Quest Software已经被DELL收购。</p>
-</li>
-<li><p>CHP，号称宇宙无敌最强协议，直接把ICA RDP PCoIP虐出xiang的国产CHP，不说了 上图。</p>
-<p><img src="https://songtianyi.info/images/004-vdi-03.png" alt="虚拟桌面协议 - songtianyi - songtianyi"></p>
-</li>
-</ol>
-</li>
-</ol>
-<p>以上参考 <a href="https://songtianyi.info/pages/vdi/004-vdi.html">https://songtianyi.info/pages/vdi/004-vdi.html</a></p>
-<p>spice/vnc/rdp, 三者的对比如下：</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>SPICE</th>
-<th>VNC</th>
-<th>RDP</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>BIOS屏幕显示</td>
-<td>能</td>
-<td>能</td>
-<td>不能</td>
-</tr>
-<tr>
-<td>全彩支持</td>
-<td>能</td>
-<td>能</td>
-<td>能</td>
-</tr>
-<tr>
-<td>更改分辨率</td>
-<td>能</td>
-<td>能</td>
-<td>能</td>
-</tr>
-<tr>
-<td>多显示器</td>
-<td>多显示器支持（高达4画面）</td>
-<td>只有一个屏幕</td>
-<td>多显示器支持</td>
-</tr>
-<tr>
-<td>图像传输</td>
-<td>图像和图形传输</td>
-<td>图像传输</td>
-<td>图像和图形传输</td>
-</tr>
-<tr>
-<td>视频播放支持</td>
-<td>GPU加速支持</td>
-<td>不能</td>
-<td>GPU加速支持</td>
-</tr>
-<tr>
-<td>音频传输</td>
-<td>双向语音可以控制</td>
-<td>不能</td>
-<td>双向语音可以控制</td>
-</tr>
-<tr>
-<td>鼠标控制</td>
-<td>客户端服务器都可以控制</td>
-<td>服务器端控制</td>
-<td>服务器端控制</td>
-</tr>
-<tr>
-<td>USB传输</td>
-<td>USB可以通过网络传输</td>
-<td>不能</td>
-<td>USB可以通过网络传输</td>
-</tr>
-</tbody></table>
-<h2 id="spice"><a href="#spice" class="headerlink" title="spice"></a>spice</h2><p>SPICE架构包括客户端、SPICE服务端和相应的QXL设备、QXL驱动等，如下图所示。客户端运行在用户终端设备上，为用户提供桌面环境。SPICE服务端以动态连接库的形式与KVM虚拟机整合，通过SPICE协议与客户端进行通信。</p>
-<p><img src="/images/spice-arc.png" alt="spice架构"></p>
-<p>Spice agent运行在客户机（虚拟机）操作系统中。Spice server和Spice client利用spice agent来执行一些需要在虚拟机里执行的任务，如配置分辨率，另外还有通过剪贴板来拷贝文件等。从上图可以看出，Spice client与server与Spice Agent的通信需要借助一些其他的软件模块，如在客户机里面，Spice Agent需要通过VDIPort Driver与主机上 QEMU的VDIPort Device进行交互，他们的交互通过一种叫做输入/输出的环进行。Spice Client和Server产生的消息被写入到设备的输出环中，由VDI Port Driver读取；而Spice Agent发出的消息则通过VDI Port Driver先写入到VDI Port Device输入环中,被QEMU读入到Spice server的缓冲区中，然后再根据消息决定由Spice Server直接处理，还是被发往Spice Client中。</p>
-<p><img src="/images/spice-agent.png" alt="spice agent通信"></p>
-<p>SPICE协议最大的特点是其架构中增加的位于Hypervisor中的QXL设备，本质上是KVM虚拟化平台中通过软件实现的PCI显示设备，利用循环队列等数据结构供虚拟化平台上的多个虚拟机共享实现了设备的虚拟化。但是，这种架构使得SPICE协议紧密地依赖于服务器虚拟化软／硬件基础设施，SPICE必须与KVM虚拟化环境绑定。传统的远程桌面传输协议工作在虚拟机Guest OS中，而SPICE协议本身运行在虚拟机服务器中，可以直接使用服务器的硬件资源。</p>
-<p>其实KVM虚拟化桌面进行云端访问时也是可以使用VNC通道进行数据传输的，然而VNC虽然通用但是效率比起SPICE还是差的远，资源消耗也是非常大，如果你是用KVM-QEMU虚拟机的话，进行云端桌面访问建议使用SPICE协议。</p>
-<p><strong>SPICE协议特点</strong></p>
-<ul>
-<li><p>和低端(low end)的虚拟桌面协议（如RFB）不同，SPICE协议虚拟出一个图形处理设备QXL，专门用于处理客户机的图形命令（graphic commands）。</p>
-</li>
-<li><p>SPICE用不同的信道来传输键盘，鼠标，视频图像和音频等，便于针对性地优化。</p>
-</li>
-<li><p>SPICE首先尝试将渲染的工作交给客户端（瘦终端），利用客户端硬件资源来加速，之后会将渲染工作交给主机来处理，这时可以用软件或者GPU来处理。</p>
-</li>
-<li><p>SPICE客户端支持linux，windows和<a href="http://spice-space.org/page/OSX_Client">Mac</a></p>
-<p><strong>SPICE协议目前已有的功能</strong></p>
-</li>
-<li><p>视频/图像压缩，基于MPEG的视频压缩和基于SFALIC，Lempel–Ziv的图像压缩</p>
-</li>
-<li><p>客户端缓存，对图像 调色板 光标进行缓存处理</p>
-</li>
-<li><p>热迁移，虚拟机从当前主机（Host）迁移到另外一个主机时spice的连接不会中断</p>
-</li>
-<li><p>多屏显示，最多支持四个屏幕</p>
-</li>
-<li><p>音频的播放和录制，音频也可以压缩传输</p>
-</li>
-<li><p>加密传输，支持openssl</p>
-</li>
-<li><p>剪贴板共享，瘦终端系统（client OS）和客户机系统（guest OS）可以相互拷贝粘贴</p>
-</li>
-<li><p>USB重定向，将瘦终端的USB设备重定向到客户机</p>
-</li>
-<li><p>smartcard，支持智能卡登录</p>
-</li>
-</ul>
-<h2 id="vnc"><a href="#vnc" class="headerlink" title="vnc"></a>vnc</h2><p> VNC (Virtual Network Console)，虚拟网络控制台。VNC系统由客户端，服务端和一个协议组成。VNC的服务端目的是分享其所运行机器的屏幕， 服务端被动的允许客户端控制它。 </p>
-<p>VNC客户端（或Viewer） 观察控制服务端，与服务端交互。 VNC 协议 Protocol (RFB)是一个简单的协议，传送服务端的原始图像到客户端（一个X,Y 位置上的正方形的点阵数据）， 客户端传送事件消息到服务端。服务器发送小方块的帧缓存给客户端，在最简单的情况，VNC协议使用大量的带宽，因此各种各样的方法被发明出来减少通讯的开支，举例来说，有各种各样的编码方法来决定最有效率的方法来传送这些点阵方块。协议允许客户端和服务端去协议哪种编码会被使用，最简单的编码，被大多数客户端和服务端所支持的是， 从左到右的像素扫描数据的原始编码， 当原始的满屏被发送后，只发送变化的方块区域。这种编码在帧间只有小部分屏幕变化的情况下工作的非常好（像是鼠标键在桌面移动的情况，或在光标处敲击文字），不过如果大量的像素同时变化带宽将会增加的非常高，像是拖动一个窗口或观看全屏录像。</p>
-<p><a href="https://novnc.com/info.html">noVNC</a> 是一个 HTML5 的 VNC 客户端，采用 JavaScript 编程实现。其主要功能是和远端的 VNC Server 互通，通过对 <a href="https://en.wikipedia.org/wiki/RFB_protocol">RFB（Remote Frame Buffer）协议</a> 数据的编解码，一方面接收远端 VNC Server 发送的数据，解码后通过 <a href="https://en.wikipedia.org/wiki/Canvas_element">Canvas</a> 技术绘制在客户端侧，另一方面将客户端侧的终端输入编码成 RFB 数据发送给远端的 VNC Server。也就是说有了 noVNC，我们可以直接使用支持 HTML5 的 Web 浏览器，譬如 Chrome，就可以访问远端的安装了 VNC Server 的机器的桌面，而不用另外安装原生的 VNC 客户端（譬如我们经常在 Windows 上安装的 <a href="https://www.realvnc.com/download/viewer/">RealVNC Viewer</a>）。</p>
-<p>但需要注意的是，具体传输时，和原生的 VNC 客户端不同，原生的客户端的 RFB 数据是直接承载在 TCP （Raw TCP）上，而 noVNC 处理的 RFB 数据是承载在 Websocket 之上。由于目前大多数 VNC 服务器都不支持 WebSockets，所以 noVNC 是不能直接连接 VNC 服务器的，怎么办呢？这就需要一个代理来实现 Websockets 和 Raw TCP 之间的转换，这个代理就是 Websockify。</p>
-<p>一个典型的从客户端浏览器到 VNC 服务器，中间经过 Websockify 转换的网络如下，注意其中 noVNC 作为一个 HTML5 的客户端，虽然一开始是存放在 websockify 所在的代理服务器上，但其主体 js 代码会在客户端浏览器访问 websockify 服务时被下载到客户端的浏览器中执行。</p>
-<p>   <img src="/images/vnc-network.png" alt="vnc-network"></p>
-<p>参考<a href="http://tinylab.org/guide-to-novnc/">http://tinylab.org/guide-to-novnc/</a></p>
-<h1 id="spice图像处理"><a href="#spice图像处理" class="headerlink" title="spice图像处理"></a>spice图像处理</h1><h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ul>
-<li><p>JPEG/MJPEG(MotionJPEG)</p>
-<ul>
-<li>JPEG是一种静止图像的压缩标准，它是一种标准的帧内压缩编码方式。当硬件处理速度足够快时，JPEG能用于实时动图像的视频压缩。在画面变动较小的情况下能提供相当不错的图像质量，传输速度快，使用相当安全，缺点是数据量较大。</li>
-<li>M-JPEG源于JPEG压缩技术，是一种简单的帧内JPEG压缩，压缩图像质量较好，在画面变动情况下无马赛克，但是由于这种压缩本身技术限制，无法做到大比例压缩，录像时每小时约1-2GB空间，网络传输时需要2M带宽，所以无论录像或网络发送传输，都将耗费大量的硬盘容量和带宽，不适合长时间连续录像的需求，不大实用于视频图像的网络传输。</li>
-</ul>
-<p>MJPEG是spice默认算法，它只单独的对某一帧进行压缩（帧内压缩），而基本不考虑视频流中不同帧之间的变化。通过此压缩技术可获取清晰度很高的视频图像，而且可灵活设置每路的视频清晰度和压缩帧数，并且压缩后的画面还可任意剪接。但它的缺陷也非常明显：</p>
-<ul>
-<li>丢帧现象严重、实时性差，在保证多台瘦客户机都必须是高清晰的前提下，很难完成实时压缩，通常用做单台虚拟机测试播放1080P 高清视频；</li>
-<li>压缩效率低，传输带宽和存储空间占用大</li>
-</ul>
-</li>
-<li><p>H.264是 ITU-T和ISO共同成立的JVT联合视频工作组制定的新一代视频编码标准，用来实现视频的高压缩比、高图像质量、良好的网络适应性等目标。H.264 不仅比MJPEG节约了80%以上的码率，而且对网络传输具有更好的支持功能。H.264引入了面向IP包的编码机制，有利于网络中的分组传输，支持网络中视频的流媒体传输，支持不同网络资源下的分级编码传输，从而获得平稳的图像质量。H.264可以在更低的带宽下实现720p、 1080i/p的广播级高清视频分辨率。</p>
-<p>尽管MJPEG能够获得比较好的单幅图像质量，但由于它在运动性、带宽占用方面均有致命缺陷，所以更需要H.264视频编码方式来满足低带宽，实时多并发连接的桌面虚拟化使用场境.</p>
-</li>
-<li><p>h.265是H.264的升级版,H.265标准保留H.264原来的某些技术，同时对一些相关的技术加以改进。新技术使用先进的技术用以改善码流、编码质量、延时和算法复杂度之间的关系，达到最优化设置；</p>
-<p>具体的研究内容包括：提高压缩效率、提高鲁棒性和错误恢复能力、减少实时的时延、减少信道获取时间和随机接入时延、降低复杂度等。H264由于算法优化，可以低于1Mbps的速度实现标清数字图像传送；H265则可以实现利用1~2Mbps的传输速度传送720P（分辨率1280*720）普通高清音视频传送。H.265旨在在有限带宽下传输更高质量的网络视频，仅需原先的一半带宽即可播放相同质量的视频。这也意味着，我们的智能手机、平板机等移动设备将能够直接在线播放1080p的全高清视频。H.265标准也同时支持4K(4096×2160)和8K(8192×4320)超高清视频。可以说，H.265标准让网络视频跟上了显示屏“高分辨率化”的脚步。</p>
-</li>
-<li><p>MPEG是ISO与IEC于1988年成立的专门针对运动图像和语音压缩制定国际标准的组织。MPEG标准主要有以下五个，<a href="https://baike.baidu.com/item/MPEG-1">MPEG-1</a>、MPEG-2、<a href="https://baike.baidu.com/item/MPEG-4">MPEG-4</a>、MPEG-7及<a href="https://baike.baidu.com/item/MPEG-21">MPEG-21</a>等。当年的dvd碟片就是用的mpeg-2视频编码，广电mpeg-2用的比较普遍。</p>
-</li>
-<li><p>YUV420和YUV444. RGB是构成多种颜色的三基色（红绿蓝），也称为加成色。主要是图像的采集和显示。YUV是优化彩色视频信号的编码和传输，和rgb相比，YUV占用的带宽少。YUV中Y表示的是亮度，UV表示的是色度，定义了颜色的两个方面的色度和饱和度。YUV分为YUV444，YUV422，YUV420等，含有不同色度分量的编码方式。每个部分用8位或者1个字节来标识。由于YUV444没有色彩二次采样的问题，也就是说我们不会从原图像中去除任何色彩信息，这样YUV444就会有完整的24bits。但是对于YUV420来说，由于我们移除了一半的水平和垂直色彩信息，以便降低带宽的使用，这最终导致了我们只用了12bits来代表YUV420，仍然是8bits的亮度，但是只有4bits而不是16bits的色彩度。你可以查看此网站(<a href="https://en.wikipedia.org/wiki/Chroma_subsampling#4:4:4">https://en.wikipedia.org/wiki/Chroma_subsampling#4:4:4</a>) 了解更多的采样系统.人类肉眼通常对于光线或者亮度比较敏感，所以无论YUV420还是YUV444都保证了亮度，但是色彩因人而异，不同的人对于不同的色彩的理解有一定的差异，同时在高帧率（high frame per second）的场景下，您往往无法很快察觉到颜色的差异，但是亮度差异会更加明显。所以，YUV420是采用了一种折中的方式来平衡显示效果和资源占用。</p>
-<ul>
-<li>对于色彩准确度上，YUV444相比YUV420 有很大的改善</li>
-<li>UV444每像素24比特，YUV420每像素仅12比特，所以YUV444的带宽消耗比YUV420高出两倍左右</li>
-<li>YUV444比YUV420使用硬件编码（NVENC）情况下略有延迟（编码量更多）</li>
-<li>基于Linux的瘦客户机可能不支持YUV444</li>
-</ul>
-<p><strong>没有最好，只有最合适，我们需要在不同场景中进行平衡的选择。建议在用户对颜色准确性敏感的3D VDI使用场景中使用YUV444。</strong></p>
-</li>
-</ul>
-<h2 id="图像处理"><a href="#图像处理" class="headerlink" title="图像处理"></a>图像处理</h2><p>VDI传输的图像画面有2种处理方式：图片和视频。</p>
-<ul>
-<li><p>图片场景</p>
-<p>如果桌面的屏幕大多数没有变化，那么传输的图像完全可以是一帧帧的图片，比如用户使用office和erp应用等。此时可以使用例如Citrix Bitmap remoting（位图远程控制），基于JPG 压缩和RLE（Rung Length Encoding）技术。位图远程（Bitmap Remoting），也叫做“Thinwire”是一种针对静态内容“Static Content”可以高效利用带宽的远程控制协议。当然，在spice协议中我们可以使用无损压缩来得到同样的体验（无损压缩是在不丢失任何信息的情况下将数据压缩更小，算法有lz4/glz）。</p>
-<ul>
-<li>对资源消耗非常低，不需要特别的终端硬件配置</li>
-<li>使用cpu进行位图压缩编码</li>
-<li>不能使用GPU编码</li>
-</ul>
-</li>
-<li><p>视频场景</p>
-<p>位图（Bitmap Remoting）对于静态图像支持的非常好，但是当涉及到移动图像和视频播放时，情况则有所不同了。当帧率越高（30fps，60fps），就有越多的图像需要被位图远程控制(Bitmap Remoting)所传输，这将严重影响带宽需求和总体的使用体验。所以，这种情况下视频编解码正好有所作用。视频编解码的技术有JPEG/M-JPE、H.264/H265和MPEG等，结合YUV方案分别有如下的视频场景下的技术方案：</p>
-<table>
-<thead>
-<tr>
-<th>技术方案</th>
-<th>带宽</th>
-<th>延时</th>
-<th>GPU加速</th>
-<th>硬件要求</th>
-<th>图像质量（SSIM）</th>
-<th>适用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>H.264 YUV420</td>
-<td>中</td>
-<td>低</td>
-<td>支持</td>
-<td></td>
-<td>0.8310</td>
-<td>一般场景</td>
-</tr>
-<tr>
-<td>H.264 YUV444</td>
-<td>高</td>
-<td>中</td>
-<td>支持</td>
-<td>Citrix linux终端不支持</td>
-<td>0.9836</td>
-<td>对颜色敏感，带宽会增加</td>
-</tr>
-<tr>
-<td>H.265 YUV420</td>
-<td>低</td>
-<td>低</td>
-<td>支持</td>
-<td>需要指定的CPU/GPU以及终端</td>
-<td>0.8311</td>
-<td>节约带宽</td>
-</tr>
-<tr>
-<td>H.265 YUV444</td>
-<td>/</td>
-<td>/</td>
-<td>少部分专业GPU卡支持</td>
-<td>/</td>
-<td>/</td>
-<td>/</td>
-</tr>
-<tr>
-<td>Citrix 无损构建（H.264/H.265）</td>
-<td>极低</td>
-<td>低</td>
-<td>支持</td>
-<td></td>
-<td>0.9999</td>
-<td>一般办公（office 等）,不适合2D/3D设计等(过程画面有损，最终清晰，锐化现象)</td>
-</tr>
-<tr>
-<td>Citrix 混合编码</td>
-<td>极低</td>
-<td>高</td>
-<td>视频编码时支持</td>
-<td></td>
-<td>0.9999</td>
-<td>结合了位图编解码和视频编解码优点。热点区域使用视频编码，非热点使用位图。无法将硬件编码用于位图编解码所以延迟大。</td>
-</tr>
-</tbody></table>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>VDI</category>
-      </categories>
-      <tags>
-        <tag>VDI</tag>
-        <tag>spice</tag>
-        <tag>vnc</tag>
       </tags>
   </entry>
   <entry>
@@ -1568,6 +1303,271 @@ memcache代码：<figure class="highlight java"><table><tr><td class="code"><pre
       </categories>
       <tags>
         <tag>cloudbase-init</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>VDI 远程协议的一些解释</title>
+    <url>/2020/12/24/VDI%20%E8%BF%9C%E7%A8%8B%E5%8D%8F%E8%AE%AE%E7%9A%84%E4%B8%80%E4%BA%9B%E8%A7%A3%E9%87%8A/</url>
+    <content><![CDATA[<h1 id="桌面协议"><a href="#桌面协议" class="headerlink" title="桌面协议"></a>桌面协议</h1><p>虚拟桌面架构（VDI）中，协议是非常关键的一环，其定义了将服务器虚拟出的客户机系统从服务器传输到各类终端的规则，涉及到安全，图像处理，数据压缩，网络传输协议等多个方面，直接决定着虚拟桌面的终端体验。</p>
+<a id="more"></a>
+<p>常用的虚拟桌面协议有：</p>
+<ol>
+<li><p>RDP(remote desktop protocol)协议：远程桌面协议，大部分 Windows 系统都默认支持此协议。Windows系统中的远程桌面管理就是基于该协议的。据说也是由思杰开发，支持的功能较少，且主要应用在windows环境中，现在也有<a href="http://www.microsoft.com/mac/remote-desktop-client">Mac下的RDP客户端</a>和linux下的RDP客户端<a href="http://www.rdesktop.org/">rdesktop</a>. 历经多个版本的开发，RDP最新版也支持了打印机重定向，音频重定向，剪贴板共享等功能。</p>
+<p>RemoteFX是RDP的增强版，提供了vGPU,视频支持，多点触摸，USB重定向等功能。 </p>
+</li>
+<li><p>RFB(Remote FrameBuffer)协议：图形远程管理协议，<strong>VNC</strong>远程管理工具就是基于此协议。</p>
+</li>
+<li><p>SPICE，Simple Protocol for Independent Computing Environment（独立计算环境简单协议）是红帽企业虚拟化桌面版的主要技术组件之一，具有自适应能力的远程提交协议，能够提供与物理桌面完全相同的最终用户体验。借助支持SPICE协议的客户端（如remote-viewer）或者通过浏览器，用户可以访问自己的虚拟云桌面。</p>
+</li>
+<li><p>ICA/HDX：Citrix Independent Computing Architecture （ ICA ）应该是目前最成熟的虚拟桌面协议, 思杰十几年的耕耘使其难以在短时间内被完全超越。ICA除了功能齐全（支持windows areo）之外，还有广泛的移动端支持。ICA的网络协议无关性，使其可以支持TCP/IP 、 NetBIOS 和 IPX/SPX 。ICA不仅支持自家的虚拟化平台XenServer，还支持vSphere和Hyper-V。性能上比较突出的特点是较低的带宽占用，在网络环境差（延迟高）的情况下也能正常使用</p>
+<p>HDX（High Definition Experience）作为ICA的增强版，着力于改善用户体验，包括音视频，多媒体和3D，HDX支持H.264.</p>
+</li>
+<li><p>PCoIP最初由加拿大公司Teradici开发，早期定位于高端图形设计，2008年VMware宣布与Teradici共同开发PCoIP，以改进自己的VDI解决方案VMware View。</p>
+</li>
+<li><p>其他协议</p>
+<ol>
+<li><p><a href="http://systems.cs.columbia.edu/projects/thinc/">THINC</a>（Thin-Client Internet Computing）是哥伦比亚大学的一个研究项目，不太成熟，只找到一篇论文，可以拿来做学习研究用。</p>
+</li>
+<li><p>X11 <a href="http://en.wikipedia.org/wiki/X_Window_System">X windows system</a> 最初设计的时候就是client server的架构方式，因此也能远程访问主机的桌面。</p>
+</li>
+<li><p>ALP：Sun公司在1999年就推出了一款瘦终端产品Sun Ray，其采用的协议为Sun公司开发的ALP（Appliance Link Protocol），VMware view也支持该协议，不过最近Oracle宣布终止Sun Ray的开发。</p>
+</li>
+<li><p>EOP(Experience Optimization Protocol)协议是Quest Software的VDI协议，用在其自家的VDI产品vWorkspace（<a href="http://www.brianmadden.com/blogs/brianmadden/archive/2007/11/12/quest-software-buys-provision-networks-finally-a-real-challenger-to-citrix-in-the-app-delivery-space.aspx">收购了Provision-Networks</a>）中，Quest没有自己的hypervisor，所以vWorkspace支持Citrix VMware 微软等的hypervisor。Quest Software已经被DELL收购。</p>
+</li>
+<li><p>CHP，号称宇宙无敌最强协议，直接把ICA RDP PCoIP虐出xiang的国产CHP，不说了 上图。</p>
+<p><img src="https://songtianyi.info/images/004-vdi-03.png" alt="虚拟桌面协议 - songtianyi - songtianyi"></p>
+</li>
+</ol>
+</li>
+</ol>
+<p>以上参考 <a href="https://songtianyi.info/pages/vdi/004-vdi.html">https://songtianyi.info/pages/vdi/004-vdi.html</a></p>
+<p>spice/vnc/rdp, 三者的对比如下：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>SPICE</th>
+<th>VNC</th>
+<th>RDP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BIOS屏幕显示</td>
+<td>能</td>
+<td>能</td>
+<td>不能</td>
+</tr>
+<tr>
+<td>全彩支持</td>
+<td>能</td>
+<td>能</td>
+<td>能</td>
+</tr>
+<tr>
+<td>更改分辨率</td>
+<td>能</td>
+<td>能</td>
+<td>能</td>
+</tr>
+<tr>
+<td>多显示器</td>
+<td>多显示器支持（高达4画面）</td>
+<td>只有一个屏幕</td>
+<td>多显示器支持</td>
+</tr>
+<tr>
+<td>图像传输</td>
+<td>图像和图形传输</td>
+<td>图像传输</td>
+<td>图像和图形传输</td>
+</tr>
+<tr>
+<td>视频播放支持</td>
+<td>GPU加速支持</td>
+<td>不能</td>
+<td>GPU加速支持</td>
+</tr>
+<tr>
+<td>音频传输</td>
+<td>双向语音可以控制</td>
+<td>不能</td>
+<td>双向语音可以控制</td>
+</tr>
+<tr>
+<td>鼠标控制</td>
+<td>客户端服务器都可以控制</td>
+<td>服务器端控制</td>
+<td>服务器端控制</td>
+</tr>
+<tr>
+<td>USB传输</td>
+<td>USB可以通过网络传输</td>
+<td>不能</td>
+<td>USB可以通过网络传输</td>
+</tr>
+</tbody></table>
+<h2 id="spice"><a href="#spice" class="headerlink" title="spice"></a>spice</h2><p>SPICE架构包括客户端、SPICE服务端和相应的QXL设备、QXL驱动等，如下图所示。客户端运行在用户终端设备上，为用户提供桌面环境。SPICE服务端以动态连接库的形式与KVM虚拟机整合，通过SPICE协议与客户端进行通信。</p>
+<p><img src="/images/spice-arc.png" alt="spice架构"></p>
+<p>Spice agent运行在客户机（虚拟机）操作系统中。Spice server和Spice client利用spice agent来执行一些需要在虚拟机里执行的任务，如配置分辨率，另外还有通过剪贴板来拷贝文件等。从上图可以看出，Spice client与server与Spice Agent的通信需要借助一些其他的软件模块，如在客户机里面，Spice Agent需要通过VDIPort Driver与主机上 QEMU的VDIPort Device进行交互，他们的交互通过一种叫做输入/输出的环进行。Spice Client和Server产生的消息被写入到设备的输出环中，由VDI Port Driver读取；而Spice Agent发出的消息则通过VDI Port Driver先写入到VDI Port Device输入环中,被QEMU读入到Spice server的缓冲区中，然后再根据消息决定由Spice Server直接处理，还是被发往Spice Client中。</p>
+<p><img src="/images/spice-agent.png" alt="spice agent通信"></p>
+<p>SPICE协议最大的特点是其架构中增加的位于Hypervisor中的QXL设备，本质上是KVM虚拟化平台中通过软件实现的PCI显示设备，利用循环队列等数据结构供虚拟化平台上的多个虚拟机共享实现了设备的虚拟化。但是，这种架构使得SPICE协议紧密地依赖于服务器虚拟化软／硬件基础设施，SPICE必须与KVM虚拟化环境绑定。传统的远程桌面传输协议工作在虚拟机Guest OS中，而SPICE协议本身运行在虚拟机服务器中，可以直接使用服务器的硬件资源。</p>
+<p>其实KVM虚拟化桌面进行云端访问时也是可以使用VNC通道进行数据传输的，然而VNC虽然通用但是效率比起SPICE还是差的远，资源消耗也是非常大，如果你是用KVM-QEMU虚拟机的话，进行云端桌面访问建议使用SPICE协议。</p>
+<p><strong>SPICE协议特点</strong></p>
+<ul>
+<li><p>和低端(low end)的虚拟桌面协议（如RFB）不同，SPICE协议虚拟出一个图形处理设备QXL，专门用于处理客户机的图形命令（graphic commands）。</p>
+</li>
+<li><p>SPICE用不同的信道来传输键盘，鼠标，视频图像和音频等，便于针对性地优化。</p>
+</li>
+<li><p>SPICE首先尝试将渲染的工作交给客户端（瘦终端），利用客户端硬件资源来加速，之后会将渲染工作交给主机来处理，这时可以用软件或者GPU来处理。</p>
+</li>
+<li><p>SPICE客户端支持linux，windows和<a href="http://spice-space.org/page/OSX_Client">Mac</a></p>
+<p><strong>SPICE协议目前已有的功能</strong></p>
+</li>
+<li><p>视频/图像压缩，基于MPEG的视频压缩和基于SFALIC，Lempel–Ziv的图像压缩</p>
+</li>
+<li><p>客户端缓存，对图像 调色板 光标进行缓存处理</p>
+</li>
+<li><p>热迁移，虚拟机从当前主机（Host）迁移到另外一个主机时spice的连接不会中断</p>
+</li>
+<li><p>多屏显示，最多支持四个屏幕</p>
+</li>
+<li><p>音频的播放和录制，音频也可以压缩传输</p>
+</li>
+<li><p>加密传输，支持openssl</p>
+</li>
+<li><p>剪贴板共享，瘦终端系统（client OS）和客户机系统（guest OS）可以相互拷贝粘贴</p>
+</li>
+<li><p>USB重定向，将瘦终端的USB设备重定向到客户机</p>
+</li>
+<li><p>smartcard，支持智能卡登录</p>
+</li>
+</ul>
+<h2 id="vnc"><a href="#vnc" class="headerlink" title="vnc"></a>vnc</h2><p> VNC (Virtual Network Console)，虚拟网络控制台。VNC系统由客户端，服务端和一个协议组成。VNC的服务端目的是分享其所运行机器的屏幕， 服务端被动的允许客户端控制它。 </p>
+<p>VNC客户端（或Viewer） 观察控制服务端，与服务端交互。 VNC 协议 Protocol (RFB)是一个简单的协议，传送服务端的原始图像到客户端（一个X,Y 位置上的正方形的点阵数据）， 客户端传送事件消息到服务端。服务器发送小方块的帧缓存给客户端，在最简单的情况，VNC协议使用大量的带宽，因此各种各样的方法被发明出来减少通讯的开支，举例来说，有各种各样的编码方法来决定最有效率的方法来传送这些点阵方块。协议允许客户端和服务端去协议哪种编码会被使用，最简单的编码，被大多数客户端和服务端所支持的是， 从左到右的像素扫描数据的原始编码， 当原始的满屏被发送后，只发送变化的方块区域。这种编码在帧间只有小部分屏幕变化的情况下工作的非常好（像是鼠标键在桌面移动的情况，或在光标处敲击文字），不过如果大量的像素同时变化带宽将会增加的非常高，像是拖动一个窗口或观看全屏录像。</p>
+<p><a href="https://novnc.com/info.html">noVNC</a> 是一个 HTML5 的 VNC 客户端，采用 JavaScript 编程实现。其主要功能是和远端的 VNC Server 互通，通过对 <a href="https://en.wikipedia.org/wiki/RFB_protocol">RFB（Remote Frame Buffer）协议</a> 数据的编解码，一方面接收远端 VNC Server 发送的数据，解码后通过 <a href="https://en.wikipedia.org/wiki/Canvas_element">Canvas</a> 技术绘制在客户端侧，另一方面将客户端侧的终端输入编码成 RFB 数据发送给远端的 VNC Server。也就是说有了 noVNC，我们可以直接使用支持 HTML5 的 Web 浏览器，譬如 Chrome，就可以访问远端的安装了 VNC Server 的机器的桌面，而不用另外安装原生的 VNC 客户端（譬如我们经常在 Windows 上安装的 <a href="https://www.realvnc.com/download/viewer/">RealVNC Viewer</a>）。</p>
+<p>但需要注意的是，具体传输时，和原生的 VNC 客户端不同，原生的客户端的 RFB 数据是直接承载在 TCP （Raw TCP）上，而 noVNC 处理的 RFB 数据是承载在 Websocket 之上。由于目前大多数 VNC 服务器都不支持 WebSockets，所以 noVNC 是不能直接连接 VNC 服务器的，怎么办呢？这就需要一个代理来实现 Websockets 和 Raw TCP 之间的转换，这个代理就是 Websockify。</p>
+<p>一个典型的从客户端浏览器到 VNC 服务器，中间经过 Websockify 转换的网络如下，注意其中 noVNC 作为一个 HTML5 的客户端，虽然一开始是存放在 websockify 所在的代理服务器上，但其主体 js 代码会在客户端浏览器访问 websockify 服务时被下载到客户端的浏览器中执行。</p>
+<p>   <img src="/images/vnc-network.png" alt="vnc-network"></p>
+<p>参考<a href="http://tinylab.org/guide-to-novnc/">http://tinylab.org/guide-to-novnc/</a></p>
+<h1 id="spice图像处理"><a href="#spice图像处理" class="headerlink" title="spice图像处理"></a>spice图像处理</h1><h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><ul>
+<li><p>JPEG/MJPEG(MotionJPEG)</p>
+<ul>
+<li>JPEG是一种静止图像的压缩标准，它是一种标准的帧内压缩编码方式。当硬件处理速度足够快时，JPEG能用于实时动图像的视频压缩。在画面变动较小的情况下能提供相当不错的图像质量，传输速度快，使用相当安全，缺点是数据量较大。</li>
+<li>M-JPEG源于JPEG压缩技术，是一种简单的帧内JPEG压缩，压缩图像质量较好，在画面变动情况下无马赛克，但是由于这种压缩本身技术限制，无法做到大比例压缩，录像时每小时约1-2GB空间，网络传输时需要2M带宽，所以无论录像或网络发送传输，都将耗费大量的硬盘容量和带宽，不适合长时间连续录像的需求，不大实用于视频图像的网络传输。</li>
+</ul>
+<p>MJPEG是spice默认算法，它只单独的对某一帧进行压缩（帧内压缩），而基本不考虑视频流中不同帧之间的变化。通过此压缩技术可获取清晰度很高的视频图像，而且可灵活设置每路的视频清晰度和压缩帧数，并且压缩后的画面还可任意剪接。但它的缺陷也非常明显：</p>
+<ul>
+<li>丢帧现象严重、实时性差，在保证多台瘦客户机都必须是高清晰的前提下，很难完成实时压缩，通常用做单台虚拟机测试播放1080P 高清视频；</li>
+<li>压缩效率低，传输带宽和存储空间占用大</li>
+</ul>
+</li>
+<li><p>H.264是 ITU-T和ISO共同成立的JVT联合视频工作组制定的新一代视频编码标准，用来实现视频的高压缩比、高图像质量、良好的网络适应性等目标。H.264 不仅比MJPEG节约了80%以上的码率，而且对网络传输具有更好的支持功能。H.264引入了面向IP包的编码机制，有利于网络中的分组传输，支持网络中视频的流媒体传输，支持不同网络资源下的分级编码传输，从而获得平稳的图像质量。H.264可以在更低的带宽下实现720p、 1080i/p的广播级高清视频分辨率。</p>
+<p>尽管MJPEG能够获得比较好的单幅图像质量，但由于它在运动性、带宽占用方面均有致命缺陷，所以更需要H.264视频编码方式来满足低带宽，实时多并发连接的桌面虚拟化使用场境.</p>
+</li>
+<li><p>h.265是H.264的升级版,H.265标准保留H.264原来的某些技术，同时对一些相关的技术加以改进。新技术使用先进的技术用以改善码流、编码质量、延时和算法复杂度之间的关系，达到最优化设置；</p>
+<p>具体的研究内容包括：提高压缩效率、提高鲁棒性和错误恢复能力、减少实时的时延、减少信道获取时间和随机接入时延、降低复杂度等。H264由于算法优化，可以低于1Mbps的速度实现标清数字图像传送；H265则可以实现利用1~2Mbps的传输速度传送720P（分辨率1280*720）普通高清音视频传送。H.265旨在在有限带宽下传输更高质量的网络视频，仅需原先的一半带宽即可播放相同质量的视频。这也意味着，我们的智能手机、平板机等移动设备将能够直接在线播放1080p的全高清视频。H.265标准也同时支持4K(4096×2160)和8K(8192×4320)超高清视频。可以说，H.265标准让网络视频跟上了显示屏“高分辨率化”的脚步。</p>
+</li>
+<li><p>MPEG是ISO与IEC于1988年成立的专门针对运动图像和语音压缩制定国际标准的组织。MPEG标准主要有以下五个，<a href="https://baike.baidu.com/item/MPEG-1">MPEG-1</a>、MPEG-2、<a href="https://baike.baidu.com/item/MPEG-4">MPEG-4</a>、MPEG-7及<a href="https://baike.baidu.com/item/MPEG-21">MPEG-21</a>等。当年的dvd碟片就是用的mpeg-2视频编码，广电mpeg-2用的比较普遍。</p>
+</li>
+<li><p>YUV420和YUV444. RGB是构成多种颜色的三基色（红绿蓝），也称为加成色。主要是图像的采集和显示。YUV是优化彩色视频信号的编码和传输，和rgb相比，YUV占用的带宽少。YUV中Y表示的是亮度，UV表示的是色度，定义了颜色的两个方面的色度和饱和度。YUV分为YUV444，YUV422，YUV420等，含有不同色度分量的编码方式。每个部分用8位或者1个字节来标识。由于YUV444没有色彩二次采样的问题，也就是说我们不会从原图像中去除任何色彩信息，这样YUV444就会有完整的24bits。但是对于YUV420来说，由于我们移除了一半的水平和垂直色彩信息，以便降低带宽的使用，这最终导致了我们只用了12bits来代表YUV420，仍然是8bits的亮度，但是只有4bits而不是16bits的色彩度。你可以查看此网站(<a href="https://en.wikipedia.org/wiki/Chroma_subsampling#4:4:4">https://en.wikipedia.org/wiki/Chroma_subsampling#4:4:4</a>) 了解更多的采样系统.人类肉眼通常对于光线或者亮度比较敏感，所以无论YUV420还是YUV444都保证了亮度，但是色彩因人而异，不同的人对于不同的色彩的理解有一定的差异，同时在高帧率（high frame per second）的场景下，您往往无法很快察觉到颜色的差异，但是亮度差异会更加明显。所以，YUV420是采用了一种折中的方式来平衡显示效果和资源占用。</p>
+<ul>
+<li>对于色彩准确度上，YUV444相比YUV420 有很大的改善</li>
+<li>UV444每像素24比特，YUV420每像素仅12比特，所以YUV444的带宽消耗比YUV420高出两倍左右</li>
+<li>YUV444比YUV420使用硬件编码（NVENC）情况下略有延迟（编码量更多）</li>
+<li>基于Linux的瘦客户机可能不支持YUV444</li>
+</ul>
+<p><strong>没有最好，只有最合适，我们需要在不同场景中进行平衡的选择。建议在用户对颜色准确性敏感的3D VDI使用场景中使用YUV444。</strong></p>
+</li>
+</ul>
+<h2 id="图像处理"><a href="#图像处理" class="headerlink" title="图像处理"></a>图像处理</h2><p>VDI传输的图像画面有2种处理方式：图片和视频。</p>
+<ul>
+<li><p>图片场景</p>
+<p>如果桌面的屏幕大多数没有变化，那么传输的图像完全可以是一帧帧的图片，比如用户使用office和erp应用等。此时可以使用例如Citrix Bitmap remoting（位图远程控制），基于JPG 压缩和RLE（Rung Length Encoding）技术。位图远程（Bitmap Remoting），也叫做“Thinwire”是一种针对静态内容“Static Content”可以高效利用带宽的远程控制协议。当然，在spice协议中我们可以使用无损压缩来得到同样的体验（无损压缩是在不丢失任何信息的情况下将数据压缩更小，算法有lz4/glz）。</p>
+<ul>
+<li>对资源消耗非常低，不需要特别的终端硬件配置</li>
+<li>使用cpu进行位图压缩编码</li>
+<li>不能使用GPU编码</li>
+</ul>
+</li>
+<li><p>视频场景</p>
+<p>位图（Bitmap Remoting）对于静态图像支持的非常好，但是当涉及到移动图像和视频播放时，情况则有所不同了。当帧率越高（30fps，60fps），就有越多的图像需要被位图远程控制(Bitmap Remoting)所传输，这将严重影响带宽需求和总体的使用体验。所以，这种情况下视频编解码正好有所作用。视频编解码的技术有JPEG/M-JPE、H.264/H265和MPEG等，结合YUV方案分别有如下的视频场景下的技术方案：</p>
+<table>
+<thead>
+<tr>
+<th>技术方案</th>
+<th>带宽</th>
+<th>延时</th>
+<th>GPU加速</th>
+<th>硬件要求</th>
+<th>图像质量（SSIM）</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>H.264 YUV420</td>
+<td>中</td>
+<td>低</td>
+<td>支持</td>
+<td></td>
+<td>0.8310</td>
+<td>一般场景</td>
+</tr>
+<tr>
+<td>H.264 YUV444</td>
+<td>高</td>
+<td>中</td>
+<td>支持</td>
+<td>Citrix linux终端不支持</td>
+<td>0.9836</td>
+<td>对颜色敏感，带宽会增加</td>
+</tr>
+<tr>
+<td>H.265 YUV420</td>
+<td>低</td>
+<td>低</td>
+<td>支持</td>
+<td>需要指定的CPU/GPU以及终端</td>
+<td>0.8311</td>
+<td>节约带宽</td>
+</tr>
+<tr>
+<td>H.265 YUV444</td>
+<td>/</td>
+<td>/</td>
+<td>少部分专业GPU卡支持</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+</tr>
+<tr>
+<td>Citrix 无损构建（H.264/H.265）</td>
+<td>极低</td>
+<td>低</td>
+<td>支持</td>
+<td></td>
+<td>0.9999</td>
+<td>一般办公（office 等）,不适合2D/3D设计等(过程画面有损，最终清晰，锐化现象)</td>
+</tr>
+<tr>
+<td>Citrix 混合编码</td>
+<td>极低</td>
+<td>高</td>
+<td>视频编码时支持</td>
+<td></td>
+<td>0.9999</td>
+<td>结合了位图编解码和视频编解码优点。热点区域使用视频编码，非热点使用位图。无法将硬件编码用于位图编解码所以延迟大。</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>VDI</category>
+      </categories>
+      <tags>
+        <tag>VDI</tag>
+        <tag>spice</tag>
+        <tag>vnc</tag>
       </tags>
   </entry>
   <entry>
