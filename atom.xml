@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2021-12-14T04:08:39.583Z</updated>
+  <updated>2021-12-14T09:05:11.634Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://xiaobinzhao.github.io/2021/12/14/qemu%20%20Machine%20Type/"/>
     <id>https://xiaobinzhao.github.io/2021/12/14/qemu%20%20Machine%20Type/</id>
     <published>2021-12-14T01:49:01.000Z</published>
-    <updated>2021-12-14T04:08:39.583Z</updated>
+    <updated>2021-12-14T09:05:11.634Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;qemu-Machine-Type&quot;&gt;&lt;a href=&quot;#qemu-Machine-Type&quot; class=&quot;headerlink&quot; title=&quot;qemu  Machine Type&quot;&gt;&lt;/a&gt;qemu  Machine Type&lt;/h1&gt;&lt;p&gt;在创建虚拟机时，可以指定qemu参数：Machine Type，来控制虚机采用的CPU芯片架构。&lt;/p&gt;</summary>
