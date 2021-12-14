@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2021-06-30T08:36:23.751Z</updated>
+  <updated>2021-12-14T04:08:39.583Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>qemu  Machine Type</title>
+    <link href="https://xiaobinzhao.github.io/2021/12/14/qemu%20%20Machine%20Type/"/>
+    <id>https://xiaobinzhao.github.io/2021/12/14/qemu%20%20Machine%20Type/</id>
+    <published>2021-12-14T01:49:01.000Z</published>
+    <updated>2021-12-14T04:08:39.583Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;qemu-Machine-Type&quot;&gt;&lt;a href=&quot;#qemu-Machine-Type&quot; class=&quot;headerlink&quot; title=&quot;qemu  Machine Type&quot;&gt;&lt;/a&gt;qemu  Machine Type&lt;/h1&gt;&lt;p&gt;在创建虚拟机时，可以指定qemu参数：Machine Type，来控制虚机采用的CPU芯片架构。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="虚拟化" scheme="https://xiaobinzhao.github.io/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+    <category term="qemu" scheme="https://xiaobinzhao.github.io/categories/%E8%99%9A%E6%8B%9F%E5%8C%96/qemu/"/>
+    
+    
+    <category term="Machine Type" scheme="https://xiaobinzhao.github.io/tags/Machine-Type/"/>
+    
+    <category term="qemu" scheme="https://xiaobinzhao.github.io/tags/qemu/"/>
+    
+  </entry>
   
   <entry>
     <title>敏捷开发（Agile）</title>
@@ -159,27 +182,6 @@
   </entry>
   
   <entry>
-    <title>hexo-Next + Github Page制作个人网站使用记录</title>
-    <link href="https://xiaobinzhao.github.io/2020/10/20/hexo/"/>
-    <id>https://xiaobinzhao.github.io/2020/10/20/hexo/</id>
-    <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2020-10-21T03:59:56.466Z</updated>
-    
-    
-    <summary type="html">记录使用github page发布个人网站的方法和调整hexo-Next主题的步骤</summary>
-    
-    
-    
-    <category term="hexo" scheme="https://xiaobinzhao.github.io/categories/hexo/"/>
-    
-    
-    <category term="hexo" scheme="https://xiaobinzhao.github.io/tags/hexo/"/>
-    
-    <category term="Next" scheme="https://xiaobinzhao.github.io/tags/Next/"/>
-    
-  </entry>
-  
-  <entry>
     <title>IO模型</title>
     <link href="https://xiaobinzhao.github.io/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</id>
@@ -203,6 +205,27 @@
     <category term="同步" scheme="https://xiaobinzhao.github.io/tags/%E5%90%8C%E6%AD%A5/"/>
     
     <category term="异步" scheme="https://xiaobinzhao.github.io/tags/%E5%BC%82%E6%AD%A5/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>hexo-Next + Github Page制作个人网站使用记录</title>
+    <link href="https://xiaobinzhao.github.io/2020/10/20/hexo/"/>
+    <id>https://xiaobinzhao.github.io/2020/10/20/hexo/</id>
+    <published>2020-10-20T01:49:01.000Z</published>
+    <updated>2020-10-21T03:59:56.466Z</updated>
+    
+    
+    <summary type="html">记录使用github page发布个人网站的方法和调整hexo-Next主题的步骤</summary>
+    
+    
+    
+    <category term="hexo" scheme="https://xiaobinzhao.github.io/categories/hexo/"/>
+    
+    
+    <category term="hexo" scheme="https://xiaobinzhao.github.io/tags/hexo/"/>
+    
+    <category term="Next" scheme="https://xiaobinzhao.github.io/tags/Next/"/>
     
   </entry>
   
