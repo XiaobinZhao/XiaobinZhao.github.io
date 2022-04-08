@@ -59,9 +59,70 @@ PATCH 请求中的实体保存的是修改资源的指令，该指令指导服�
 PUT 用做更新操作的时候是提交一整个更新后的实体，而不是需要修改的实体中的部分属性。当 URI 指向一个存在的资源，服务器要做的事就是查找并替换。
 
 3. HTTP不是RPC
-人们常常错误地将HTTP称作一种远程过程调用(RPC)机制，仅仅是因为它也包括了请求和响应。RPC与其他形式的基于网络应用的通信的区别之处在于，从概念上讲它是在调用远程机器上的一个过程( procedure)。在RPC协议中，调用方识别出过程并且传递一组固定的参数，然后等待在使用相同接口返回的一个消息中提供的回答。远程方法调用(RMI)也是类似的，差异仅仅是将过程标识为一个{对象，方法}的组合，而不是一个简单的服务过程( service procedure)。被代理的RMI( Brokered rMi)添加了名称服务的间接层( name service indirection)和少量其他把戏( a few other tricks)，但是接口基本上是相同的。
-将HTTP与RPC区分开的并不是语法，甚至也不是使用一个流作为参数所获得的不同的特性，尽管它帮助解释了为何现有的RPC机制对于Web而言是不可用的。HTTP与RPC之间的重大区别的是:**请求是被定向到使用一个有标准语义的通用接口的资源，中间组件能够采用与提供服务的机器几乎完全相同的方式来解释这些语义**。其结果是使得一个应用能够支持转换的分层( layers of transformation)和独立于信息来源的间接层( indirection that are independent of the
-information origin)，这对于一个需要满足互联网规模、多个组织、无法控制的可伸缩性需求的信息系统来说，是非常有用的。与之相比较，RPC的机制是根据语言的API( language API)来定义的，而不是根据基于网络应用的需求来定义的。
+    人们常常错误地将HTTP称作一种远程过程调用(RPC)机制，仅仅是因为它也包括了请求和响应。RPC与其他形式的基于网络应用的通信的区别之处在于，从概念上讲它是在调用远程机器上的一个过程( procedure)。在RPC协议中，调用方识别出过程并且传递一组固定的参数，然后等待在使用相同接口返回的一个消息中提供的回答。远程方法调用(RMI)也是类似的，差异仅仅是将过程标识为一个{对象，方法}的组合，而不是一个简单的服务过程( service procedure)。被代理的RMI( Brokered rMi)添加了名称服务的间接层( name service indirection)和少量其他把戏( a few other tricks)，但是接口基本上是相同的。
+    将HTTP与RPC区分开的并不是语法，甚至也不是使用一个流作为参数所获得的不同的特性，尽管它帮助解释了为何现有的RPC机制对于Web而言是不可用的。HTTP与RPC之间的重大区别的是:**请求是被定向到使用一个有标准语义的通用接口的资源，中间组件能够采用与提供服务的机器几乎完全相同的方式来解释这些语义**。其结果是使得一个应用能够支持转换的分层( layers of transformation)和独立于信息来源的间接层( indirection that are independent of the
+    information origin)，这对于一个需要满足互联网规模、多个组织、无法控制的可伸缩性需求的信息系统来说，是非常有用的。与之相比较，RPC的机制是根据语言的API( language API)来定义的，而不是根据基于网络应用的需求来定义的。
+
+4. 异常处理的HTTP响应状态码
+
+     - REST的建议是应当考虑尽可能使用匹配的Http状态码来对应到错误类型，比如删除用户的操作：
+       - 用户找不到是404
+       - 删除成功后是204
+       - 用户因为有账户余额无法删除是409（客户端的问题是4xx）
+       - 其它服务端异常是500（服务端的问题是5xx）
+     - 总体来说这个规范出发点是好的，实现起来落地比较困难，原因有下面几个：
+       - 状态码对应各种错误类型的映射关系没有统一标准，工程师实现的时候五花八门
+       - 实现起来可能需要在业务逻辑中耦合状态码，很难在GlobalExceptionHandler去做，除非事先先规范出十几种异常
+       - 如果使用了不正确的响应状态可能会导致反向代理等触发错误的一些操作，而且出现问题的时候搞不清楚是哪个层面出错了
+       - 各种Http Client对应非200状态码的处理方式不太一致
+     - 有关这个问题的争议，各大平台的API实现有些遵从这个规范建议，有些是500甚至200打天下的，相关的国内外讨论有：
+       - https://stackoverflow.com/questions/27921537/returning-http-200-ok-with-error-within-response-body
+       - https://www.zhihu.com/question/268409269/
+     - 国内外的很多大厂对于这点的实现不尽相同，总的来说，我的建议是：
+       - 如果我们明确API是REST的，而且API对外使用，应当使用合适的状态码来反映错误（建议控制在20个以内常用的），并且在文档中进行说明，而且出错后需要在响应体补充细化的error信息（包含code和message）
+       - 如果REST API对内使用，那么在客户端和服务端商量好统一标准的情况下可以对响应码类型进行收敛到几个，实现起来也方便
+       - 如果API是内部使用的RPC over HTTP形式，甚至可以退化到业务异常也使用200响应返回
+
+5. 返回数据是否需要包装
+
+     看到过许多文章都在说，REST还是建议返回的数据本身就是实体信息（或列表信息），而不建议把数据进行一层包装（Result）。如果需要有更多的信息来补充的话，可以放到HTTP Header中，比如https://developer.github.com/v3/projects/cards/的API：
+
+     ```tex
+     GET /projects/columns/:column_id/cards
+     
+     Status: 200 OK
+     Link: <https://api.github.com/resource?page=2>; rel="next",
+           <https://api.github.com/resource?page=5>; rel="last"
+     [
+       {
+         "url": "https://api.github.com/projects/columns/cards/1478",
+         "id": 1478,
+         "node_id": "MDExOlByb2plY3RDYXJkMTQ3OA==",
+         "note": "Add payload for delete Project column",
+         "created_at": "2016-09-05T14:21:06Z",
+         "updated_at": "2016-09-05T14:20:22Z",
+         "archived": false,
+         "column_url": "https://api.github.com/projects/columns/367",
+         "content_url": "https://api.github.com/repos/api-playground/projects-test/issues/3",
+         "project_url": "https://api.github.com/projects/120"
+       }
+     ]
+     ```
+
+     之前我们给出的HATEOAS的例子是在响应体中有"content"和"links"的层级，也就是响应体并不是资源本身，是有包装的，除了links，很多时候我们会直接以统一的格式来定义API响应结构体，比如：
+
+     ```json
+     {
+     	"code" : "",
+     	"message" : "",
+     	"path" : ""
+     	"time" : "",
+         "data" : {},
+         "links": []
+     }
+     ```
+
+     我个人比较喜欢这种方式，不喜欢使用HTTP头，原因还是因为多变的部署和网络环境下，如果某些环节请求头被修改了或丢弃了会很麻烦（还有麻烦的Header Key大小写问题），响应体一般所有的代理都不会去动。
 
 # url 资源设计
 决定哪些部分应该被分解成独立甚至重叠的资源，这是服务的设计流程的一部分。在进行这些决策时，我们需要考虑以下几个设计因素:
@@ -77,5 +138,6 @@ information origin)，这对于一个需要满足互联网规模、多个组织�
 # 参考文献
 
 - [ Richardson成熟度模型(Richardson Maturity Model) - 通往真正REST的步骤 ](https://blog.csdn.net/dm_vincent/article/details/51341037 )
+- [朱晔的互联网架构实践心得S2E5：浅谈四种API设计风格（RPC、REST、GraphQL、服务端驱动） - lovecindywang - 博客园 (cnblogs.com)](https://www.cnblogs.com/lovecindywang/p/10383756.html)
 - 《REST实战+中文版-4》
 
