@@ -1,6 +1,16 @@
-go web framework base on goFame.
+---
+title: GoFrame学习之路
+date: 2022-04-12 09:49:01
+tags:
+- GoFrame
+- gf
+- go
+categories:
+- go
+---
+在团队中使用过Django/FastAPI/Spring，开发过或大或小的项目，并且也使用python整合了一套用于生产环境的框架。这些项目大部分都是前后端分离的，是一个提供RESTful API的web server。在go的世界里，开发web server，有很多选择，比如beego/iris/gin等，那么哪一个是一个合适的选择呢？直到我看到这片文章[Golang框架选型比较: goframe, beego, iris和gin ](https://goframe.org/pages/viewpage.action?pageId=3673375) ，尤其这句话吸引了我：**团队踩了一年多的坑，才发现团队确实需要一个统一的技术框架而不是一堆不成体系的轮子**；这句话完全就是团队现在的状态，毫不犹豫的，进入GoFrame~
 
-- https://goframe.org/
+<!-- more -->
 
 # 准备工作
 
