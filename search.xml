@@ -297,12 +297,11 @@
       </tags>
   </entry>
   <entry>
-    <title></title>
+    <title>GoFrame学习之路</title>
     <url>/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/</url>
-    <content><![CDATA[<p>go web framework base on goFame.</p>
-<ul>
-<li><a href="https://goframe.org/">https://goframe.org/</a></li>
-</ul>
+    <content><![CDATA[<p>在团队中使用过Django/FastAPI/Spring，开发过或大或小的项目，并且也使用python整合了一套用于生产环境的框架。这些项目大部分都是前后端分离的，是一个提供RESTful API的web server。在go的世界里，开发web server，有很多选择，比如beego/iris/gin等，那么哪一个是一个合适的选择呢？直到我看到这片文章<a href="https://goframe.org/pages/viewpage.action?pageId=3673375">Golang框架选型比较: goframe, beego, iris和gin </a> ，尤其这句话吸引了我：<strong>团队踩了一年多的坑，才发现团队确实需要一个统一的技术框架而不是一堆不成体系的轮子</strong>；这句话完全就是团队现在的状态，毫不犹豫的，进入GoFrame~</p>
+<a id="more"></a>
+
 <h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="go语言安装"><a href="#go语言安装" class="headerlink" title="go语言安装"></a>go语言安装</h2><p>window版本的安装，自行下载exe进行安装，然后设置环境变量即可。以下以linux安装为主。本次安装版本使用：<code>go1.16.13</code></p>
 <h3 id="apt-get安装"><a href="#apt-get安装" class="headerlink" title="apt-get安装"></a>apt-get安装</h3><p><code>apt-get install golang</code></p>
 <p>Debian9 安装的golang版本默认为<code>golang-1.7</code></p>
@@ -460,11 +459,12 @@
 <p>我们的建议:<code>dao</code>层的代码应该尽量保证通用性，并且大部分场景下不需要增加额外方法，只需要使用一些通用的链式操作方法拼凑即可满足。业务逻辑、包括看似只是简单的数据操作的逻辑都应当封装到<code>service</code>中，<code>service</code>中包含多个业务模块，每个模块独自管理自己的<code>dao</code>对象，<code>service</code>与<code>service</code>之间通过相互调用方法来实现数据通信而不是随意去调用其他<code>service</code>模块的<code>dao</code>对象。</p>
 <p>以上信息总结自gf官网，详情请参看：<a href="https://goframe.org/display/gf">框架介绍 - GoFrame (ZH)-v2.0 - GoFrame官网</a></p>
 <h1 id="开始开发"><a href="#开始开发" class="headerlink" title="开始开发"></a>开始开发</h1><h2 id="1-gf-cli安装"><a href="#1-gf-cli安装" class="headerlink" title="1. gf-cli安装"></a>1. gf-cli安装</h2><ol>
-<li><p>二进制安装</p>
-<p>从<a href="https://github.com/gogf/gf-cli/releases">Releases · gogf/gf-cli (github.com)</a>下载二进制，然后修改名字为<code>gf.exe</code>；放置到<code>%GOROOT%/bin</code>或者<code>%GOPATH%/bin</code></p>
+<li><p>windows二进制安装</p>
+<p>从<a href="https://github.com/gogf/gf/releases%E4%B8%8B%E8%BD%BD%E4%BA%8C%E8%BF%9B%E5%88%B6%EF%BC%8C%E7%84%B6%E5%90%8E%E4%BF%AE%E6%94%B9%E5%90%8D%E5%AD%97%E4%B8%BA%60gf.exe%60%EF%BC%9B%E6%94%BE%E7%BD%AE%E5%88%B0%60%GOROOT%/bin%60%E6%88%96%E8%80%85%60%GOPATH%/bin%60%E6%88%96%E8%80%85%E4%BD%BF%E7%94%A8install%E5%91%BD%E4%BB%A4%EF%BC%9A">https://github.com/gogf/gf/releases下载二进制，然后修改名字为`gf.exe`；放置到`%GOROOT%/bin`或者`%GOPATH%/bin`或者使用install命令：</a></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="variable">$</span> ./gf_windows_amd64.exe install </span><br><span class="line">I found some installable paths <span class="keyword">for</span> you(from <span class="variable">$PATH</span>):</span><br><span class="line">  Id | Writable | Installed | Path</span><br><span class="line">   <span class="number">0</span> |     true |      true | E:\go<span class="literal">-workspace</span>\bin</span><br><span class="line">   <span class="number">1</span> |     true |     false | D:\programs\go\bin</span><br><span class="line">please choose one installation destination [<span class="type">default</span> <span class="number">0</span>]:</span><br><span class="line">gf binary is successfully installed to: E:\go<span class="literal">-workspace</span>\bin</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>手动安装 <a href="https://github.com/gogf/gf-cli/blob/master/README.MD">gf-cli/README.MD</a></p>
-<p><code>go install github.com/gogf/gf-cli/v2/gf@master</code></p>
+<li><p>手动安装</p>
+<p><code>git clone https://github.com/gogf/gf &amp;&amp; cd gf/cmd/gf &amp;&amp; go install</code></p>
 </li>
 <li><p>校验</p>
 <p><code>gf -v</code></p>
@@ -910,6 +910,14 @@
 </tr>
 </tbody></table>
 <h3 id="12-单元测试"><a href="#12-单元测试" class="headerlink" title="12. 单元测试"></a>12. 单元测试</h3>]]></content>
+      <categories>
+        <category>go</category>
+      </categories>
+      <tags>
+        <tag>GoFrame</tag>
+        <tag>gf</tag>
+        <tag>go</tag>
+      </tags>
   </entry>
   <entry>
     <title>qemu  Machine Type</title>
