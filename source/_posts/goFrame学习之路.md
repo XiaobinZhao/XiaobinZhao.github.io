@@ -206,13 +206,23 @@ Debian9 安装的golang版本默认为`golang-1.7`
 
 ## 1. gf-cli安装
 
-1. 二进制安装
+1. windows二进制安装
 
-   从[Releases · gogf/gf-cli (github.com)](https://github.com/gogf/gf-cli/releases)下载二进制，然后修改名字为`gf.exe`；放置到`%GOROOT%/bin`或者`%GOPATH%/bin`
+   从https://github.com/gogf/gf/releases下载二进制，然后修改名字为`gf.exe`；放置到`%GOROOT%/bin`或者`%GOPATH%/bin`或者使用install命令：
 
-2. 手动安装 [gf-cli/README.MD](https://github.com/gogf/gf-cli/blob/master/README.MD)
+   ```powershell
+   $ ./gf_windows_amd64.exe install 
+   I found some installable paths for you(from $PATH):
+     Id | Writable | Installed | Path
+      0 |     true |      true | E:\go-workspace\bin
+      1 |     true |     false | D:\programs\go\bin
+   please choose one installation destination [default 0]:
+   gf binary is successfully installed to: E:\go-workspace\bin
+   ```
 
-   `go install github.com/gogf/gf-cli/v2/gf@master`
+2. 手动安装
+
+   `git clone https://github.com/gogf/gf && cd gf/cmd/gf && go install`
 
 3. 校验
 
