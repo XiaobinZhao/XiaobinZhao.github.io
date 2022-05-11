@@ -1108,8 +1108,12 @@
     <content><![CDATA[<p>在团队中使用过Django/FastAPI/Spring，开发过或大或小的项目，并且也使用python整合了一套用于生产环境的框架。这些项目大部分都是前后端分离的，是一个提供RESTful API的web server。在go的世界里，开发web server，有很多选择，比如beego/iris/gin等，那么哪一个是一个合适的选择呢？直到我看到这片文章<a href="https://goframe.org/pages/viewpage.action?pageId=3673375">Golang框架选型比较: goframe, beego, iris和gin </a> ，尤其这句话吸引了我：<strong>团队踩了一年多的坑，才发现团队确实需要一个统一的技术框架而不是一堆不成体系的轮子</strong>；这句话完全就是团队现在的状态，毫不犹豫的，进入GoFrame~</p>
 <a id="more"></a>
 
-
-
+<h1 id="项目地址"><a href="#项目地址" class="headerlink" title="项目地址"></a>项目地址</h1><ul>
+<li><p>gitee: <a href="https://gitee.com/xiaobin_zhao/my-gf.git">https://gitee.com/xiaobin_zhao/my-gf.git</a></p>
+</li>
+<li><p>github: <a href="https://github.com/XiaobinZhao/my-gf.git">https://github.com/XiaobinZhao/my-gf.git</a></p>
+</li>
+</ul>
 <h1 id="一个成熟的项目应该具备哪些特点"><a href="#一个成熟的项目应该具备哪些特点" class="headerlink" title="一个成熟的项目应该具备哪些特点"></a>一个成熟的项目应该具备哪些特点</h1><p>一个成熟完整的项目需要事先有标准，有架构，有设计，虽然很多公司在起步的时候没有财力和资源建设独立的基础架构或平台架构部门，甚至运维团队都没有，但是这不妨碍我们心中有一个蓝图，知道努力的方向。</p>
 <p>参考：<a href="https://www.cnblogs.com/lovecindywang/p/10941007.html">朱晔的互联网架构实践心得S2E7:漫谈平台架构的工作)</a></p>
 <h3 id="规范"><a href="#规范" class="headerlink" title="规范"></a>规范</h3><ol>
