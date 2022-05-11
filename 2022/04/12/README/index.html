@@ -26,7 +26,7 @@
   <meta name="description" content="在团队中使用过Django&#x2F;FastAPI&#x2F;Spring，开发过或大或小的项目，并且也使用python整合了一套用于生产环境的框架。这些项目大部分都是前后端分离的，是一个提供RESTful API的web server。在go的世界里，开发web server，有很多选择，比如beego&#x2F;iris&#x2F;gin等，那么哪一个是一个合适的选择呢？直到我看到这片文章Golang框架选型比较: goframe">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GoFrame学习之路">
-<meta property="og:url" content="https://xiaobinzhao.github.io/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/index.html">
+<meta property="og:url" content="https://xiaobinzhao.github.io/2022/04/12/README/index.html">
 <meta property="og:site_name" content="路漫漫其修远兮">
 <meta property="og:description" content="在团队中使用过Django&#x2F;FastAPI&#x2F;Spring，开发过或大或小的项目，并且也使用python整合了一套用于生产环境的框架。这些项目大部分都是前后端分离的，是一个提供RESTful API的web server。在go的世界里，开发web server，有很多选择，比如beego&#x2F;iris&#x2F;gin等，那么哪一个是一个合适的选择呢？直到我看到这片文章Golang框架选型比较: goframe">
 <meta property="og:locale" content="zh_CN">
@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://gfcdn.johng.cn/download/attachments/30740166/image2022-1-18_10-38-49.png?version=1&modificationDate=1642473395894&api=v2">
 <meta property="og:image" content="https://goframe.org/download/attachments/1114387/image2021-6-8_22-53-43.png?version=1&modificationDate=1623163987980&api=v2">
 <meta property="article:published_time" content="2022-04-12T01:49:01.000Z">
-<meta property="article:modified_time" content="2022-05-09T03:35:39.499Z">
+<meta property="article:modified_time" content="2022-05-11T01:47:00.555Z">
 <meta property="article:author" content="琢灵">
 <meta property="article:tag" content="GoFrame">
 <meta property="article:tag" content="gf">
@@ -42,7 +42,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://gfcdn.johng.cn/download/attachments/30740166/image2022-1-18_0-47-31.png?version=1&modificationDate=1642437918159&api=v2">
 
-<link rel="canonical" href="https://xiaobinzhao.github.io/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">
+<link rel="canonical" href="https://xiaobinzhao.github.io/2022/04/12/README/">
 
 
 <script id="page-configurations">
@@ -201,7 +201,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiaobinzhao.github.io/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/">
+    <link itemprop="mainEntityOfPage" href="https://xiaobinzhao.github.io/2022/04/12/README/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/my-avatar.jpg">
@@ -232,7 +232,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-09 11:35:39" itemprop="dateModified" datetime="2022-05-09T11:35:39+08:00">2022-05-09</time>
+                <time title="修改时间：2022-05-11 09:47:00" itemprop="dateModified" datetime="2022-05-11T09:47:00+08:00">2022-05-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -260,8 +260,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/" itemprop="commentCount"></span>
+    <a title="valine" href="/2022/04/12/README/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/04/12/README/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -801,6 +801,20 @@
 <p>我们可以通过单例对象名称获取对应配置的<code>Logger</code>单例对象：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对应 logger.logger1 配置项</span></span><br><span class="line">l1 := g.Log(<span class="string">&quot;logger1&quot;</span>)</span><br><span class="line"><span class="comment">// 对应 logger.logger2 配置项</span></span><br><span class="line">l2 := g.Log(<span class="string">&quot;logger2&quot;</span>)</span><br><span class="line"><span class="comment">// 对应默认配置项 logger</span></span><br><span class="line">l3 := g.Log(<span class="string">&quot;none&quot;</span>)</span><br><span class="line"><span class="comment">// 对应默认配置项 logger</span></span><br><span class="line">l4 := g.Log()</span><br></pre></td></tr></table></figure>
 
+<p><strong>log这一部分需要特别说明一下。</strong> 在gf中，涉及到日志的几个部分：server、db以及log，可以发现每个部分都有单独的log配置，也就是说每一部分的log配置都可以和其他不一样。另外还有一部分是gf系统本身的，比如server启动时产生的，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">2022-05-07 11:35:20.949 [DEBU] SetServerRoot path: /root/go-workspace/MyGoFrame/myapp/resource/public</span><br><span class="line">2022-05-07 11:35:20.958 [INFO] swagger ui is serving at address: http://0.0.0.0:8199/redoc/</span><br><span class="line">2022-05-07 11:35:20.958 [INFO] openapi specification is serving at address: http://0.0.0.0:8199/api.json</span><br><span class="line">2022-05-07 11:35:20.959 [INFO] pid[22663]: http server started listening on [0.0.0.0:8199]</span><br><span class="line"></span><br><span class="line">    ADDRESS    | METHOD |      ROUTE       |                             HANDLER                             |            MIDDLEWARE             </span><br><span class="line">---------------|--------|------------------|-----------------------------------------------------------------|-----------------------------------</span><br><span class="line">  0.0.0.0:8199 | ALL    | /*               | github.com/gogf/gf/v2/net/ghttp.internalMiddlewareServerTracing | GLOBAL MIDDLEWARE                 </span><br><span class="line">---------------|--------|------------------|-----------------------------------------------------------------|-----------------------------------</span><br><span class="line">...省略...</span><br></pre></td></tr></table></figure>
+
+<p>所以总共有4个部分的日志，但是无论是那一部分，都是glog组件的实例。</p>
+<p>但是如果4个部分的log设置没有特殊区别，期望统一设置，实验下来发现并没有那么容易。经过在gf官网的confluence和gf的作者讨论，最终的结论是：</p>
+<ol>
+<li><p>gf系统有一个默认的handler，我们可以设置这个handler，来实现我们的目的，从而避免gf系统的日志脱离我们控制。gf作者的原话是：</p>
+<blockquote>
+<p>通过<code>v2.1</code>以上版本（目前可以尝试<code>master</code>分支）的<code>glog.SetDefaultHandler</code>设置全局的自定义处理方法来实现自定义日志打印。</p>
+</blockquote>
+</li>
+<li><p>统一了系统的log处理之后，相当于全局默认的log配置就被固定了，此时再使用配置文件的logger配置项，就可以进行配置项覆盖了。</p>
+</li>
+</ol>
 <h4 id="gf-build"><a href="#gf-build" class="headerlink" title="gf-build"></a>gf-build</h4><figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[gfcli.build]</span></span><br><span class="line">    <span class="attr">name</span>=      <span class="string">&quot;my-goframe&quot;</span></span><br><span class="line">    <span class="attr">arch</span>=      <span class="string">&quot;all&quot;</span></span><br><span class="line">    <span class="attr">system</span>=    <span class="string">&quot;all&quot;</span></span><br><span class="line">    <span class="attr">mod</span>=       <span class="string">&quot;none&quot;</span></span><br><span class="line">    <span class="attr">cgo</span>=       <span class="number">0</span></span><br><span class="line">    <span class="attr">pack</span>=      <span class="string">&quot;manifest/config,resource/i18n&quot;</span></span><br><span class="line">    <span class="attr">version</span>=   <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="attr">output</span>=    <span class="string">&quot;./bin&quot;</span></span><br><span class="line">    <span class="attr">extra</span>=     <span class="string">&quot;&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>配置选项的释义同命令行同名选项。</p>
@@ -1040,7 +1054,6 @@
 </ol>
 <p>大体流程如下：</p>
 <pre class="mermaid">sequenceDiagram
-    autonumber
     client ->> +server: login（username+password）
     Note right of server: 验证用户名+密码正确，<br/>并加密算出token；token存入缓存
     server -->> -client: 返回token
@@ -1050,7 +1063,7 @@
 
 
 
-<h4 id="独立部署"><a href="#独立部署" class="headerlink" title="独立部署"></a>独立部署</h4><p>推荐使用systemctl来控制服务进程，推荐参考<a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-commands.html">Systemd 入门教程：命令篇 - 阮一峰</a></p>
+<h3 id="14-部署"><a href="#14-部署" class="headerlink" title="14. 部署"></a>14. 部署</h3><h4 id="独立部署"><a href="#独立部署" class="headerlink" title="独立部署"></a>独立部署</h4><p>推荐使用systemctl来控制服务进程，推荐参考<a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-commands.html">Systemd 入门教程：命令篇 - 阮一峰</a></p>
 <ol>
 <li><p>书写shell脚本，控制服务启停，参考：<a target="_blank" rel="noopener" href="https://goframe.org/pages/viewpage.action?pageId=7296120">最快打包部署GoFrame项目到云服务器</a></p>
 </li>
@@ -1069,7 +1082,187 @@
 <li><p>接下来就可以愉快的使用systemctl来控制服务的启停了</p>
 </li>
 </ol>
-<h4 id="容器部署"><a href="#容器部署" class="headerlink" title="容器部署"></a>容器部署</h4>
+<h5 id="打包成deb"><a href="#打包成deb" class="headerlink" title="打包成deb"></a>打包成deb</h5><p>以上的过程可以打包成deb文件来进行更加方便、规范的部署。</p>
+<ol>
+<li><p>deb打包需要有 postinst(postinstallation)、 postrm(postremove)、preinst(preinstallation)、prerm(preremove)等几个控制文件。按照需要修改这几个文件。</p>
+<ol>
+<li><p>在postinst添加设置开机启动的命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment">################################</span></span><br><span class="line"><span class="comment"># Deb包文件解包之后，将会运行该脚本</span></span><br><span class="line"><span class="comment">################################</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置服务开机自启动</span></span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl <span class="built_in">enable</span> mygf-app.service</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;postinst done&quot;</span></span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在postrm中清空安装目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line"><span class="comment">################################</span></span><br><span class="line"><span class="comment"># 删除软件包关联文件之后执行</span></span><br><span class="line"><span class="comment">################################</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;postrm done&quot;</span></span><br><span class="line"><span class="comment"># 删除因为dpkg卸载自动清除之后遗留的目录</span></span><br><span class="line">rm -rf /opt/my-goframe</span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>其他文件按需修改</p>
+</li>
+</ol>
+</li>
+<li><p><code>dpkg-deb -b xxx</code>使用dpkg-deb命令即可得到deb包</p>
+</li>
+<li><p>以上过程可以写一个shell脚本来实现。具体可以查看本项目代码。</p>
+</li>
+</ol>
+<p>经过以上步骤即可得到一个deb包，使用dpkg -i来安装，然后使用systemctl命令来控制服务启停。perfect ~</p>
+<h4 id="容器部署"><a href="#容器部署" class="headerlink" title="容器部署"></a>容器部署</h4><ol>
+<li><p>书写Dockerfile</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">FROM</span> loads/alpine:<span class="number">3.8</span></span><br><span class="line"><span class="keyword">LABEL</span><span class="bash"> maintainer=<span class="string">&quot;xiaobin.zhao@cstack.io&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">###############################################################################</span></span><br><span class="line"><span class="comment">#                                INSTALLATION</span></span><br><span class="line"><span class="comment">###############################################################################</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置在容器内执行时当前的目录</span></span><br><span class="line"><span class="keyword">ENV</span> <span class="keyword">WORKDIR</span><span class="bash"> /opt/my-goFrame</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加应用可执行文件，并设置执行权限</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> ./bin/linux_amd64/mygf-app   <span class="variable">$WORKDIR</span>/mygf-app</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> chmod +x <span class="variable">$WORKDIR</span>/mygf-app</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># <span class="doctag">TODO:</span> 可能是gf build的问题，造成资源没有被pack,需要继续拷贝</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> ./resource/i18n   <span class="variable">$WORKDIR</span>/resource/i18n</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> ./resource/public   <span class="variable">$WORKDIR</span>/resource/public</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###############################################################################</span></span><br><span class="line"><span class="comment">#                                   START</span></span><br><span class="line"><span class="comment">###############################################################################</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> <span class="variable">$WORKDIR</span></span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> ./mygf-app</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>过程中发现gf build没有把资源文件pack进去，需要拷贝进容器</p>
+</li>
+<li><p>执行<code>gf docker</code>或者执行<code>gf build</code>和<code>docker build</code></p>
+</li>
+<li><p><code>docker run</code>即可得到容器实例</p>
+</li>
+</ol>
+<h3 id="15-压力测试"><a href="#15-压力测试" class="headerlink" title="15. 压力测试"></a>15. 压力测试</h3><p>使用jmeter做一下压力测试，看下简单业务查询（sql读）的能力。</p>
+<table>
+<thead>
+<tr>
+<th>并发</th>
+<th>请求个数</th>
+<th>平均时长</th>
+<th>最小时长</th>
+<th>最大时长</th>
+<th>QPS</th>
+<th>error %（503 Service Unavailable）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>100</td>
+<td>10000</td>
+<td>158</td>
+<td>22</td>
+<td>19214</td>
+<td>400.5</td>
+<td>0.02%</td>
+</tr>
+<tr>
+<td>50</td>
+<td>10000</td>
+<td>85</td>
+<td>27</td>
+<td>7080</td>
+<td>461.8</td>
+<td>0</td>
+</tr>
+<tr>
+<td>20</td>
+<td>10000</td>
+<td>30</td>
+<td>27</td>
+<td>259</td>
+<td>616.8</td>
+<td>0</td>
+</tr>
+<tr>
+<td>10</td>
+<td>10000</td>
+<td>31</td>
+<td>27</td>
+<td>505</td>
+<td>301.4</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<p>可以看到，qps还是表现不错的。</p>
+<p>以下是我使用<a target="_blank" rel="noopener" href="https://gitee.com/xiaobin_zhao/my-fast-api.git">fastapi</a>做的框架，测试的数据。</p>
+<table>
+<thead>
+<tr>
+<th><strong>异步（limit_concurrency=10）</strong></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>并发</td>
+<td>请求个数</td>
+<td>平均时长</td>
+<td>最小时长</td>
+<td>最大时长</td>
+<td>QPS</td>
+<td>error %（503 Service Unavailable）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1000</td>
+<td>38</td>
+<td>31</td>
+<td>113</td>
+<td>116.2925922</td>
+<td>0</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1000</td>
+<td>39</td>
+<td>28</td>
+<td>86</td>
+<td>205.3809817</td>
+<td>0.121</td>
+</tr>
+<tr>
+<td>15</td>
+<td>1050</td>
+<td>43</td>
+<td>28</td>
+<td>81</td>
+<td>242.2145329</td>
+<td>0.29047619</td>
+</tr>
+<tr>
+<td>20</td>
+<td>1000</td>
+<td>46</td>
+<td>28</td>
+<td>81</td>
+<td>308.9280198</td>
+<td>0.412</td>
+</tr>
+<tr>
+<td>50</td>
+<td>1000</td>
+<td>52</td>
+<td>28</td>
+<td>93</td>
+<td>485.9086492</td>
+<td>0.637</td>
+</tr>
+<tr>
+<td>100</td>
+<td>1000</td>
+<td>95</td>
+<td>28</td>
+<td>1082</td>
+<td>425.3509145</td>
+<td>0.641</td>
+</tr>
+<tr>
+<td>200</td>
+<td>1000</td>
+<td>56</td>
+<td>28</td>
+<td>88</td>
+<td>756.429652</td>
+<td>0.785</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>1000</td>
+<td>104</td>
+<td>54</td>
+<td>317</td>
+<td>823.723229</td>
+<td>0.878</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong></p>
+<p>虽然测试过程不严谨，控制变量也不对等，只是进行一个大概的压力测试结果。</p>
+<p>以上测试数据明显可以看出go的效率要比python要高。</p>
+<h1 id="完结，撒花…"><a href="#完结，撒花…" class="headerlink" title="完结，撒花…"></a>完结，撒花…</h1>
     </div>
 
     
@@ -1099,7 +1292,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://xiaobinzhao.github.io/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/" title="GoFrame学习之路">https://xiaobinzhao.github.io/2022/04/12/goFrame学习之路/</a>
+    <a href="https://xiaobinzhao.github.io/2022/04/12/README/" title="GoFrame学习之路">https://xiaobinzhao.github.io/2022/04/12/README/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -1121,10 +1314,13 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/04/12/README/" rel="prev" title="GoFrame学习之路">
-      <i class="fa fa-chevron-left"></i> GoFrame学习之路
+    <a href="/2021/12/14/qemu%20%20Machine%20Type/" rel="prev" title="qemu  Machine Type">
+      <i class="fa fa-chevron-left"></i> qemu  Machine Type
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/" rel="next" title="GoFrame学习之路">
+      GoFrame学习之路 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -1184,7 +1380,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E6%88%90%E7%86%9F%E7%9A%84%E9%A1%B9%E7%9B%AE%E5%BA%94%E8%AF%A5%E5%85%B7%E5%A4%87%E5%93%AA%E4%BA%9B%E7%89%B9%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">一个成熟的项目应该具备哪些特点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%84%E8%8C%83"><span class="nav-number">1.0.1.</span> <span class="nav-text">规范</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%A1%86%E6%9E%B6"><span class="nav-number">1.0.2.</span> <span class="nav-text">基础框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%B6"><span class="nav-number">1.0.3.</span> <span class="nav-text">中间件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E7%BB%B4"><span class="nav-number">1.0.4.</span> <span class="nav-text">运维</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.0.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#go%E8%AF%AD%E8%A8%80%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.</span> <span class="nav-text">go语言安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#apt-get%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.1.</span> <span class="nav-text">apt-get安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.2.</span> <span class="nav-text">手动安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9GoFrame"><span class="nav-number">2.2.</span> <span class="nav-text">为什么选择GoFrame</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-Frame-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-number">2.3.</span> <span class="nav-text">Go Frame 目录结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E6%8E%A5%E5%8F%A3-api"><span class="nav-number">2.3.1.</span> <span class="nav-text">业务接口 - api</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E5%B0%81%E8%A3%85-service"><span class="nav-number">2.3.2.</span> <span class="nav-text">逻辑封装 - service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE-dao"><span class="nav-number">2.3.3.</span> <span class="nav-text">数据访问 - dao</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E6%A8%A1%E5%9E%8B-model"><span class="nav-number">2.3.4.</span> <span class="nav-text">结构模型 - model</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E5%88%86%E5%B1%82%E6%B5%81%E8%BD%AC"><span class="nav-number">2.4.</span> <span class="nav-text">请求分层流转</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cmd"><span class="nav-number">2.4.1.</span> <span class="nav-text">cmd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#api"><span class="nav-number">2.4.2.</span> <span class="nav-text">api</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#controller"><span class="nav-number">2.4.3.</span> <span class="nav-text">controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#model"><span class="nav-number">2.4.4.</span> <span class="nav-text">model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service"><span class="nav-number">2.4.5.</span> <span class="nav-text">service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dao"><span class="nav-number">2.4.6.</span> <span class="nav-text">dao</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-Frame%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E7%AD%94"><span class="nav-number">2.5.</span> <span class="nav-text">Go Frame常见问题解答</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A1%86%E6%9E%B6%E6%98%AF%E5%90%A6%E6%94%AF%E6%8C%81%E5%B8%B8%E8%A7%81%E7%9A%84MVC%E5%BC%80%E5%8F%91%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.5.1.</span> <span class="nav-text">1. 框架是否支持常见的MVC开发模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%A6%82%E4%BD%95%E6%B8%85%E6%99%B0%E7%95%8C%E5%AE%9A%E5%92%8C%E7%AE%A1%E7%90%86service%E5%92%8Ccontroller%E7%9A%84%E5%88%86%E5%B1%82%E8%81%8C%E8%B4%A3"><span class="nav-number">2.5.2.</span> <span class="nav-text">2. 如何清晰界定和管理service和controller的分层职责</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A6%82%E4%BD%95%E6%B8%85%E6%99%B0%E7%95%8C%E5%AE%9A%E5%92%8C%E7%AE%A1%E7%90%86service%E5%92%8Cdao%E7%9A%84%E5%88%86%E5%B1%82%E8%81%8C%E8%B4%A3"><span class="nav-number">2.5.3.</span> <span class="nav-text">3. 如何清晰界定和管理service和dao的分层职责</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E5%BC%80%E5%8F%91"><span class="nav-number">3.</span> <span class="nav-text">开始开发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-gf-cli%E5%AE%89%E8%A3%85"><span class="nav-number">3.1.</span> <span class="nav-text">1. gf-cli安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%95%B0%E6%8D%AE%E5%BA%93%E8%A1%A8%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.2.</span> <span class="nav-text">2. 数据库表设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-gf-cli%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90dao-do-entity"><span class="nav-number">3.3.</span> <span class="nav-text">3. gf cli自动生成dao&#x2F;do&#x2F;entity</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%BC%80%E5%A7%8B%E4%BB%A3%E7%A0%81%E5%BC%80%E5%8F%91"><span class="nav-number">3.4.</span> <span class="nav-text">4. 开始代码开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-main"><span class="nav-number">3.4.1.</span> <span class="nav-text">1. main</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%B7%AF%E7%94%B1"><span class="nav-number">3.4.2.</span> <span class="nav-text">2. 路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-middleware"><span class="nav-number">3.4.3.</span> <span class="nav-text">3. middleware</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-openAPIDoc-swagger"><span class="nav-number">3.4.4.</span> <span class="nav-text">4. openAPIDoc(swagger)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-controller"><span class="nav-number">3.4.5.</span> <span class="nav-text">5. controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-service"><span class="nav-number">3.4.6.</span> <span class="nav-text">6. service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-inputModel%E5%92%8CoutputModel"><span class="nav-number">3.4.7.</span> <span class="nav-text">7. inputModel和outputModel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-dao-do-entity%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90"><span class="nav-number">3.4.8.</span> <span class="nav-text">8. dao&#x2F;do&#x2F;entity自动生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-errCode"><span class="nav-number">3.4.9.</span> <span class="nav-text">9. errCode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-I18N"><span class="nav-number">3.4.10.</span> <span class="nav-text">10. I18N</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="nav-number">3.4.11.</span> <span class="nav-text">11. 配置管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#server"><span class="nav-number">3.4.11.1.</span> <span class="nav-text">server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#db"><span class="nav-number">3.4.11.2.</span> <span class="nav-text">db</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#log"><span class="nav-number">3.4.11.3.</span> <span class="nav-text">log</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gf-build"><span class="nav-number">3.4.11.4.</span> <span class="nav-text">gf-build</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gf-cli"><span class="nav-number">3.4.11.5.</span> <span class="nav-text">gf-cli</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="nav-number">3.4.12.</span> <span class="nav-text">12. 单元测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-token%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81"><span class="nav-number">3.4.13.</span> <span class="nav-text">13. token身份验证</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8B%AC%E7%AB%8B%E9%83%A8%E7%BD%B2"><span class="nav-number">3.4.13.1.</span> <span class="nav-text">独立部署</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E9%83%A8%E7%BD%B2"><span class="nav-number">3.4.13.2.</span> <span class="nav-text">容器部署</span></a></li></ol></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E6%88%90%E7%86%9F%E7%9A%84%E9%A1%B9%E7%9B%AE%E5%BA%94%E8%AF%A5%E5%85%B7%E5%A4%87%E5%93%AA%E4%BA%9B%E7%89%B9%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">一个成熟的项目应该具备哪些特点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%84%E8%8C%83"><span class="nav-number">1.0.1.</span> <span class="nav-text">规范</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%A1%86%E6%9E%B6"><span class="nav-number">1.0.2.</span> <span class="nav-text">基础框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%B6"><span class="nav-number">1.0.3.</span> <span class="nav-text">中间件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E7%BB%B4"><span class="nav-number">1.0.4.</span> <span class="nav-text">运维</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.0.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#go%E8%AF%AD%E8%A8%80%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.</span> <span class="nav-text">go语言安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#apt-get%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.1.</span> <span class="nav-text">apt-get安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.2.</span> <span class="nav-text">手动安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9GoFrame"><span class="nav-number">2.2.</span> <span class="nav-text">为什么选择GoFrame</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-Frame-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-number">2.3.</span> <span class="nav-text">Go Frame 目录结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E6%8E%A5%E5%8F%A3-api"><span class="nav-number">2.3.1.</span> <span class="nav-text">业务接口 - api</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E5%B0%81%E8%A3%85-service"><span class="nav-number">2.3.2.</span> <span class="nav-text">逻辑封装 - service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE-dao"><span class="nav-number">2.3.3.</span> <span class="nav-text">数据访问 - dao</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E6%A8%A1%E5%9E%8B-model"><span class="nav-number">2.3.4.</span> <span class="nav-text">结构模型 - model</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E5%88%86%E5%B1%82%E6%B5%81%E8%BD%AC"><span class="nav-number">2.4.</span> <span class="nav-text">请求分层流转</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cmd"><span class="nav-number">2.4.1.</span> <span class="nav-text">cmd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#api"><span class="nav-number">2.4.2.</span> <span class="nav-text">api</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#controller"><span class="nav-number">2.4.3.</span> <span class="nav-text">controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#model"><span class="nav-number">2.4.4.</span> <span class="nav-text">model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#service"><span class="nav-number">2.4.5.</span> <span class="nav-text">service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dao"><span class="nav-number">2.4.6.</span> <span class="nav-text">dao</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-Frame%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E7%AD%94"><span class="nav-number">2.5.</span> <span class="nav-text">Go Frame常见问题解答</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A1%86%E6%9E%B6%E6%98%AF%E5%90%A6%E6%94%AF%E6%8C%81%E5%B8%B8%E8%A7%81%E7%9A%84MVC%E5%BC%80%E5%8F%91%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.5.1.</span> <span class="nav-text">1. 框架是否支持常见的MVC开发模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%A6%82%E4%BD%95%E6%B8%85%E6%99%B0%E7%95%8C%E5%AE%9A%E5%92%8C%E7%AE%A1%E7%90%86service%E5%92%8Ccontroller%E7%9A%84%E5%88%86%E5%B1%82%E8%81%8C%E8%B4%A3"><span class="nav-number">2.5.2.</span> <span class="nav-text">2. 如何清晰界定和管理service和controller的分层职责</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A6%82%E4%BD%95%E6%B8%85%E6%99%B0%E7%95%8C%E5%AE%9A%E5%92%8C%E7%AE%A1%E7%90%86service%E5%92%8Cdao%E7%9A%84%E5%88%86%E5%B1%82%E8%81%8C%E8%B4%A3"><span class="nav-number">2.5.3.</span> <span class="nav-text">3. 如何清晰界定和管理service和dao的分层职责</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E5%BC%80%E5%8F%91"><span class="nav-number">3.</span> <span class="nav-text">开始开发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-gf-cli%E5%AE%89%E8%A3%85"><span class="nav-number">3.1.</span> <span class="nav-text">1. gf-cli安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%95%B0%E6%8D%AE%E5%BA%93%E8%A1%A8%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.2.</span> <span class="nav-text">2. 数据库表设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-gf-cli%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90dao-do-entity"><span class="nav-number">3.3.</span> <span class="nav-text">3. gf cli自动生成dao&#x2F;do&#x2F;entity</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%BC%80%E5%A7%8B%E4%BB%A3%E7%A0%81%E5%BC%80%E5%8F%91"><span class="nav-number">3.4.</span> <span class="nav-text">4. 开始代码开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-main"><span class="nav-number">3.4.1.</span> <span class="nav-text">1. main</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%B7%AF%E7%94%B1"><span class="nav-number">3.4.2.</span> <span class="nav-text">2. 路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-middleware"><span class="nav-number">3.4.3.</span> <span class="nav-text">3. middleware</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-openAPIDoc-swagger"><span class="nav-number">3.4.4.</span> <span class="nav-text">4. openAPIDoc(swagger)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-controller"><span class="nav-number">3.4.5.</span> <span class="nav-text">5. controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-service"><span class="nav-number">3.4.6.</span> <span class="nav-text">6. service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-inputModel%E5%92%8CoutputModel"><span class="nav-number">3.4.7.</span> <span class="nav-text">7. inputModel和outputModel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-dao-do-entity%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90"><span class="nav-number">3.4.8.</span> <span class="nav-text">8. dao&#x2F;do&#x2F;entity自动生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-errCode"><span class="nav-number">3.4.9.</span> <span class="nav-text">9. errCode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-I18N"><span class="nav-number">3.4.10.</span> <span class="nav-text">10. I18N</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="nav-number">3.4.11.</span> <span class="nav-text">11. 配置管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#server"><span class="nav-number">3.4.11.1.</span> <span class="nav-text">server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#db"><span class="nav-number">3.4.11.2.</span> <span class="nav-text">db</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#log"><span class="nav-number">3.4.11.3.</span> <span class="nav-text">log</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gf-build"><span class="nav-number">3.4.11.4.</span> <span class="nav-text">gf-build</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gf-cli"><span class="nav-number">3.4.11.5.</span> <span class="nav-text">gf-cli</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="nav-number">3.4.12.</span> <span class="nav-text">12. 单元测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-token%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81"><span class="nav-number">3.4.13.</span> <span class="nav-text">13. token身份验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-%E9%83%A8%E7%BD%B2"><span class="nav-number">3.4.14.</span> <span class="nav-text">14. 部署</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8B%AC%E7%AB%8B%E9%83%A8%E7%BD%B2"><span class="nav-number">3.4.14.1.</span> <span class="nav-text">独立部署</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%89%93%E5%8C%85%E6%88%90deb"><span class="nav-number">3.4.14.1.1.</span> <span class="nav-text">打包成deb</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E9%83%A8%E7%BD%B2"><span class="nav-number">3.4.14.2.</span> <span class="nav-text">容器部署</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95"><span class="nav-number">3.4.15.</span> <span class="nav-text">15. 压力测试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%8C%E7%BB%93%EF%BC%8C%E6%92%92%E8%8A%B1%E2%80%A6"><span class="nav-number">4.</span> <span class="nav-text">完结，撒花…</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
