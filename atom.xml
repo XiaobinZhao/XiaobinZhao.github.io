@@ -205,6 +205,29 @@
   </entry>
   
   <entry>
+    <title>python异步编程</title>
+    <link href="https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/"/>
+    <id>https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/</id>
+    <published>2020-10-20T01:49:01.000Z</published>
+    <updated>2022-05-24T09:19:32.362Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;什么是异步编程&quot;&gt;&lt;a href=&quot;#什么是异步编程&quot; class=&quot;headerlink&quot; title=&quot;什么是异步编程&quot;&gt;&lt;/a&gt;什么是异步编程&lt;/h1&gt;&lt;p&gt;提到异步，那么就有同步。需要了解一下几个名词：同步/异步、阻塞/非阻塞。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="架构" scheme="https://xiaobinzhao.github.io/categories/%E6%9E%B6%E6%9E%84/"/>
+    
+    <category term="python" scheme="https://xiaobinzhao.github.io/categories/python/"/>
+    
+    
+    <category term="python" scheme="https://xiaobinzhao.github.io/tags/python/"/>
+    
+    <category term="异步编程" scheme="https://xiaobinzhao.github.io/tags/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
     <title>hexo-Next + Github Page制作个人网站使用记录</title>
     <link href="https://xiaobinzhao.github.io/2020/10/20/hexo/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/hexo/</id>
@@ -352,29 +375,6 @@
     <category term="redis lock" scheme="https://xiaobinzhao.github.io/tags/redis-lock/"/>
     
     <category term="etcd lock" scheme="https://xiaobinzhao.github.io/tags/etcd-lock/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>python异步编程</title>
-    <link href="https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/"/>
-    <id>https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/</id>
-    <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2022-05-24T07:54:54.035Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;什么是异步编程&quot;&gt;&lt;a href=&quot;#什么是异步编程&quot; class=&quot;headerlink&quot; title=&quot;什么是异步编程&quot;&gt;&lt;/a&gt;什么是异步编程&lt;/h1&gt;&lt;p&gt;提到异步，那么就有同步。需要了解一下几个名词：同步/异步、阻塞/非阻塞。&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="架构" scheme="https://xiaobinzhao.github.io/categories/%E6%9E%B6%E6%9E%84/"/>
-    
-    <category term="python" scheme="https://xiaobinzhao.github.io/categories/python/"/>
-    
-    
-    <category term="python" scheme="https://xiaobinzhao.github.io/tags/python/"/>
-    
-    <category term="异步编程" scheme="https://xiaobinzhao.github.io/tags/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/"/>
     
   </entry>
   
