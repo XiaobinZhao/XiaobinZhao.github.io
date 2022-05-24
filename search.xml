@@ -7,6 +7,18 @@
 <a id="more"></a>
 
 <p>具体解释参看 io模型与阻塞相关章节。</p>
+<h2 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h2><ul>
+<li>程序未得到所需计算资源时被挂起的状态。</li>
+<li><strong>程序在等待某个操作完成期间，自身无法继续干别的事情，则称该程序在该操作上是阻塞的。</strong></li>
+<li>常见的阻塞形式有：网络I/O阻塞、磁盘I/O阻塞、用户输入阻塞等。</li>
+</ul>
+<p>阻塞是无处不在的，包括CPU切换上下文时，所有的进程都无法真正干事情，它们也会被阻塞。（如果是多核CPU则正在执行上下文切换操作的核不可被利用。）</p>
+<h2 id="非阻塞"><a href="#非阻塞" class="headerlink" title="非阻塞"></a>非阻塞</h2><ul>
+<li><strong>程序在等待某操作过程中，自身不被阻塞，可以继续运行干别的事情，则称该程序在该操作上是非阻塞的。</strong></li>
+<li>非阻塞并<strong>不是</strong>在任何程序级别、任何情况下都可以存在的。</li>
+<li>仅当程序封装的级别可以囊括独立的子程序单元时，它才可能存在非阻塞状态。</li>
+</ul>
+<p>非阻塞的存在是因为阻塞存在，正因为某个操作阻塞导致的耗时与效率低下，我们才要把它变成非阻塞的。</p>
 <h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><ul>
 <li>并发描述的是程序的组织结构。指程序要被设计成多个可独立执行的子任务。</li>
 <li>以利用有限的计算机资源使多个任务可以被实时或近实时执行为目的。</li>
@@ -2682,6 +2694,46 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
       </tags>
   </entry>
   <entry>
+    <title>hexo-Next + Github Page制作个人网站使用记录</title>
+    <url>/2020/10/20/hexo/</url>
+    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
+<li>在github上创建仓库</li>
+<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
+<li>仓库新建分支gh-page</li>
+<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
+<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
+</ol>
+<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
+<li><p>修改内容自动重载并启动server</p>
+<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
+<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
+<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
+</li>
+</ol>
+<a id="more"></a>
+
+<ol start="2">
+<li><p>背景动画</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>其他可以参考</p>
+<ul>
+<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
+<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
+<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
+</ul>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>Next</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>IO模型</title>
     <url>/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</url>
     <content><![CDATA[<h1 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h1><p>在Linux(UNIX)操作系统中，共有五种IO模型，分别是：阻塞IO模型、非阻塞IO模型、IO复用模型、信号驱动IO模型以及异步IO模型。</p>
@@ -2737,46 +2789,6 @@ sprint-review-metting --> retrospective-meeting(Retrospective Meeting: 回顾会
         <tag>非阻塞</tag>
         <tag>同步</tag>
         <tag>异步</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>hexo-Next + Github Page制作个人网站使用记录</title>
-    <url>/2020/10/20/hexo/</url>
-    <content><![CDATA[<h1 id="github-page"><a href="#github-page" class="headerlink" title="github page"></a>github page</h1><ol>
-<li>在github上创建仓库</li>
-<li>仓库命名为：<code>&#123;github用户名&#125;.github.io</code>, 比如 <code>XiaobinZhao.github.io</code></li>
-<li>仓库新建分支gh-page</li>
-<li>在仓库的settings –&gt; options –&gt; github pages 设置仓库的gh-page分支为发布分支，并save</li>
-<li>打开<code>https://&#123;github用户名&#125;.github.io</code>即可享用， 比如<code>https://xiaobinzhao.github.io/</code></li>
-</ol>
-<h1 id="hexo-Next-主题使用记录"><a href="#hexo-Next-主题使用记录" class="headerlink" title="hexo-Next 主题使用记录"></a>hexo-Next 主题使用记录</h1><ol>
-<li><p>修改内容自动重载并启动server</p>
-<p>安装 <code>hexo-browsersync</code>即可：<code>npm install hexo-browsersync</code></p>
-<p>安装成功之后，只需要正常执行 <code>hexo server</code> 或 <code>hexo s</code> 就能查看效果了。</p>
-<p>经过测试，当保存文章的 Markdown 文件时，网页会自动刷新。另外，修改主题配置文件并保存之后，网页也会自动刷新，非常 nice。唯一一个缺憾是修改站点配置文件没办法触发网页的自动刷新，需要重新执行 <code>hexo g</code>。</p>
-</li>
-</ol>
-<a id="more"></a>
-
-<ol start="2">
-<li><p>背景动画</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># JavaScript 3D library.</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/theme-next/theme-next-three</span></span><br><span class="line"><span class="attr">three:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="string">fasle</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="literal">false</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">vendors:</span></span><br><span class="line">  <span class="attr">three:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js</span></span><br><span class="line">  <span class="attr">three_waves:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js</span></span><br><span class="line">  <span class="attr">canvas_lines:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_lines.min.js</span></span><br><span class="line">  <span class="attr">canvas_sphere:</span> <span class="string">//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/canvas_sphere.min.js</span>	</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>其他可以参考</p>
-<ul>
-<li><a href="https://wylu.me/posts/e0424f3f/"> NexT主题进阶配置 </a></li>
-<li><a href="https://hexo.io/zh-cn/docs/front-matterh"> hexo文档 </a></li>
-<li><a href="http://theme-next.iissnan.com/"> next  IIssNan文档 </a></li>
-</ul>
-</li>
-</ol>
-]]></content>
-      <categories>
-        <category>hexo</category>
-      </categories>
-      <tags>
-        <tag>hexo</tag>
-        <tag>Next</tag>
       </tags>
   </entry>
   <entry>
