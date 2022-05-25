@@ -143,7 +143,7 @@ print(isinstance(gen, Iterator))#output:True
 
 （4）`.send()`和`next()`一样，都能让生成器继续往下走一步（下次遇到yield停），但`send()`能传一个值，这个值作为`yield`表达式整体的结果
 
-　　——换句话说，就是send可以强行修改上一个yield表达式值。比如函数中有一个yield赋值，a = yield 5，第一次迭代到这里会返回5，a还没有赋值。第二次迭代时，使用.send(10)，那么，就是强行修改yield 5表达式的值为10，本来是5的，那么a=10
+　　——换句话说，就是send可以强行修改上一个yield表达式值。比如函数中有一个yield赋值，a = yield 5，第一次迭代到这里会返回5，a还没有赋值。第二次迭代时，使用.send(10)，那么，就是强行修改yield 5表达式的值为10，那么a=10
 
 ```python
 >>> def test():

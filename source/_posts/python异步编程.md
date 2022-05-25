@@ -546,7 +546,7 @@ class Task:
 
 再看`fetch()`生成器，其内部写完了所有的业务逻辑，包括如何发送请求，如何读取响应。而且注册给`selector`的回调相当简单，就是给对应的`future`对象绑定结果值。两个`yield`表达式都是返回对应的`future`对象，然后返回`Task.step()`之内，这样`Task`, `Future`, `Coroutine`三者精妙地串联在了一起。
 
-初始化`Task`对象以后，把`fetch()`给驱动到了第44行`yied f`就完事了，接下来怎么继续？
+初始化`Task`对象以后，把`fetch()`给驱动到了`selector.register(sock.fileno(), EVENT_WRITE, on_connected)`之后的`yied f`就完事了，接下来怎么继续？
 
 ### 事件循环(Event Loop)驱动协程运行
 
@@ -576,7 +576,7 @@ def loop():
 - 请求和响应也不得不分为两个回调以至于破坏了同步代码那种结构
 - 程序员必须在回调之间维护必须的状态。
 
-还有更多示例中没有展示，但确实存在的问题，参见4.1节。
+还有更多示例中没有展示，但确实存在的问题，参见第3节。
 
 而基于生成器协程的风格：
 
@@ -603,9 +603,9 @@ Python 语言的设计者们也认识到了这个问题，再次秉承着“程�
 yield from 是Python 3.3新引入的语法（PEP380）。它主要解决的就是在生成器里玩生成器不方便的问题。它有两大主要功能。
 
 第一个功能是：让嵌套生成器不必通过循环迭代yield，而是直接yield  from。以下两种在生成器里玩子生成器的方式是等价的。
-```
+```python
 def gen_one():
-    subgen = range(10)    
+    subgen = range(10)   # range 惰性求值; 是可迭代对象(__iter__)而不是迭代器(`__iter__`+`__next__`) 
     yield from subgen
 
 def gen_two():
@@ -614,7 +614,7 @@ def gen_two():
         yield item
 ```
 第二个功能就是在子生成器和原生成器的调用者之间打开双向通道，两者可以直接通信。
-```
+```python
 def gen():
     yield from subgen()
 
@@ -682,6 +682,7 @@ def read_all(sock):
 三个关键点的抽象已经完成，现在重构`Crawler`类：
 
 ```python
+
 class Crawler:
     def __init__(self, url):
         self.url = url
@@ -699,7 +700,7 @@ class Crawler:
             stopped = True
 ```
 
-面代码整体来讲没什么问题，可复用的代码已经抽象出去，作为子生成器也可以使用 `yield from` 语法来获取值。但另外有个点需要**注意**：在第24和第35行返回future对象的时候，我们了`yield from f` 而不是原来的`yield f`。`yield`可以直接作用于普通Python对象，而`yield from`却不行，所以我们对`Future`还要进一步改造，把它变成一个`iterable`对象就可以了。
+上面代码整体来讲没什么问题，可复用的代码已经抽象出去，作为子生成器也可以使用 `yield from` 语法来获取值。但另外有个点需要**注意**：在返回future对象的时候，我们改成了`yield from f` 而不是原来的`yield f`。`yield`可以直接作用于普通Python对象，而`yield from`却不行，所以我们对`Future`还要进一步改造，把它变成一个`iterable`对象就可以了。
 
 ```python
 class Future:
