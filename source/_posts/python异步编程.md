@@ -1,7 +1,6 @@
 ---
 title: python异步编程
 date: 2020-10-20 09:49:01
-top: true
 tag: 
 - python
 - 异步编程
