@@ -115,14 +115,14 @@
   </entry>
   
   <entry>
-    <title>cloudbase-init 源码研究</title>
-    <link href="https://xiaobinzhao.github.io/2020/12/04/cloudbase-init%20%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
-    <id>https://xiaobinzhao.github.io/2020/12/04/cloudbase-init%20%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/</id>
+    <title>cloud-init原理和cloudbase-init 源码研究</title>
+    <link href="https://xiaobinzhao.github.io/2020/12/04/cloudbase-init%20%E5%8E%9F%E7%90%86%E5%92%8C%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/"/>
+    <id>https://xiaobinzhao.github.io/2020/12/04/cloudbase-init%20%E5%8E%9F%E7%90%86%E5%92%8C%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6/</id>
     <published>2020-12-04T10:40:01.000Z</published>
-    <updated>2020-12-08T01:30:38.276Z</updated>
+    <updated>2022-06-10T07:09:21.070Z</updated>
     
     
-    <summary type="html">&lt;h1 id=&quot;cloudbase-init-源码研究&quot;&gt;&lt;a href=&quot;#cloudbase-init-源码研究&quot; class=&quot;headerlink&quot; title=&quot;cloudbase-init 源码研究&quot;&gt;&lt;/a&gt;cloudbase-init 源码研究&lt;/h1&gt;&lt;p&gt;cloudbase-init是cloud-init的windows版本实现，与cloudinit有一些区别，官方文档请参看&lt;a href=&quot;https://cloudbase-init.readthedocs.io/&quot;&gt;https://cloudbase-init.readthedocs.io/&lt;/a&gt;&lt;/p&gt;</summary>
+    <summary type="html">&lt;h1 id=&quot;cloud-init原理和cloudbase-init-源码研究&quot;&gt;&lt;a href=&quot;#cloud-init原理和cloudbase-init-源码研究&quot; class=&quot;headerlink&quot; title=&quot;cloud-init原理和cloudbase-init 源码研究&quot;&gt;&lt;/a&gt;cloud-init原理和cloudbase-init 源码研究&lt;/h1&gt;&lt;p&gt;cloud-init是专为云环境中虚拟机的初始化而开发的工具，它从各种数据源（HTTP 或者ConfigDrive）读取相关数据并据此对虚拟机进行配置。向一台数据服务器获取元数据（meta data）和用户数据（user data），前者是指VM的必要信息，如主机名、网络地址等；后者是系统或用户需要的数据和文件，如用户组信息、启动脚本等。当cloud-init获取这些信息后，开始使用一些模块对数据进行处理，如新建用户、启动脚本等。常见的配置包括：设定虚拟机的hostname、hosts文件、设定用户名密码、更新apt -get的本地缓存等。&lt;/p&gt;</summary>
     
     
     
@@ -130,6 +130,16 @@
     
     
     <category term="cloudbase-init" scheme="https://xiaobinzhao.github.io/tags/cloudbase-init/"/>
+    
+    <category term="cloud-init" scheme="https://xiaobinzhao.github.io/tags/cloud-init/"/>
+    
+    <category term="169.254.169.254" scheme="https://xiaobinzhao.github.io/tags/169-254-169-254/"/>
+    
+    <category term="ConfigDrive" scheme="https://xiaobinzhao.github.io/tags/ConfigDrive/"/>
+    
+    <category term="虚拟化" scheme="https://xiaobinzhao.github.io/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/"/>
+    
+    <category term="云计算" scheme="https://xiaobinzhao.github.io/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/"/>
     
   </entry>
   
@@ -205,6 +215,27 @@
   </entry>
   
   <entry>
+    <title>hexo-Next + Github Page制作个人网站使用记录</title>
+    <link href="https://xiaobinzhao.github.io/2020/10/20/hexo/"/>
+    <id>https://xiaobinzhao.github.io/2020/10/20/hexo/</id>
+    <published>2020-10-20T01:49:01.000Z</published>
+    <updated>2020-10-21T03:59:56.466Z</updated>
+    
+    
+    <summary type="html">记录使用github page发布个人网站的方法和调整hexo-Next主题的步骤</summary>
+    
+    
+    
+    <category term="hexo" scheme="https://xiaobinzhao.github.io/categories/hexo/"/>
+    
+    
+    <category term="hexo" scheme="https://xiaobinzhao.github.io/tags/hexo/"/>
+    
+    <category term="Next" scheme="https://xiaobinzhao.github.io/tags/Next/"/>
+    
+  </entry>
+  
+  <entry>
     <title>IO模型</title>
     <link href="https://xiaobinzhao.github.io/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/io%20%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%98%BB%E5%A1%9E%E3%80%81%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81%E5%90%8C%E6%AD%A5%E3%80%81%E5%BC%82%E6%AD%A5/</id>
@@ -228,27 +259,6 @@
     <category term="同步" scheme="https://xiaobinzhao.github.io/tags/%E5%90%8C%E6%AD%A5/"/>
     
     <category term="异步" scheme="https://xiaobinzhao.github.io/tags/%E5%BC%82%E6%AD%A5/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>hexo-Next + Github Page制作个人网站使用记录</title>
-    <link href="https://xiaobinzhao.github.io/2020/10/20/hexo/"/>
-    <id>https://xiaobinzhao.github.io/2020/10/20/hexo/</id>
-    <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2020-10-21T03:59:56.466Z</updated>
-    
-    
-    <summary type="html">记录使用github page发布个人网站的方法和调整hexo-Next主题的步骤</summary>
-    
-    
-    
-    <category term="hexo" scheme="https://xiaobinzhao.github.io/categories/hexo/"/>
-    
-    
-    <category term="hexo" scheme="https://xiaobinzhao.github.io/tags/hexo/"/>
-    
-    <category term="Next" scheme="https://xiaobinzhao.github.io/tags/Next/"/>
     
   </entry>
   
