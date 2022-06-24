@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2022-05-25T06:53:06.624Z</updated>
+  <updated>2022-06-24T05:48:14.853Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title></title>
+    <link href="https://xiaobinzhao.github.io/2022/06/24/linux%E7%A7%AF%E7%B4%AF/"/>
+    <id>https://xiaobinzhao.github.io/2022/06/24/linux%E7%A7%AF%E7%B4%AF/</id>
+    <published>2022-06-24T05:36:13.750Z</published>
+    <updated>2022-06-24T05:48:14.853Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;linux-下载deb和其依赖&quot;&gt;&lt;a href=&quot;#linux-下载deb和其依赖&quot; class=&quot;headerlink&quot; title=&quot;linux 下载deb和其依赖&quot;&gt;&lt;/a&gt;linux</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>GoFrame学习之路</title>
