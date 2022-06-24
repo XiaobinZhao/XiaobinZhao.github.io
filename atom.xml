@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2022-06-24T05:48:14.853Z</updated>
+  <updated>2022-06-24T08:57:19.402Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -17,23 +17,37 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
+    <title>linux 下载deb和其依赖</title>
     <link href="https://xiaobinzhao.github.io/2022/06/24/linux%E7%A7%AF%E7%B4%AF/"/>
     <id>https://xiaobinzhao.github.io/2022/06/24/linux%E7%A7%AF%E7%B4%AF/</id>
-    <published>2022-06-24T05:36:13.750Z</published>
-    <updated>2022-06-24T05:48:14.853Z</updated>
+    <published>2022-06-24T01:49:01.000Z</published>
+    <updated>2022-06-24T08:57:19.402Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;linux-下载deb和其依赖&quot;&gt;&lt;a href=&quot;#linux-下载deb和其依赖&quot; class=&quot;headerlink&quot; title=&quot;linux 下载deb和其依赖&quot;&gt;&lt;/a&gt;linux</summary>
-        
-      
+    <summary type="html">&lt;h1 id=&quot;linux-下载deb和其依赖&quot;&gt;&lt;a href=&quot;#linux-下载deb和其依赖&quot; class=&quot;headerlink&quot; title=&quot;linux 下载deb和其依赖&quot;&gt;&lt;/a&gt;linux 下载deb和其依赖&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;安装apt-rdepends&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;apt install apt-rdepends&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;下载依赖，比如vim&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;apt download $(apt-rdepends vim | grep -v &amp;quot;^ &amp;quot;)&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;如果出现错误比如：&lt;code&gt;E: Can&amp;#39;t select candidate version from package debconf-2.0 as it has no candidate&lt;/code&gt;可以使用一下命令：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;apt-get download $(apt-rdepends vim | grep -v &amp;quot;^ &amp;quot; | sed &amp;#39;s/debconf-2.0/debconf/g&amp;#39;)&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;拷贝deb文件到新的环境，安装之：&lt;code&gt;dpkg -i *&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</summary>
     
     
     
+    <category term="linux" scheme="https://xiaobinzhao.github.io/categories/linux/"/>
+    
+    
+    <category term="linux" scheme="https://xiaobinzhao.github.io/tags/linux/"/>
+    
+    <category term="deb" scheme="https://xiaobinzhao.github.io/tags/deb/"/>
+    
+    <category term="depends" scheme="https://xiaobinzhao.github.io/tags/depends/"/>
     
   </entry>
   
