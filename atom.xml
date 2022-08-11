@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2022-08-11T07:31:14.766Z</updated>
+  <updated>2022-08-11T07:35:28.541Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -17,23 +17,27 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
+    <title>PostgreSQL初探</title>
     <link href="https://xiaobinzhao.github.io/2022/08/11/postgreSQL/"/>
     <id>https://xiaobinzhao.github.io/2022/08/11/postgreSQL/</id>
-    <published>2022-08-11T07:31:55.920Z</published>
-    <updated>2022-08-11T07:31:14.766Z</updated>
+    <published>2022-08-11T10:40:01.000Z</published>
+    <updated>2022-08-11T07:35:28.541Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;postgreSQL&quot;&gt;&lt;a href=&quot;#postgreSQL&quot; class=&quot;headerlink&quot; title=&quot;postgreSQL&quot;&gt;&lt;/a&gt;postgreSQL&lt;/h1&gt;&lt;p&gt;PostgreSQL</summary>
-        
-      
+    <summary type="html">&lt;h1 id=&quot;postgreSQL&quot;&gt;&lt;a href=&quot;#postgreSQL&quot; class=&quot;headerlink&quot; title=&quot;postgreSQL&quot;&gt;&lt;/a&gt;postgreSQL&lt;/h1&gt;&lt;p&gt;PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。&lt;/p&gt;
+&lt;p&gt;PostgreSQL 开发者把它念作 &lt;strong&gt;post-gress-Q-L&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;PostgreSQL 的 Slogan 是 “世界上最先进的开源关系型数据库”。&lt;/p&gt;</summary>
     
     
     
+    <category term="技术积累" scheme="https://xiaobinzhao.github.io/categories/%E6%8A%80%E6%9C%AF%E7%A7%AF%E7%B4%AF/"/>
+    
+    
+    <category term="PostgreSQL" scheme="https://xiaobinzhao.github.io/tags/PostgreSQL/"/>
+    
+    <category term="psql" scheme="https://xiaobinzhao.github.io/tags/psql/"/>
+    
+    <category term="db" scheme="https://xiaobinzhao.github.io/tags/db/"/>
     
   </entry>
   
