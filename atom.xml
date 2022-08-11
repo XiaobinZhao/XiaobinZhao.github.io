@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2022-06-24T08:57:19.402Z</updated>
+  <updated>2022-08-11T07:31:14.766Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title></title>
+    <link href="https://xiaobinzhao.github.io/2022/08/11/postgreSQL/"/>
+    <id>https://xiaobinzhao.github.io/2022/08/11/postgreSQL/</id>
+    <published>2022-08-11T07:31:55.920Z</published>
+    <updated>2022-08-11T07:31:14.766Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;postgreSQL&quot;&gt;&lt;a href=&quot;#postgreSQL&quot; class=&quot;headerlink&quot; title=&quot;postgreSQL&quot;&gt;&lt;/a&gt;postgreSQL&lt;/h1&gt;&lt;p&gt;PostgreSQL</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>linux 下载deb和其依赖</title>

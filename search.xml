@@ -1004,6 +1004,122 @@
       </tags>
   </entry>
   <entry>
+    <title></title>
+    <url>/2022/08/11/postgreSQL/</url>
+    <content><![CDATA[<h1 id="postgreSQL"><a href="#postgreSQL" class="headerlink" title="postgreSQL"></a>postgreSQL</h1><p>PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。</p>
+<p>PostgreSQL 开发者把它念作 <strong>post-gress-Q-L</strong>。</p>
+<p>PostgreSQL 的 Slogan 是 “世界上最先进的开源关系型数据库”。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><ol>
+<li><p>windows安装 <a href="https://www.enterprisedb.com/downloads/postgres-postgresql-downloads">https://www.enterprisedb.com/downloads/postgres-postgresql-downloads</a></p>
+</li>
+<li><p>ubuntu/debian安装：</p>
+<ol>
+<li><code> sudo sh -c &#39;echo &quot;deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main&quot; &gt; /etc/apt/sources.list.d/pgdg.list&#39;</code></li>
+<li><code>wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc --no-check-certificate | sudo apt-key add -</code></li>
+<li><code>apt-get update</code></li>
+<li><code> apt-get install postgresql postgresql-client</code></li>
+</ol>
+</li>
+<li><p>遇到的一些问题</p>
+<p>debian9上安装的postgresql14.</p>
+<ol>
+<li><p>psql命令得到 <code>错误: 连接到套接字&quot;/var/run/postgresql/.s.PGSQL.5432&quot;上的服务器失败:拒绝连接</code></p>
+<p>psql默认使用5432端口连接，但是netstat查询发现启动的是5433端口。可修改配置文件为5432</p>
+<p><code>vim /etc/postgresql/14/main/postgresql.conf</code></p>
+</li>
+<li><p><code>psql -l -U postgres</code>得到输出：<code>psql: 错误: 连接到套接字&quot;/var/run/postgresql/.s.PGSQL.5432&quot;上的服务器失败:致命错误:  对用户&quot;postgres&quot;的对等认证失败</code>，安装的时候并没有让输入密码呀，怎么回事呢？</p>
+<p>其实是postgresql与mysql/sql server等的不同之处是：PostgreSQL默认创建了名为postgres数据库用户账户，还创建了名为postgres的Unix系统账户。</p>
+</li>
+</ol>
+</li>
+<li><p>外部链接</p>
+<ol>
+<li>修改 <code>vim /etc/postgresql/14/main/pg_hba.conf</code>,增加一条<code>host    all             all             0.0.0.0/0               md5</code></li>
+<li>修改 <code>/etc/postgresql/14/main/postgresql.conf</code>,修改 <code>listen_addresses = &#39;0.0.0.0&#39;</code></li>
+<li>重启服务</li>
+<li>注意防火墙允许相应的端口</li>
+</ol>
+</li>
+</ol>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><ol>
+<li><p>schema</p>
+<p>PostgreSQL 模式（SCHEMA）可以看着是一个<strong>表的集合</strong>。默认包含一个public的schema</p>
+<p>一个模式可以包含视图、索引、数据类型、函数和操作符等。</p>
+<p>相同的对象名称可以被用于不同的模式中而不会出现冲突，例如 schema1 和 myschema 都可以包含名为 mytable 的表。</p>
+<p>使用模式的优势：</p>
+<ul>
+<li>允许多个用户使用一个数据库并且不会互相干扰。</li>
+<li>将数据库对象组织成逻辑组以便更容易管理。</li>
+<li>第三方应用的对象可以放在独立的模式中，这样它们就不会与其他对象的名称发生冲突。</li>
+</ul>
+<p>模式类似于操作系统层的目录，但是模式不能嵌套。</p>
+</li>
+<li><p>管理员用户postgres</p>
+<p>安装完成后，PostgreSQL默认创建了名为postgres数据库用户账户，其与MySQL的root以及SQLServer的sa账户一样，是超级管理员账户，但与MySQL不一样的是，PostgreSQL还创建了名为postgres的Unix系统账户。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">root@xview:~# cat /etc/passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">... 省略</span><br><span class="line">postgres:x:113:117:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>默认数据库</p>
+<p>模板数据库就是创建新database时，PostgreSQL会基于模板数据库制作一份副本，其中会包含所有的数据库设置和数据文件。和SQLServer的master数据库一样，PostgreSQL的默认数据库是template1和template0，你可以用命令行管理工具psql来管理它，当然前提是要切换到postgres的系统账户.</p>
+<p>建库时如果不指定 TEMPLATE 属性，默认用的是 <strong>template1</strong> 模板库.</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 默认模板库为 template1</span></span><br><span class="line">postgres=# create database db1;</span><br><span class="line">CREATE DATABASE</span><br><span class="line"><span class="meta">#</span><span class="bash"> 备注：建库时如果不指定 TEMPLATE 属性，默认用的是 template1 模板库.</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 手工指定模板库</span></span><br><span class="line">postgres=# create database db2 template template0;</span><br><span class="line">CREATE DATABASE</span><br><span class="line"><span class="meta">#</span><span class="bash"> 备注：也可以指定模板库为 template0</span></span><br></pre></td></tr></table></figure>
+
+<p>template1 和 template0 的区别？</p>
+<ul>
+<li><p>template1 可以连接并创建对象，template0 不可以连接.相比 template0,template1被称为非干净数据库，而 template0被称为干净的数据库。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">postgres=# \c template1</span><br><span class="line">您现在已经连接到数据库 &quot;template1&quot;,用户 &quot;postgres&quot;.</span><br><span class="line">template1=# \c template0</span><br><span class="line">连接到套接字&quot;/var/run/postgresql/.s.PGSQL.5432&quot;上的服务器失败:致命错误:  数据库 &quot;template0&quot; 当前不接受联接</span><br><span class="line">保留上一次连接</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用 template1 模板库建库时不可指定新的 encoding 和 locale，而 template0 可以</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">postgres=# create database db3 TEMPLATE template0 ENCODING &#x27;SQL_ASCII&#x27; ;</span><br><span class="line">CREATE DATABASE</span><br><span class="line">postgres=# create database db4 TEMPLATE template1 ENCODING &#x27;SQL_ASCII&#x27; ;</span><br><span class="line">错误:  新的编码(SQL_ASCII)与模板数据库(UTF8)的编码不兼容</span><br><span class="line">提示:  在模版数据库中使用同一编码，或者使用template0作为模版.</span><br><span class="line">postgres=# create database db4 TEMPLATE template1 ENCODING &#x27;UTF8&#x27; ;</span><br><span class="line">CREATE DATABASE</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>template0 库和 template1 都不可删除</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>postgresql默认安装完成之后有用户<code>postgres</code></p>
+<h3 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h3><ol>
+<li>pgAdmin</li>
+<li><a href="https://www.beekeeperstudio.io/download/?ext=exe&arch=&type=installer&edition=community">beekeeper studio</a></li>
+</ol>
+<h3 id="psql"><a href="#psql" class="headerlink" title="psql"></a>psql</h3><ol>
+<li><p>进入数据库 </p>
+<ul>
+<li><code>sudo -i -u postgres</code>切换到postgres unix用户</li>
+<li><code>psql</code>以postgres 超管进入</li>
+</ul>
+</li>
+<li><p>postgres安装完成后，会增加2个命令：createuser、createdb</p>
+<ul>
+<li><code>createuser --superuser user1</code></li>
+<li><code>createdb -O user1  db1</code></li>
+</ul>
+</li>
+<li><p>也可以在psql命令内，创建数据库</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">postgres=# create database db1;</span><br><span class="line">CREATE DATABASE</span><br></pre></td></tr></table></figure>
+
+<p>建库时如果不指定 TEMPLATE 属性，默认用的是 template1 模板库.</p>
+</li>
+<li><p>或者使用已经创建好的用户和数据库进入</p>
+<p><code>psql -U user1-d db1</code></p>
+</li>
+<li><p>其他命令</p>
+<ul>
+<li>命令行操作的帮助<code>\?</code></li>
+<li>查看数据库列表 <code>\l</code></li>
+<li>切换到test数据库<code>\c test</code></li>
+<li>查看当前schema中所有的表<code>\d</code></li>
+<li>查看表的结构<code>\d [schema.]table</code></li>
+<li>查询结果横纵显示切换<code>\x</code></li>
+<li>执行SQL消耗时间开关<code>\timing</code></li>
+<li>查看命令历史记录<code>\s</code></li>
+<li>显示字符集<code>\encoding</code></li>
+<li>查看所有的sql关键字 <code>\h</code></li>
+</ul>
+</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
     <title>linux 下载deb和其依赖</title>
     <url>/2022/06/24/linux%E7%A7%AF%E7%B4%AF/</url>
     <content><![CDATA[<h1 id="linux-下载deb和其依赖"><a href="#linux-下载deb和其依赖" class="headerlink" title="linux 下载deb和其依赖"></a>linux 下载deb和其依赖</h1><ol>
