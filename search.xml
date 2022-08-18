@@ -1004,6 +1004,104 @@
       </tags>
   </entry>
   <entry>
+    <title></title>
+    <url>/2022/08/18/%E6%8A%93%E5%8C%85android%E5%BA%94%E7%94%A8/</url>
+    <content><![CDATA[<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">title: android应用抓包&#x2F;爬虫</span><br><span class="line">date: 2022-08-18 19:40:01</span><br><span class="line">tags:</span><br><span class="line">- 抓包</span><br><span class="line">- android抓包</span><br><span class="line">- Charles </span><br><span class="line">- android模拟器</span><br><span class="line">- 逍遥多开器</span><br><span class="line">- 逍遥模拟器</span><br><span class="line">categories:</span><br><span class="line">- 技术积累</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="android应用抓包-爬虫"><a href="#android应用抓包-爬虫" class="headerlink" title="android应用抓包/爬虫"></a>android应用抓包/爬虫</h1><p>本文采用方案为：逍遥多开器（逍遥模拟器）+ Charles + Apifox + python + Typora + 福昕高级PDF编辑器</p>
+<p>其中网络封包截取工具试用了fiddler，https 解码失败，后采用的Charles。</p>
+<a id="more"></a>
+
+<h2 id="android模拟器"><a href="#android模拟器" class="headerlink" title="android模拟器"></a>android模拟器</h2><p>为了简单获取android root权限以及操作方便，建议使用android模拟器，手机的话会有一些麻烦，本文采用的是逍遥模拟器。</p>
+<ol>
+<li><p><a href="https://download.microvirt.com/download/XYAZ-Setup.exe">下载逍遥模拟器</a></p>
+</li>
+<li><p>下载完成之后，打开逍遥多开器，并下载 <strong>安卓5.1</strong> 模拟器。我刚开始也是使用的默认自带的模拟器（安卓7.1），但是在https解码时失败：<code>Client SSL handshake failed: An unknown issue occurred processing the certificate (certificate_unknown)</code>,后来网上搜索发现有网友提供解释为：</p>
+<p>Android7.0 之后默认不信任用户添加到系统的CA证书：</p>
+<blockquote>
+<p>To provide a more consistent and more secure experience across the Android ecosystem, beginning with Android Nougat, compatible devices trust only the standardized system CAs maintained in AOSP.</p>
+</blockquote>
+<p>也就是说对基于 SDK24（Nougat是android7.0代号） 及以上的APP来说，即使你在手机上安装了抓包工具的证书也无法抓取 https 请求。</p>
+<p>有2个解决办法：</p>
+<ol>
+<li><p>使用&lt;7.0的android版本，比如android5.1</p>
+</li>
+<li><p>将抓包软件的证书安装成系统证书, 参看博客：<a href="https://blog.lv5.moe/p/solutions-to-certificate-invalidation-after-android-7">Android 7.0 之后抓包 unknown 和证书无效的解决方案 </a>；但是这个对我不生效，因为<code>/system/etc/security/cacerts/</code>目录是只读的</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\zhao_&gt; adb shell</span><br><span class="line">root@VOG<span class="literal">-AL00</span>:/ <span class="comment"># mount</span></span><br><span class="line">... 省略 ...</span><br><span class="line">/dev/block/sda6 /system ext4 ro,relatime,<span class="keyword">data</span>=ordered <span class="number">0</span> <span class="number">0</span></span><br><span class="line">... 省略 ...</span><br></pre></td></tr></table></figure>
+
+<p>注意这里的<code>ro</code>,就是read only. 所以只有第一条路可以走了。</p>
+<p>不过文章的解决办法应该可以使用的：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\zhao_&gt; adb shell</span><br><span class="line">root@VOG<span class="literal">-AL00</span>:/ <span class="comment"># cd /system/etc/security/cacerts/</span></span><br><span class="line">root@VOG<span class="literal">-AL00</span>:/system/etc/security/cacerts <span class="comment"># ls -l</span></span><br><span class="line"><span class="literal">-rw</span><span class="literal">-r</span>-<span class="literal">-r</span>-- root     root         <span class="number">4767</span> <span class="number">2022</span><span class="literal">-08</span><span class="literal">-02</span> <span class="number">13</span>:<span class="number">32</span> <span class="number">00673</span>b5b.<span class="number">0</span></span><br><span class="line"><span class="literal">-rw</span><span class="literal">-r</span>-<span class="literal">-r</span>-- root     root         <span class="number">4919</span> <span class="number">2022</span><span class="literal">-08</span><span class="literal">-02</span> <span class="number">13</span>:<span class="number">32</span> <span class="number">02</span>b73561.<span class="number">0</span></span><br><span class="line"><span class="literal">-rw</span><span class="literal">-r</span>-<span class="literal">-r</span>-- root     root         <span class="number">7142</span> <span class="number">2022</span><span class="literal">-08</span><span class="literal">-02</span> <span class="number">13</span>:<span class="number">32</span> <span class="number">03</span>f2b8cf.<span class="number">0</span></span><br><span class="line">... 省略 ...</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+</li>
+<li><p>注意</p>
+<ol>
+<li>安装目录需要留有足够空间，一个android系统需要1.3G左右，安装完成之后，总共的空间估计要到5G</li>
+<li>逍遥模拟器支持拖拽apk文件进行应用安装</li>
+</ol>
+</li>
+</ol>
+<h2 id="Charles"><a href="#Charles" class="headerlink" title="Charles"></a>Charles</h2><p>Fiddler和Charles的功能大同小异，基本上都是抓包、断点调试、请求替换、构造请求、代理功能；主要区别：Fiddler只能运行在Windows平台，而Charles是基于Java实现的，基本上可以运行在所有主流的桌面系统。</p>
+<p>Fiddler和Charles的原理都一样：中间人攻击（man-in-the-middle）。</p>
+<p>应用的正常工作是需要和服务器进行数据交互的，即：app端向服务器端去发送请求，服务器作出响应。但是我们可以在app和服务器之间塞一个中间人（proxy），这个中间人就是Charles（fiddler）。具体逻辑为：app发数据到fiddler，fiddler拿着同样的数据去发到服务器上。服务器作出响应，这个时候fiddler先给它拦截上，拦截完之后再给结果返回给app端。如下图：</p>
+<pre class="mermaid">graph TD
+   A[app]
+   A-->B[Charles/Fiddler]
+   B-->C[服务器]
+   C-->B
+   B-->A</pre>
+
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><ol>
+<li>下载： <a href="https://www.charlesproxy.com/assets/release/4.6.2/charles-proxy-4.6.2-win64.msi?k=241730e9c7%EF%BC%8Cmac%E5%92%8Clinux%E5%B9%B3%E5%8F%B0%EF%BC%8C%E8%AF%B7%E6%9F%A5%E7%9C%8B%5B%E5%AE%98%E7%BD%91%5D">https://www.charlesproxy.com/assets/release/4.6.2/charles-proxy-4.6.2-win64.msi?k=241730e9c7，mac和linux平台，请查看[官网]</a>(<a href="https://www.charlesproxy.com/latest-release/download.do">Download a Free Trial of Charles • Charles Web Debugging Proxy (charlesproxy.com)</a>)</li>
+<li>安装</li>
+<li>默认30天试用期，但是有一点很烦的是，没有注册，30分钟之后就需要重启一下，难受，所以破解一下：<a href="https://www.zzzmode.com/mytools/charles/">Charles破解工具 (zzzmode.com)</a></li>
+</ol>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>因为要抓https的包，所以要对https进行解码破解，此处使用的方法是：自签名证书。</p>
+<ol>
+<li>查看本地PC的地址，比如：10.221.101.123</li>
+<li>在中间人（Charles）安装自签名根证书：help–&gt;SSl Proxying—&gt;Install Charles Root Certificate; 安装到<code>受信任的根证书颁发机构</code></li>
+<li>在Charles添加需要抓包的站点，Proxy–&gt;SSL Proxy Settings， 勾选：Enable  SSL  Proxying,并且add 需要抓包的站点，比如：<a href="http://www.baidu.com/443">www.baidu.com/443</a>; 如果不知道该怎么添加，可以填入：*/443, 就会把所有的https都解码。</li>
+<li>在android模拟器上修改网络配置，设置代理为：主机名：10.221.101.123，端口：8888； 设置完成之后，会在Charles弹出窗口允许连接，此处点击：Allow</li>
+<li>在android模拟器上打开浏览器，输入：<code>chls.pro/ssl</code>,即可下载证书并且安装</li>
+</ol>
+<h2 id="抓包"><a href="#抓包" class="headerlink" title="抓包"></a>抓包</h2><p>说到抓包，最有名的就是tcpdump+wireshark。那么是否可以在android环境里也是用tcpdump来抓数据包，然后使用wireshark来分析呢？</p>
+<p>答案是可以的。</p>
+<h3 id="在android内使用tcpdump"><a href="#在android内使用tcpdump" class="headerlink" title="在android内使用tcpdump"></a>在android内使用tcpdump</h3><ul>
+<li>tcpdump下载。逍遥模拟器的android 5.1环境自带了tcpdump，位于：<code>/system/xbin/tcpdump</code>。如果是手机的话，需要下载专门为arm架构的版本，下载地址：<a href="https://www.androidtcpdump.com/android-tcpdump/downloads">tcpdump Binary Downloads (32 Bit) | Android tcpdump</a></li>
+<li>使用命令：<code>tcpdump -i wlan0 -s 0 -w /sdcard/xxxx.pcap</code></li>
+<li>得到抓包数据之后，可以使用wireshark打开</li>
+</ul>
+<p>但是发现，https的数据包无法解析。</p>
+<h3 id="使用Charles"><a href="#使用Charles" class="headerlink" title="使用Charles"></a>使用Charles</h3><p>上文已经提到Charles可以实现解码https的数据包。</p>
+<p>配置好android模拟器和Charles，就可以开始抓包了。</p>
+<p>重点查看右侧Contents内的数据，如果内容不对，可以参看Overview–&gt;Notes，正常情况下，没有这个字段。</p>
+<h2 id="Apifox"><a href="#Apifox" class="headerlink" title="Apifox"></a>Apifox</h2><p>抓到包之后，可以分析得到一个请求的以下参数：</p>
+<ol>
+<li>host</li>
+<li>port</li>
+<li>url(path/param)</li>
+<li>http method(post/get/put/delete)</li>
+<li>request header<ol>
+<li>Content-type</li>
+<li>authorization</li>
+</ol>
+</li>
+<li>request body</li>
+</ol>
+<p>收集到以上参数之后，就可以在apifox上构建接口文档，可以开心的导出openAPI/swagger或者团队分享等。</p>
+<h2 id="python爬虫"><a href="#python爬虫" class="headerlink" title="python爬虫"></a>python爬虫</h2><p>经过抓包和Apifox的整理，我们可以清晰的得到我们想要的数据以及接口信息。那么就可以上代码了。一般使用urllib3或者requests包，来发请求，整理数据之后，写入txt文本、word文档、excel文档等，甚至是数学分析得到一些图表。</p>
+<p>作者君是想要爬取一个考试网站的信息，并且按需要整理一些题目，然后打印出来。所以通过python代码整理数据之后，以markdown语法输出到txt文本。然后在把这txt重名为.md文件，使用typora打开</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">... 省略 ... </span><br><span class="line"><span class="bullet">1.</span> 简述毛泽东思想的科学内涵。</span><br><span class="line"><span class="bullet">   -</span> 毛泽东思想是马克思主义中国化第一次历史性飞跃的理论成果，是马克思列宁主义在中国的运用和发展，是被实践证明了的关于中国革命和建设的正确的理论原则和经验总结，是中国共产党集体智慧的结晶。其含义主要包括：第一，毛泽东思想是以马克思列宁主义原理作指导、在解决中国革命和建设实际问题中形成的理论体系，是中国化的马克思主义。第二，毛泽东思想是被实践证明了的正确的理论原则和经验总结。第三，毛泽东思想是中国共产党集体智慧的结晶，毛泽东是这个理论体系的主要创造者。</span><br><span class="line"><span class="bullet">1.</span> 简述毛泽东思想的历史地位。</span><br><span class="line"><span class="bullet">   -</span> 毛泽东思想的历史地位：毛泽东思想是中国共产党和中华民族宝贵的精神财富，它将长期指导我们的思想和行动。</span><br><span class="line"><span class="bullet">   -</span> （1）毛泽东思想是马克思主义中国化第一个重大理论成果。</span><br><span class="line"><span class="bullet">   -</span> （2）毛泽东思想是中国革命和建设的科学指南。</span><br><span class="line"><span class="bullet">   -</span> （3）毛泽东思想是中华民族宝贵的精神财富。</span><br><span class="line">... 省略 ... </span><br></pre></td></tr></table></figure>
+
+<h2 id="typora"><a href="#typora" class="headerlink" title="typora"></a>typora</h2><p>typora打开之后，看起来就比较整齐了，然后导出pdf。导出word的话格式不太好看。</p>
+<h2 id="福昕高级PDF编辑器"><a href="#福昕高级PDF编辑器" class="headerlink" title="福昕高级PDF编辑器"></a>福昕高级PDF编辑器</h2><p>导出的pdf文件使用福昕高级PDF编辑器打开，然后使用书签–&gt;选项–&gt;创建新的基于书签结构的目录页,即可 生成目录。可以使用页眉页脚等添加页码。</p>
+<p>完结，撒花~</p>
+]]></content>
+  </entry>
+  <entry>
     <title>PostgreSQL初探</title>
     <url>/2022/08/11/postgreSQL/</url>
     <content><![CDATA[<h1 id="postgreSQL"><a href="#postgreSQL" class="headerlink" title="postgreSQL"></a>postgreSQL</h1><p>PostgreSQL 是一个免费的对象-关系数据库服务器(ORDBMS)，在灵活的BSD许可证下发行。</p>

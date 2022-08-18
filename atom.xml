@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2022-08-11T07:35:28.541Z</updated>
+  <updated>2022-08-18T08:34:08.889Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title></title>
+    <link href="https://xiaobinzhao.github.io/2022/08/18/%E6%8A%93%E5%8C%85android%E5%BA%94%E7%94%A8/"/>
+    <id>https://xiaobinzhao.github.io/2022/08/18/%E6%8A%93%E5%8C%85android%E5%BA%94%E7%94%A8/</id>
+    <published>2022-08-18T08:34:39.704Z</published>
+    <updated>2022-08-18T08:34:08.889Z</updated>
+    
+    
+    <summary type="html">&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;title: android应用抓包&amp;#x2F;爬虫&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;date: 2022-08-18 19:40:01&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;tags:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- 抓包&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- android抓包&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- Charles &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- android模拟器&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- 逍遥多开器&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- 逍遥模拟器&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;categories:&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;- 技术积累&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+
+
+&lt;h1 id=&quot;android应用抓包-爬虫&quot;&gt;&lt;a href=&quot;#android应用抓包-爬虫&quot; class=&quot;headerlink&quot; title=&quot;android应用抓包/爬虫&quot;&gt;&lt;/a&gt;android应用抓包/爬虫&lt;/h1&gt;&lt;p&gt;本文采用方案为：逍遥多开器（逍遥模拟器）+ Charles + Apifox + python + Typora + 福昕高级PDF编辑器&lt;/p&gt;
+&lt;p&gt;其中网络封包截取工具试用了fiddler，https 解码失败，后采用的Charles。&lt;/p&gt;</summary>
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>PostgreSQL初探</title>
