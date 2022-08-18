@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2022-08-18T08:50:43.920Z</updated>
+  <updated>2022-08-18T09:00:32.129Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -21,11 +21,12 @@
     <link href="https://xiaobinzhao.github.io/2022/08/18/%E6%8A%93%E5%8C%85android%E5%BA%94%E7%94%A8/"/>
     <id>https://xiaobinzhao.github.io/2022/08/18/%E6%8A%93%E5%8C%85android%E5%BA%94%E7%94%A8/</id>
     <published>2022-08-18T11:40:01.000Z</published>
-    <updated>2022-08-18T08:50:43.920Z</updated>
+    <updated>2022-08-18T09:00:32.129Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;android应用抓包-爬虫&quot;&gt;&lt;a href=&quot;#android应用抓包-爬虫&quot; class=&quot;headerlink&quot; title=&quot;android应用抓包/爬虫&quot;&gt;&lt;/a&gt;android应用抓包/爬虫&lt;/h1&gt;&lt;p&gt;本文采用方案为：逍遥多开器（逍遥模拟器）+ Charles + Apifox + python + Typora + 福昕高级PDF编辑器&lt;/p&gt;
-&lt;p&gt;其中网络封包截取工具试用了fiddler，https 解码失败，后采用的Charles。&lt;/p&gt;</summary>
+&lt;p&gt;其中网络封包截取工具试用了fiddler，https 解码失败，后采用的Charles。&lt;/p&gt;
+&lt;hr&gt;</summary>
     
     
     

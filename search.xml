@@ -1008,6 +1008,7 @@
     <url>/2022/08/18/%E6%8A%93%E5%8C%85android%E5%BA%94%E7%94%A8/</url>
     <content><![CDATA[<h1 id="android应用抓包-爬虫"><a href="#android应用抓包-爬虫" class="headerlink" title="android应用抓包/爬虫"></a>android应用抓包/爬虫</h1><p>本文采用方案为：逍遥多开器（逍遥模拟器）+ Charles + Apifox + python + Typora + 福昕高级PDF编辑器</p>
 <p>其中网络封包截取工具试用了fiddler，https 解码失败，后采用的Charles。</p>
+<hr>
 <a id="more"></a>
 
 <h2 id="android模拟器"><a href="#android模拟器" class="headerlink" title="android模拟器"></a>android模拟器</h2><p>为了简单获取android root权限以及操作方便，建议使用android模拟器，手机的话会有一些麻烦，本文采用的是逍遥模拟器。</p>
