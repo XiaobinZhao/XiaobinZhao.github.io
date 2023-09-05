@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/pace-js@1/themes/blue/pace-theme-minimal.css">
+  <script src="//cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiaobinzhao.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"Valine","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="keepalive+inotify+rsync高可用同步节点间目录文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="keepalive+inotify+rsync高可用同步节点间目录文件">
+<meta property="og:url" content="https://xiaobinzhao.github.io/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/index.html">
+<meta property="og:site_name" content="路漫漫其修远兮">
+<meta property="og:description" content="keepalive+inotify+rsync高可用同步节点间目录文件">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-08-21T09:49:01.000Z">
+<meta property="article:modified_time" content="2023-09-05T09:23:33.896Z">
+<meta property="article:author" content="琢灵">
+<meta property="article:tag" content="keepalive">
+<meta property="article:tag" content="inotify">
+<meta property="article:tag" content="rsync">
+<meta property="article:tag" content="文件同步">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://xiaobinzhao.github.io/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>keepalive+inotify+rsync高可用同步节点间目录文件 | 路漫漫其修远兮</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="路漫漫其修远兮" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">路漫漫其修远兮</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">灵自天生，用心雕琢</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiaobinzhao.github.io/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my-avatar.jpg">
+      <meta itemprop="name" content="琢灵">
+      <meta itemprop="description" content="技术笔记，生活点滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="路漫漫其修远兮">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          keepalive+inotify+rsync高可用同步节点间目录文件
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-08-21 17:49:01" itemprop="dateCreated datePublished" datetime="2023-08-21T17:49:01+08:00">2023-08-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-09-05 17:23:33" itemprop="dateModified" datetime="2023-09-05T17:23:33+08:00">2023-09-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">keepalive+inotify+rsync高可用同步节点间目录文件</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="keepalive-inotify-rsync高可用同步节点间目录文件"><a href="#keepalive-inotify-rsync高可用同步节点间目录文件" class="headerlink" title="keepalive+inotify+rsync高可用同步节点间目录文件"></a>keepalive+inotify+rsync高可用同步节点间目录文件</h1><p>在高可用主备服务场景中，如何实现2个节点之间的文件同步呢？</p>
+<p>这个问题中涉及关键字<strong>文件同步</strong>，说起这个，linux世界里首选 <code>rsync</code>。有了 <code>rsync</code>，文件同步有了，但是怎么做自动同步呢？在高可用场景中怎么使用呢？带着这些问题，我们先从了解rsync开始。</p>
+<a id="more"></a>
+
+<h2 id="rsync入门"><a href="#rsync入门" class="headerlink" title="rsync入门"></a>rsync入门</h2><p>以下入门手册来自 <a target="_blank" rel="noopener" href="https://www.ruanyifeng.com/blog/2020/08/rsync.html">rsync 用法教程 - 阮一峰的网络日志 (ruanyifeng.com)</a></p>
+<h3 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h3><p>rsync 是一个常用的 Linux 应用程序，用于文件同步。</p>
+<p>它可以在本地计算机与远程计算机之间，或者两个本地目录之间同步文件（但不支持两台远程计算机之间的同步）。它也可以当作文件复制工具，替代<code>cp</code>和<code>mv</code>命令。它名称里面的<code>r</code>指的是 remote，rsync 其实就是”远程同步”（remote sync）的意思。与其他文件传输工具（如 FTP 或 scp）不同，rsync 的最大特点是会检查发送方和接收方已有的文件，仅传输有变动的部分（默认规则是文件大小或修改时间有变动）。</p>
+<h3 id="二、安装"><a href="#二、安装" class="headerlink" title="二、安装"></a>二、安装</h3><p>如果本机或者远程计算机没有安装 rsync，可以用下面的命令安装。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># Debian</span><br><span class="line">$ sudo apt-get install rsync</span><br><span class="line"></span><br><span class="line"># Red Hat</span><br><span class="line">$ sudo yum install rsync</span><br><span class="line"></span><br><span class="line"># Arch Linux</span><br><span class="line">$ sudo pacman -S rsync</span><br></pre></td></tr></table></figure>
+
+<p>注意，传输的双方都必须安装 rsync。</p>
+<h3 id="三、基本用法"><a href="#三、基本用法" class="headerlink" title="三、基本用法"></a>三、基本用法</h3><h4 id="3-1-r-参数"><a href="#3-1-r-参数" class="headerlink" title="3.1 -r 参数"></a>3.1 <code>-r</code> 参数</h4><p>本机使用 rsync 命令时，可以作为<code>cp</code>和<code>mv</code>命令的替代方法，将源目录同步到目标目录。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -r <span class="built_in">source</span> destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令中，<code>-r</code>表示递归，即包含子目录。注意，<code>-r</code>是必须的，否则 rsync 运行不会成功。<code>source</code>目录表示源目录，<code>destination</code>表示目标目录。</p>
+<p>如果有多个文件或目录需要同步，可以写成下面这样。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -r source1 source2 destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令中，<code>source1</code>、<code>source2</code>都会被同步到<code>destination</code>目录。</p>
+<h4 id="3-2-a-参数"><a href="#3-2-a-参数" class="headerlink" title="3.2 -a 参数"></a>3.2 <code>-a</code> 参数</h4><p><code>-a</code>参数可以替代<code>-r</code>，除了可以递归同步以外，还可以同步元信息（比如修改时间、权限等）。由于 rsync 默认使用文件大小和修改时间决定文件是否需要更新，所以<code>-a</code>比<code>-r</code>更有用。下面的用法才是常见的写法。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -a <span class="built_in">source</span> destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>目标目录<code>destination</code>如果不存在，rsync 会自动创建。执行上面的命令后，源目录<code>source</code>被完整地复制到了目标目录<code>destination</code>下面，即形成了<code>destination/source</code>的目录结构。</p>
+<p>如果只想同步源目录<code>source</code>里面的内容到目标目录<code>destination</code>，则需要在源目录后面加上斜杠。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -a <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令执行后，<code>source</code>目录里面的内容，就都被复制到了<code>destination</code>目录里面，并不会在<code>destination</code>下面创建一个<code>source</code>子目录。</p>
+<h4 id="3-3-n-参数"><a href="#3-3-n-参数" class="headerlink" title="3.3 -n 参数"></a>3.3 <code>-n</code> 参数</h4><p>如果不确定 rsync 执行后会产生什么结果，可以先用<code>-n</code>或<code>--dry-run</code>参数模拟执行的结果。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -anv <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令中，<code>-n</code>参数模拟命令执行的结果，并不真的执行命令。<code>-v</code>参数则是将结果输出到终端，这样就可以看到哪些内容会被同步。</p>
+<h4 id="3-4-delete-参数"><a href="#3-4-delete-参数" class="headerlink" title="3.4 --delete 参数"></a>3.4 <code>--delete</code> 参数</h4><p>默认情况下，rsync 只确保源目录的所有内容（明确排除的文件除外）都复制到目标目录。它不会使两个目录保持相同，并且不会删除文件。如果要使得目标目录成为源目录的镜像副本，则必须使用<code>--delete</code>参数，这将删除只存在于目标目录、不存在于源目录的文件。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av --delete <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令中，<code>--delete</code>参数会使得<code>destination</code>成为<code>source</code>的一个镜像。</p>
+<h3 id="四、排除文件"><a href="#四、排除文件" class="headerlink" title="四、排除文件"></a>四、排除文件</h3><h4 id="4-1-exclude-参数"><a href="#4-1-exclude-参数" class="headerlink" title="4.1 --exclude 参数"></a>4.1 <code>--exclude</code> 参数</h4><p>有时，我们希望同步时排除某些文件或目录，这时可以用<code>--exclude</code>参数指定排除模式。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av --exclude=<span class="string">&#x27;*.txt&#x27;</span> <span class="built_in">source</span>/ destination</span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">$ rsync -av --exclude <span class="string">&#x27;*.txt&#x27;</span> <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令排除了所有 TXT 文件。</p>
+<p>注意，rsync 会同步以”点”开头的隐藏文件，如果要排除隐藏文件，可以这样写<code>--exclude=&quot;.*&quot;</code>。</p>
+<p>如果要排除某个目录里面的所有文件，但不希望排除目录本身，可以写成下面这样。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av --exclude <span class="string">&#x27;dir1/*&#x27;</span> <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>多个排除模式，可以用多个<code>--exclude</code>参数。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av --exclude <span class="string">&#x27;file1.txt&#x27;</span> --exclude <span class="string">&#x27;dir1/*&#x27;</span> <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>多个排除模式也可以利用 Bash 的大扩号的扩展功能，只用一个<code>--exclude</code>参数。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av --exclude=&#123;<span class="string">&#x27;file1.txt&#x27;</span>,<span class="string">&#x27;dir1/*&#x27;</span>&#125; <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>如果排除模式很多，可以将它们写入一个文件，每个模式一行，然后用<code>--exclude-from</code>参数指定这个文件。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av --exclude-from=<span class="string">&#x27;exclude-file.txt&#x27;</span> <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="4-2-include-参数"><a href="#4-2-include-参数" class="headerlink" title="4.2 --include 参数"></a>4.2 <code>--include</code> 参数</h4><p><code>--include</code>参数用来指定必须同步的文件模式，往往与<code>--exclude</code>结合使用。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av --include=<span class="string">&quot;*.txt&quot;</span> --exclude=<span class="string">&#x27;*&#x27;</span> <span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令指定同步时，排除所有文件，但是会包括 TXT 文件。\</p>
+<h3 id="五、远程同步"><a href="#五、远程同步" class="headerlink" title="五、远程同步"></a>五、远程同步</h3><h4 id="5-1-SSH-协议"><a href="#5-1-SSH-协议" class="headerlink" title="5.1 SSH 协议"></a>5.1 SSH 协议</h4><p>rsync 除了支持本地两个目录之间的同步，也支持远程同步。它可以将本地内容，同步到远程服务器。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av <span class="built_in">source</span>/ username@remote_host:destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>也可以将远程内容同步到本地。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av username@remote_host:<span class="built_in">source</span>/ destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>rsync 默认使用 SSH 进行远程登录和数据传输。</p>
+<p>由于早期 rsync 不使用 SSH 协议，需要用<code>-e</code>参数指定协议，后来才改的。所以，下面<code>-e ssh</code>可以省略。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av -e ssh <span class="built_in">source</span>/ user@remote_host:/destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>但是，如果 ssh 命令有附加的参数，则必须使用<code>-e</code>参数指定所要执行的 SSH 命令。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av -e <span class="string">&#x27;ssh -p 2234&#x27;</span> <span class="built_in">source</span>/ user@remote_host:/destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令中，<code>-e</code>参数指定 SSH 使用2234端口。</p>
+<blockquote>
+<p><strong>特别注意</strong>：ssh协议需要输入密码，如果想自动化或者免密，需要做互信。互信步骤如下</p>
+<ul>
+<li>分别在2个节点运行 <code>ssh-keygen</code>生成公钥和秘钥</li>
+<li>分别在2个节点运行 <code>ssh-copy-id root@另一个节点地址</code>,如果出现ssh-copy-id命令找不到，可以使用<code>cat ~/.ssh/id_*.pub | ssh -p 22345  root@另一个节点地址 &#39;cat &gt;&gt; .ssh/authorized_keys&#39;</code>代替。 </li>
+</ul>
+</blockquote>
+<h4 id="5-2-rsync-协议"><a href="#5-2-rsync-协议" class="headerlink" title="5.2 rsync 协议"></a>5.2 rsync 协议</h4><p>除了使用 SSH，如果另一台服务器安装并运行了 rsync 守护程序，则也可以用<code>rsync://</code>协议（默认端口873）进行传输。具体写法是服务器与目标目录之间使用双冒号分隔<code>::</code>。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av <span class="built_in">source</span>/ 192.168.122.32::module/destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>注意，上面地址中的<code>module</code>并不是实际路径名，而是 rsync 守护程序指定的一个资源名，由管理员分配。</p>
+<p>如果想知道 rsync 守护程序分配的所有 module 列表，可以执行下面命令。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync rsync://192.168.122.32</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>rsync 协议除了使用双冒号，也可以直接用<code>rsync://</code>协议指定地址。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ rsync -av <span class="built_in">source</span>/ rsync://192.168.122.32/module/destination</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h3 id="六、配置项"><a href="#六、配置项" class="headerlink" title="六、配置项"></a>六、配置项</h3><p><code>-a</code>、<code>--archive</code>参数表示存档模式，保存所有的元数据，比如修改时间（modification time）、权限、所有者等，并且软链接也会同步过去。</p>
+<p><code>--append</code>参数指定文件接着上次中断的地方，继续传输。</p>
+<p><code>--append-verify</code>参数跟<code>--append</code>参数类似，但会对传输完成后的文件进行一次校验。如果校验失败，将重新发送整个文件。</p>
+<p><code>-b</code>、<code>--backup</code>参数指定在删除或更新目标目录已经存在的文件时，将该文件更名后进行备份，默认行为是删除。更名规则是添加由<code>--suffix</code>参数指定的文件后缀名，默认是<code>~</code>。</p>
+<p><code>--backup-dir</code>参数指定文件备份时存放的目录，比如<code>--backup-dir=/path/to/backups</code>。</p>
+<p><code>--bwlimit</code>参数指定带宽限制，默认单位是 KB/s，比如<code>--bwlimit=100</code>。</p>
+<p><code>-c</code>、<code>--checksum</code>参数改变<code>rsync</code>的校验方式。默认情况下，rsync 只检查文件的大小和最后修改日期是否发生变化，如果发生变化，就重新传输；使用这个参数以后，则通过判断文件内容的校验和，决定是否重新传输。</p>
+<p><code>--delete</code>参数删除只存在于目标目录、不存在于源目标的文件，即保证目标目录是源目标的镜像。</p>
+<p><code>-e</code>参数指定使用 SSH 协议传输数据。</p>
+<p><code>--exclude</code>参数指定排除不进行同步的文件，比如<code>--exclude=&quot;*.iso&quot;</code>。</p>
+<p><code>--exclude-from</code>参数指定一个本地文件，里面是需要排除的文件模式，每个模式一行。</p>
+<p><code>--existing</code>、<code>--ignore-non-existing</code>参数表示不同步目标目录中不存在的文件和目录。</p>
+<p><code>-h</code>参数表示以人类可读的格式输出。</p>
+<p><code>-h</code>、<code>--help</code>参数返回帮助信息。</p>
+<p><code>-i</code>参数表示输出源目录与目标目录之间文件差异的详细情况。</p>
+<p><code>--ignore-existing</code>参数表示只要该文件在目标目录中已经存在，就跳过去，不再同步这些文件。</p>
+<p><code>--include</code>参数指定同步时要包括的文件，一般与<code>--exclude</code>结合使用。</p>
+<p><code>--link-dest</code>参数指定增量备份的基准目录。</p>
+<p><code>-m</code>参数指定不同步空目录。</p>
+<p><code>--max-size</code>参数设置传输的最大文件的大小限制，比如不超过200KB（<code>--max-size=&#39;200k&#39;</code>）。</p>
+<p><code>--min-size</code>参数设置传输的最小文件的大小限制，比如不小于10KB（<code>--min-size=10k</code>）。</p>
+<p><code>-n</code>参数或<code>--dry-run</code>参数模拟将要执行的操作，而并不真的执行。配合<code>-v</code>参数使用，可以看到哪些内容会被同步过去。</p>
+<p><code>-P</code>参数是<code>--progress</code>和<code>--partial</code>这两个参数的结合。</p>
+<p><code>--partial</code>参数允许恢复中断的传输。不使用该参数时，<code>rsync</code>会删除传输到一半被打断的文件；使用该参数后，传输到一半的文件也会同步到目标目录，下次同步时再恢复中断的传输。一般需要与<code>--append</code>或<code>--append-verify</code>配合使用。</p>
+<p><code>--partial-dir</code>参数指定将传输到一半的文件保存到一个临时目录，比如<code>--partial-dir=.rsync-partial</code>。一般需要与<code>--append</code>或<code>--append-verify</code>配合使用。</p>
+<p><code>--progress</code>参数表示显示进展。</p>
+<p><code>-r</code>参数表示递归，即包含子目录。</p>
+<p><code>--remove-source-files</code>参数表示传输成功后，删除发送方的文件。</p>
+<p><code>--size-only</code>参数表示只同步大小有变化的文件，不考虑文件修改时间的差异。</p>
+<p><code>--suffix</code>参数指定文件名备份时，对文件名添加的后缀，默认是<code>~</code>。</p>
+<p><code>-u</code>、<code>--update</code>参数表示同步时跳过目标目录中修改时间更新的文件，即不同步这些有更新的时间戳的文件。</p>
+<p><code>-v</code>参数表示输出细节。<code>-vv</code>表示输出更详细的信息，<code>-vvv</code>表示输出最详细的信息。</p>
+<p><code>--version</code>参数返回 rsync 的版本。</p>
+<p><code>-z</code>参数指定同步时压缩数据。</p>
+<h2 id="keepalive-inotify-rsync方案"><a href="#keepalive-inotify-rsync方案" class="headerlink" title="keepalive+inotify+rsync方案"></a>keepalive+inotify+rsync方案</h2><p>了解以上的基本知识之后，我们明白了如何使用<code>rsync</code>在2个节点之间进行同步，但是如何实现自动同步？inotity。</p>
+<h3 id="inotify"><a href="#inotify" class="headerlink" title="inotify"></a>inotify</h3><p>inotify是Linux内核的一个文件系统事件监控机制,主要功能和用途如下:</p>
+<ol>
+<li>inotify可以监视文件系统的各种事件,如文件访问、修改、读写、删除、移动等变化。</li>
+<li>应用程序可以通过inotify提供的系统调用获取这些事件通知。</li>
+<li>常见用途包括文件变化监控、同步、自动化处理等,非常适合需要关注文件变化的程序。</li>
+<li>inotify取代了早期的dnotify机制,提供更丰富的事件类型支持。</li>
+</ol>
+<p>inotify内核已经包含了，但是还需要安装相应的包，来提供命令，调用inotify</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># Debian&#x2F;Ubuntu:</span><br><span class="line">sudo apt update</span><br><span class="line">sudo apt install inotify-tools</span><br><span class="line"></span><br><span class="line"># centos</span><br><span class="line">sudo yum install inotify-tools</span><br></pre></td></tr></table></figure>
+
+<h3 id="定制脚本"><a href="#定制脚本" class="headerlink" title="定制脚本"></a>定制脚本</h3><p>有了 inotify，那么我们就可以编写一个脚本来实现实时数据同步了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># File name: data_realtime_sync.sh</span></span><br><span class="line"><span class="comment"># File path: /opt/xview/xview-api/data_realtime_rsync.sh</span></span><br><span class="line"><span class="comment"># author: xiaobin.zhao@cstack.io</span></span><br><span class="line"><span class="comment"># date: 2023-09-01</span></span><br><span class="line"><span class="comment"># 说明：实时同步目录下文件，文件内容变更时，自动同步变更文件所在的目录。使用`inotify`监控目录路径下文件的修改、属性变更、移动、创建、删除操作</span></span><br><span class="line"><span class="comment"># 然后使用`rsync`同步文件到目标目录。注意：由于内核已经支持rsync，只需要安装inotify-tools软件包，`apt-get install inotify-tools`。</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 1. 同步协议可以有2种实现：ssh协议和rsync协议</span></span><br><span class="line"><span class="comment">#  1.1. ssh 协议</span></span><br><span class="line"><span class="comment">#  1.1.1. ssh协议可以使用 `-e` 参数也可省略,比如：rsync -avz /source -e &quot;ssh -p22345&quot; root@192.168.100.10:/destination;这里指定ssh端口为22345</span></span><br><span class="line"><span class="comment">#  1.1.2. ssh协议如果没有做节点互信，是需要输入密码的，如果需要免密，可以使用ssh-keygen生成密钥对，然后使用ssh-copy-id将公钥拷贝到目标服务器上。</span></span><br><span class="line"><span class="comment">#  1.1.3. ssh协议不需要开启rsync的守护程序和rsync配置文件，直接使用rsync命令即可。</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#  1.2. rsync 协议</span></span><br><span class="line"><span class="comment">#  1.2.1. rsync 协议使用module和配置文件来指定资源。`rsync协议`的具体写法是服务器与目标目录之间使用双冒号分隔::，</span></span><br><span class="line"><span class="comment">#         比如`rsync -av source/ 192.168.122.32::module/destination`, 这个地址中的module并不是实际路径名，而是 rsync 守护程序</span></span><br><span class="line"><span class="comment">#         指定的一个资源名，由配置文件指定。也可以直接用rsync://协议指定地址，比如：` rsync -av source/ rsync://192.168.122.32/module/destination`</span></span><br><span class="line"><span class="comment">#  1.2.2. rsync 协议服务端需要开启rsync的守护程序，可以使用`rsync --daemon`来启动守护程序。客户端不用开启。</span></span><br><span class="line"><span class="comment">#  1.2.3. rsync 协议可以指定密码文件（客户端和服务端都需要），可以使用`rsync --password-file=/path/to/passwordfile`，密码文件的权限为600</span></span><br><span class="line"><span class="comment">#  1.2.4. rsync 协议需要在目标服务器配置rsync的配置文件，可以使用`rsync --daemon --config=/etc/rsyncd.conf`来指定配置文件</span></span><br><span class="line"><span class="comment">#  1.2.5. 具体流程可以参考 https://blog.csdn.net/zd147896325/article/details/108776954</span></span><br><span class="line"><span class="comment">#                       https://www.cnblogs.com/leixixi/p/14751914.html</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># 2. 推荐使用ssh协议，配置简单一点。配置互信步骤如下</span></span><br><span class="line"><span class="comment"># 2.1. 分别在2个节点运行 `ssh-keygen`生成公钥和秘钥</span></span><br><span class="line"><span class="comment"># 2.2. 分别在2个节点运行 `ssh-copy-id root@另一个节点地址`,如果出现ssh-copy-id命令找不到，</span></span><br><span class="line"><span class="comment">#      可以使用`cat ~/.ssh/id_*.pub | ssh -p 22345  root@另一个节点地址 &#x27;cat &gt;&gt; .ssh/authorized_keys&#x27;`代替。</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 以下脚本只能在`inotify`运行时进行同步，为了防止有意外遗漏，可以增加定时任务做全量同步作为补充。</span></span><br><span class="line"><span class="comment"># 每2个小时做1次全量同步</span></span><br><span class="line"><span class="comment"># crontab -e</span></span><br><span class="line"><span class="comment"># * */2 * * * rsync -avzc -e &quot;ssh -p $&#123;ssh_port&#125;&quot; --log-file=$&#123;log_path&#125; --log-file-format=$&#123;log_fmt&#125; /var/lib/xview root@10.221.128.178:/var/lib/xview</span></span><br><span class="line"></span><br><span class="line">dest_ip=<span class="string">&quot;10.221.128.178&quot;</span></span><br><span class="line">src_dir=<span class="string">&quot;/var/lib/xview&quot;</span></span><br><span class="line">dest_dir=<span class="string">&quot;/var/lib/xview&quot;</span></span><br><span class="line">ssh_port=22345</span><br><span class="line">log_path=<span class="string">&quot;/var/log/xview/xview-rsync.log&quot;</span></span><br><span class="line">log_fmt=<span class="string">&quot;%f&quot;</span>  <span class="comment"># 输出变更时的文件</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 由于rsync同步的特性，这里必须要先cd到源目录，inotify再监听 ./ 才能rsync同步后目录结构一致</span></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;src_dir&#125;</span> || <span class="built_in">exit</span>  <span class="comment"># 目录不存在时，退出</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 递归监控目录路径下文件的修改、属性变更、移动、创建、删除，并按照格式输出：&#x27;&#123;事件&#125; &#123;路径&#125;&#123;文件名&#125;&#x27;，</span></span><br><span class="line"><span class="comment"># modify是只要有内容变更即触发，而close_write是写操作完成关闭文件时触发</span></span><br><span class="line">inotifywait -mrq -e modify,attrib,close_write,move,create,delete --format <span class="string">&#x27;%e %w%f&#x27;</span> ./ |</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> -r file;<span class="keyword">do</span>  <span class="comment"># 把监控到有发生更改的&quot;文件路径列表&quot;循环</span></span><br><span class="line"></span><br><span class="line">    INO_EVENT=$(<span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$file</span>&quot;</span> | awk <span class="string">&#x27;&#123;print $1&#125;&#x27;</span>)  <span class="comment"># 获取变更文件的事件类型</span></span><br><span class="line">    INO_FILE=$(<span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$file</span>&quot;</span>  | awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span>) <span class="comment"># 获取变更文件的绝对路径，例如`/root/syncdir/test.txt`</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> [[ <span class="variable">$INO_EVENT</span> =~ <span class="string">&#x27;CREATE&#x27;</span> ]] || [[ <span class="variable">$INO_EVENT</span> =~ <span class="string">&#x27;MODIFY&#x27;</span> ]] || [[ <span class="variable">$INO_EVENT</span> =~ <span class="string">&#x27;CLOSE_WRITE&#x27;</span> ]] ||</span><br><span class="line">    [[ <span class="variable">$INO_EVENT</span> =~ <span class="string">&#x27;MOVED_TO&#x27;</span> ]];<span class="keyword">then</span>  <span class="comment"># 创建/修改/移动文件;modify是只要有内容变更即触发，而close_write是写操作完成关闭文件时触发</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> ip <span class="keyword">in</span> <span class="variable">$&#123;dest_ip&#125;</span>;<span class="keyword">do</span></span><br><span class="line">            <span class="comment"># -a 表示同步所有文件，包括隐藏文件和其下所有子文件和文件的属性</span></span><br><span class="line">            <span class="comment"># -v 表示输出详细信息</span></span><br><span class="line">            <span class="comment"># -z 表示传输时进行压缩，</span></span><br><span class="line">            <span class="comment"># -c 表示基于文件校验和进行增量同步,而不是基于文件时间戳和大小。默认情况下,rsync判断目标文件是否需要同步是通过比较源文件和</span></span><br><span class="line">            <span class="comment"># 目标文件最后修改时间(mtime)和文件大小是否相同，但是某些情况下,文件的mtime和大小相同,但内容可能不同,</span></span><br><span class="line">            <span class="comment"># 这时就需要比较文件校验和来判断是否真正改变了文件内容。</span></span><br><span class="line">            <span class="comment"># -R 表示使用相对路径信息</span></span><br><span class="line">            rsync -avzcR -e <span class="string">&quot;ssh -p <span class="variable">$&#123;ssh_port&#125;</span>&quot;</span> --log-file=<span class="variable">$&#123;log_path&#125;</span> --log-file-format=<span class="variable">$&#123;log_fmt&#125;</span> $(dirname <span class="variable">$&#123;INO_FILE&#125;</span>) root@<span class="variable">$&#123;ip&#125;</span>:<span class="variable">$&#123;dest_dir&#125;</span></span><br><span class="line">            <span class="comment"># 上面的rsync同步命令 源是用了$(dirname $&#123;INO_FILE&#125;)变量 即每次只针对性的同步发生改变的文件的目录，而不是整个目录同步</span></span><br><span class="line">        <span class="keyword">done</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    <span class="comment"># 修改属性事件 指 touch chgrp chmod chown等操作</span></span><br><span class="line">    <span class="keyword">if</span> [[ <span class="variable">$INO_EVENT</span> =~ <span class="string">&#x27;ATTRIB&#x27;</span> ]];<span class="keyword">then</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> [ ! -d <span class="string">&quot;<span class="variable">$INO_FILE</span>&quot;</span> ];<span class="keyword">then</span>  <span class="comment"># 如果修改属性的是目录 则不同步，因为同步目录会发生递归扫描，等此目录下的文件发生同步时，rsync会顺带更新此目录</span></span><br><span class="line">            <span class="keyword">for</span> ip <span class="keyword">in</span> <span class="variable">$&#123;dest_ip&#125;</span>;<span class="keyword">do</span></span><br><span class="line">                rsync -avzcR -e <span class="string">&quot;ssh -p <span class="variable">$&#123;ssh_port&#125;</span>&quot;</span> --log-file=<span class="variable">$&#123;log_path&#125;</span> --log-file-format=<span class="variable">$&#123;log_fmt&#125;</span> $(dirname <span class="variable">$&#123;INO_FILE&#125;</span>) root@<span class="variable">$&#123;ip&#125;</span>:<span class="variable">$&#123;dest_dir&#125;</span></span><br><span class="line">            <span class="keyword">done</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    <span class="comment"># 删除、移动出事件</span></span><br><span class="line">    <span class="comment"># 如果直接同步已删除的路径$&#123;INO_FILE&#125;会报no such or directory错误 所以这里同步的源是被删文件或目录的上一级路径，</span></span><br><span class="line">    <span class="comment"># 并加上--delete来删除目标上有而源中没有的文件，这里不能做到指定文件删除，如果删除的路径越靠近根，则同步的目录越多，</span></span><br><span class="line">    <span class="comment"># 同步删除的操作就越花时间</span></span><br><span class="line">    <span class="keyword">if</span> [[ <span class="variable">$INO_EVENT</span> =~ <span class="string">&#x27;DELETE&#x27;</span> ]] || [[ <span class="variable">$INO_EVENT</span> =~ <span class="string">&#x27;MOVED_FROM&#x27;</span> ]];<span class="keyword">then</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> ip <span class="keyword">in</span> <span class="variable">$&#123;dest_ip&#125;</span>;<span class="keyword">do</span></span><br><span class="line">            rsync -avzcR --delete -e <span class="string">&quot;ssh -p <span class="variable">$&#123;ssh_port&#125;</span>&quot;</span> --log-file=<span class="variable">$&#123;log_path&#125;</span> --log-file-format=<span class="variable">$&#123;log_fmt&#125;</span>  $(dirname <span class="variable">$&#123;INO_FILE&#125;</span>) root@<span class="variable">$&#123;ip&#125;</span>:<span class="variable">$&#123;dest_dir&#125;</span></span><br><span class="line">        <span class="keyword">done</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>脚本解释</p>
+<ul>
+<li>rsync采用ssh协议，需要先进行互信（参考rsync入门）；rsync协议部署略复杂</li>
+<li>输出日志到指定目录：/var/log/xview/xview-rsync.log</li>
+<li>输出日志时带上变更的文件名：log_fmt=”%f” </li>
+<li>监听指定路径的变更事件，并按照不同的变更事件进行不同的处理<ul>
+<li>文件<strong>创建/修改/移动文件/属性变更</strong>，同步文件所在的文件夹下所有的变更</li>
+<li><strong>文件夹属性</strong>变更，跳过，等待和文件变更时一起处理</li>
+<li>文件<strong>删除/移出</strong>，同步文件所在的文件夹，并删除目标机器下多余的文件</li>
+</ul>
+</li>
+</ul>
+<h3 id="定制systemctl服务"><a href="#定制systemctl服务" class="headerlink" title="定制systemctl服务"></a>定制systemctl服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=xview-rsync daemon</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/usr/bin/nohup /opt/xview/xview-api/data_realtime_rsync.sh &amp;</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>systemctl restart/stop/start xview-rsync</code>来控制服务的启停。</p>
+<h3 id="补充定时任务"><a href="#补充定时任务" class="headerlink" title="补充定时任务"></a>补充定时任务</h3><p>脚本只能在<code>xview-rsync</code>运行时进行同步，为了防止有意外遗漏，可以增加定时任务做全量同步作为补充</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> crontab -e</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> * */2 * * * rsync -avzc -e <span class="string">&quot;ssh -p <span class="variable">$&#123;ssh_port&#125;</span>&quot;</span> --log-file=<span class="variable">$&#123;log_path&#125;</span> --log-file-format=<span class="variable">$&#123;log_fmt&#125;</span> /var/lib/xview root@10.221.128.178:/var/lib/xview</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="keepalive"><a href="#keepalive" class="headerlink" title="keepalive"></a>keepalive</h3><p>回到最初的问题：<strong>在高可用主备服务场景中，如何实现2个节点之间的文件同步呢？</strong></p>
+<p>关键词<strong>高可用</strong>。我们一般的高可用方案是keepalive，使用keepalive来控制vip在master/backup节点之间漂移，实现主备切换。那么如何在keepalive环境中配置xview-rsync呢？使用keepalive的notify-scripts.</p>
+<p>编辑keepalive的配置文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">global_defs &#123;</span><br><span class="line">    notification_email &#123;</span><br><span class="line">        root@localhost</span><br><span class="line">    &#125;</span><br><span class="line">    notification_email_from keadmin@localhost</span><br><span class="line">    smtp_server localhost</span><br><span class="line">    smtp_connect_timeout 30</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 51</span><br><span class="line">    priority 150</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass xview-ha</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        10.10.1.200/24</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">notify_master &quot;/bin/bash /opt/xview/xview-api/notify_master.sh&quot;</span><br><span class="line">notify_backup &quot;/bin/bash /opt/xview/xview-api/notify_backup.sh&quot;</span><br><span class="line">notify_fault  &quot;/bin/bash /opt/xview/xview-api/notify_backup.sh&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>notify_master.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/usr/bin/env bash</span></span><br><span class="line">echo &quot;master&quot; &gt; /opt/xview/xview-api/keepalive_status.txt</span><br><span class="line"></span><br><span class="line">systemctl restart xview-rsync.service</span><br></pre></td></tr></table></figure>
+
+<p>notify_backup.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/usr/bin/env bash</span></span><br><span class="line">echo &quot;slave&quot; &gt; /opt/xview/xview-api/keepalive_status.txt</span><br><span class="line"></span><br><span class="line">systemctl stop xview-rsync.service</span><br></pre></td></tr></table></figure>
+
+<p>只有主节点在运行xview-rsync服务，备节点服务关闭。当主节点切换时，备节点xview-sync服务启动，主节点关闭。</p>
+<p>以上</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="琢灵 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>琢灵
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://xiaobinzhao.github.io/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/" title="keepalive+inotify+rsync高可用同步节点间目录文件">https://xiaobinzhao.github.io/2023/08/21/rsync同步目录文件/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/keepalive/" rel="tag"><i class="fa fa-tag"></i> keepalive</a>
+              <a href="/tags/inotify/" rel="tag"><i class="fa fa-tag"></i> inotify</a>
+              <a href="/tags/rsync/" rel="tag"><i class="fa fa-tag"></i> rsync</a>
+              <a href="/tags/%E6%96%87%E4%BB%B6%E5%90%8C%E6%AD%A5/" rel="tag"><i class="fa fa-tag"></i> 文件同步</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/08/18/%E6%8A%93%E5%8C%85android%E5%BA%94%E7%94%A8/" rel="prev" title="android应用抓包/爬虫">
+      <i class="fa fa-chevron-left"></i> android应用抓包/爬虫
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#keepalive-inotify-rsync%E9%AB%98%E5%8F%AF%E7%94%A8%E5%90%8C%E6%AD%A5%E8%8A%82%E7%82%B9%E9%97%B4%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">keepalive+inotify+rsync高可用同步节点间目录文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#rsync%E5%85%A5%E9%97%A8"><span class="nav-number">1.1.</span> <span class="nav-text">rsync入门</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%AE%80%E4%BB%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">一、简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.2.</span> <span class="nav-text">二、安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="nav-number">1.1.3.</span> <span class="nav-text">三、基本用法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-r-%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">3.1 -r 参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-a-%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">3.2 -a 参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-n-%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">3.3 -n 参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-delete-%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.3.4.</span> <span class="nav-text">3.4 --delete 参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%8E%92%E9%99%A4%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.4.</span> <span class="nav-text">四、排除文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-exclude-%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">4.1 --exclude 参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-include-%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.4.2.</span> <span class="nav-text">4.2 --include 参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E8%BF%9C%E7%A8%8B%E5%90%8C%E6%AD%A5"><span class="nav-number">1.1.5.</span> <span class="nav-text">五、远程同步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-SSH-%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.1.5.1.</span> <span class="nav-text">5.1 SSH 协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-rsync-%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.1.5.2.</span> <span class="nav-text">5.2 rsync 协议</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E9%85%8D%E7%BD%AE%E9%A1%B9"><span class="nav-number">1.1.6.</span> <span class="nav-text">六、配置项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#keepalive-inotify-rsync%E6%96%B9%E6%A1%88"><span class="nav-number">1.2.</span> <span class="nav-text">keepalive+inotify+rsync方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#inotify"><span class="nav-number">1.2.1.</span> <span class="nav-text">inotify</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E5%88%B6%E8%84%9A%E6%9C%AC"><span class="nav-number">1.2.2.</span> <span class="nav-text">定制脚本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E5%88%B6systemctl%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.2.3.</span> <span class="nav-text">定制systemctl服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="nav-number">1.2.4.</span> <span class="nav-text">补充定时任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#keepalive"><span class="nav-number">1.2.5.</span> <span class="nav-text">keepalive</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="琢灵"
+      src="/images/my-avatar.jpg">
+  <p class="site-author-name" itemprop="name">琢灵</p>
+  <div class="site-description" itemprop="description">技术笔记，生活点滴</div>
+</div>
+
+
+   <div class="feed-link motion-element">
+     <a href="/atom.xml" rel="alternate">
+       <i class="fa fa-rss"></i>
+       RSS
+     </a>
+   </div>
+ 
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">69</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/XiaobinZhao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;XiaobinZhao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+      
+        <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+        <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+        <div class="widget-wrap">
+            <div id="myCanvasContainer" class="widget tagcloud">
+                <canvas width="250" height="250" id="resCanvas" style="width:100%">
+                    <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/169-254-169-254/" rel="tag">169.254.169.254</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Charles/" rel="tag">Charles</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ConfigDrive/" rel="tag">ConfigDrive</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Coroutine/" rel="tag">Coroutine</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastAPI/" rel="tag">FastAPI</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GoFrame/" rel="tag">GoFrame</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IO%E6%A8%A1%E5%9E%8B/" rel="tag">IO模型</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/KanBan/" rel="tag">KanBan</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Machine-Type/" rel="tag">Machine Type</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Next/" rel="tag">Next</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PostgreSQL/" rel="tag">PostgreSQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RESTful/" rel="tag">RESTful</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RMM/" rel="tag">RMM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Richardson%E6%88%90%E7%86%9F%E5%BA%A6%E6%A8%A1%E5%9E%8B/" rel="tag">Richardson成熟度模型</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ScrumBan/" rel="tag">ScrumBan</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VDI/" rel="tag">VDI</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/agile/" rel="tag">agile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android%E6%8A%93%E5%8C%85/" rel="tag">android抓包</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android%E6%A8%A1%E6%8B%9F%E5%99%A8/" rel="tag">android模拟器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cap/" rel="tag">cap</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud-init/" rel="tag">cloud-init</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudbase-init/" rel="tag">cloudbase-init</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/db/" rel="tag">db</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/deb/" rel="tag">deb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/depends/" rel="tag">depends</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etag/" rel="tag">etag</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd-lock/" rel="tag">etcd lock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcntl/" rel="tag">fcntl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gf/" rel="tag">gf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/inotify/" rel="tag">inotify</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/keepalive/" rel="tag">keepalive</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql-%E4%B9%90%E8%A7%82%E9%94%81/" rel="tag">mysql 乐观锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql-%E6%82%B2%E8%A7%82%E9%94%81/" rel="tag">mysql 悲观锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/oslo-concurrency/" rel="tag">oslo.concurrency</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/psql/" rel="tag">psql</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/qemu/" rel="tag">qemu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis-lock/" rel="tag">redis lock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rsync/" rel="tag">rsync</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scrum/" rel="tag">scrum</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spice/" rel="tag">spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vnc/" rel="tag">vnc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/yield/" rel="tag">yield</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/" rel="tag">云计算</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" rel="tag">分布式锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E7%A8%8B/" rel="tag">协程</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%90%8C%E6%AD%A5/" rel="tag">同步</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A7%E5%B0%8F%E5%86%99%E6%95%8F%E6%84%9F/" rel="tag">大小写敏感</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91/" rel="tag">并发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%82%E6%AD%A5/" rel="tag">异步</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/" rel="tag">异步编程</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%93%E5%8C%85/" rel="tag">抓包</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91/" rel="tag">敏捷开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%87%E4%BB%B6%E5%90%8C%E6%AD%A5/" rel="tag">文件同步</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%87%E4%BB%B6%E9%94%81/" rel="tag">文件锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF/" rel="tag">缓存击穿</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F/" rel="tag">缓存穿透</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" rel="tag">缓存雪崩</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" rel="tag">虚拟化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%8D%E9%81%A5%E5%A4%9A%E5%BC%80%E5%99%A8/" rel="tag">逍遥多开器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%8D%E9%81%A5%E6%A8%A1%E6%8B%9F%E5%99%A8/" rel="tag">逍遥模拟器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E6%94%B9%E9%80%A0/" rel="tag">遗留系统改造</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%94%81/" rel="tag">锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%98%BB%E5%A1%9E/" rel="tag">阻塞</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%9D%9E%E9%98%BB%E5%A1%9E/" rel="tag">非阻塞</a><span class="tag-list-count">1</span></li></ul>
+                </canvas>
+            </div>
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="http://www.beian.gov.cn/" rel="noopener" target="_blank">陕ICP备2021002750号 </a>
+      <img src="/images/beian.png" style="display: inline-block;">
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">琢灵</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+  <script src='https://unpkg.com/mermaid@8.8.4/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({});
+    }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js"></script>
+    <script defer src="//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'default',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'IhFe1C45bDBFTjSxcahEd1Lv-gzGzoHsz',
+      appKey     : 'Ljdc8IPrTgT76N2glnDMs90o',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

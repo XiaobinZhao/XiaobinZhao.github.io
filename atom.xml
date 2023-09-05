@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2022-08-18T09:00:32.129Z</updated>
+  <updated>2023-09-05T09:23:33.896Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>keepalive+inotify+rsync高可用同步节点间目录文件</title>
+    <link href="https://xiaobinzhao.github.io/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/"/>
+    <id>https://xiaobinzhao.github.io/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/</id>
+    <published>2023-08-21T09:49:01.000Z</published>
+    <updated>2023-09-05T09:23:33.896Z</updated>
+    
+    
+    <summary type="html">keepalive+inotify+rsync高可用同步节点间目录文件</summary>
+    
+    
+    
+    <category term="架构" scheme="https://xiaobinzhao.github.io/categories/%E6%9E%B6%E6%9E%84/"/>
+    
+    
+    <category term="keepalive" scheme="https://xiaobinzhao.github.io/tags/keepalive/"/>
+    
+    <category term="inotify" scheme="https://xiaobinzhao.github.io/tags/inotify/"/>
+    
+    <category term="rsync" scheme="https://xiaobinzhao.github.io/tags/rsync/"/>
+    
+    <category term="文件同步" scheme="https://xiaobinzhao.github.io/tags/%E6%96%87%E4%BB%B6%E5%90%8C%E6%AD%A5/"/>
+    
+  </entry>
   
   <entry>
     <title>android应用抓包/爬虫</title>
