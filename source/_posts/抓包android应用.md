@@ -12,13 +12,13 @@ categories:
 - 技术积累
 ---
 
-
-
 # android应用抓包/爬虫
 
 本文采用方案为：逍遥多开器（逍遥模拟器）+ Charles + Apifox + python + Typora + 福昕高级PDF编辑器
 
 其中网络封包截取工具试用了fiddler，https 解码失败，后采用的Charles。
+
+---
 
 <!-- more -->
 
