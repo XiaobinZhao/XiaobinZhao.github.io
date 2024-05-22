@@ -1,7 +1,6 @@
 ---
 title: GoFrame学习之路
 date: 2022-04-12 09:49:01
-top: true
 tags:
 - GoFrame
 - gf
