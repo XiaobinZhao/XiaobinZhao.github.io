@@ -6,7 +6,7 @@
   <link href="https://xiaobinzhao.github.io/atom.xml" rel="self"/>
   
   <link href="https://xiaobinzhao.github.io/"/>
-  <updated>2024-05-22T03:42:16.006Z</updated>
+  <updated>2024-05-22T03:57:31.061Z</updated>
   <id>https://xiaobinzhao.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://xiaobinzhao.github.io/2024/05/11/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/"/>
     <id>https://xiaobinzhao.github.io/2024/05/11/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/</id>
     <published>2024-05-11T08:49:01.000Z</published>
-    <updated>2024-05-22T03:42:16.006Z</updated>
+    <updated>2024-05-22T03:57:31.061Z</updated>
     
     
     <summary type="html">垃圾回收和python内存管理</summary>
@@ -166,7 +166,7 @@
     <link href="https://xiaobinzhao.github.io/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/"/>
     <id>https://xiaobinzhao.github.io/2022/04/12/goFrame%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF/</id>
     <published>2022-04-12T01:49:01.000Z</published>
-    <updated>2022-05-25T06:53:06.624Z</updated>
+    <updated>2024-05-22T03:57:31.075Z</updated>
     
     
     <summary type="html">&lt;p&gt;在团队中使用过Django/FastAPI/Spring，开发过或大或小的项目，并且也使用python整合了一套用于生产环境的框架。这些项目大部分都是前后端分离的，是一个提供RESTful API的web server。在go的世界里，开发web server，有很多选择，比如beego/iris/gin等，那么哪一个是一个合适的选择呢？直到我看到这片文章&lt;a href=&quot;https://goframe.org/pages/viewpage.action?pageId=3673375&quot;&gt;Golang框架选型比较: goframe, beego, iris和gin &lt;/a&gt; ，尤其这句话吸引了我：&lt;strong&gt;团队踩了一年多的坑，才发现团队确实需要一个统一的技术框架而不是一堆不成体系的轮子&lt;/strong&gt;；这句话完全就是团队现在的状态，毫不犹豫的，进入GoFrame~&lt;/p&gt;</summary>
@@ -430,6 +430,27 @@
   </entry>
   
   <entry>
+    <title>yield</title>
+    <link href="https://xiaobinzhao.github.io/2020/10/20/yiled/"/>
+    <id>https://xiaobinzhao.github.io/2020/10/20/yiled/</id>
+    <published>2020-10-20T01:49:01.000Z</published>
+    <updated>2022-05-25T02:08:41.952Z</updated>
+    
+    
+    <summary type="html">yield 解释</summary>
+    
+    
+    
+    <category term="python" scheme="https://xiaobinzhao.github.io/categories/python/"/>
+    
+    
+    <category term="python" scheme="https://xiaobinzhao.github.io/tags/python/"/>
+    
+    <category term="yield" scheme="https://xiaobinzhao.github.io/tags/yield/"/>
+    
+  </entry>
+  
+  <entry>
     <title>python异步编程</title>
     <link href="https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/"/>
     <id>https://xiaobinzhao.github.io/2020/10/20/python%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/</id>
@@ -449,27 +470,6 @@
     <category term="python" scheme="https://xiaobinzhao.github.io/tags/python/"/>
     
     <category term="异步编程" scheme="https://xiaobinzhao.github.io/tags/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>yield</title>
-    <link href="https://xiaobinzhao.github.io/2020/10/20/yiled/"/>
-    <id>https://xiaobinzhao.github.io/2020/10/20/yiled/</id>
-    <published>2020-10-20T01:49:01.000Z</published>
-    <updated>2022-05-25T02:08:41.952Z</updated>
-    
-    
-    <summary type="html">yield 解释</summary>
-    
-    
-    
-    <category term="python" scheme="https://xiaobinzhao.github.io/categories/python/"/>
-    
-    
-    <category term="python" scheme="https://xiaobinzhao.github.io/tags/python/"/>
-    
-    <category term="yield" scheme="https://xiaobinzhao.github.io/tags/yield/"/>
     
   </entry>
   
