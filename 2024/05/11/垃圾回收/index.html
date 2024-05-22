@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/pace-js@1/themes/blue/pace-theme-minimal.css">
+  <script src="//cdn.jsdelivr.net/npm/pace-js@1/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiaobinzhao.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"Valine","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="垃圾回收和python内存管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="垃圾回收">
+<meta property="og:url" content="https://xiaobinzhao.github.io/2024/05/11/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/index.html">
+<meta property="og:site_name" content="路漫漫其修远兮">
+<meta property="og:description" content="垃圾回收和python内存管理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/LLRiaS9YfFTNKib4s5vx9pwhzponISWVqAjnMkdKvoF9wVOqpaxWHhlWWUhFqkSk88M5ibhUZHHhZAqMib0Yqtv51g/640?wx_fmt=png&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:image" content="https://xiaobinzhao.github.io/2024/05/11/images/python%E5%86%85%E5%AD%98%E5%AF%B9%E8%B1%A1%E5%9B%BE.jpg">
+<meta property="og:image" content="https://xiaobinzhao.github.io/2024/05/11/images/python%E5%86%85%E5%AD%98%E6%B1%A0%E7%BB%93%E6%9E%84%E5%9B%BE.jpg">
+<meta property="article:published_time" content="2024-05-11T08:49:01.000Z">
+<meta property="article:modified_time" content="2024-05-22T03:42:16.006Z">
+<meta property="article:author" content="琢灵">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="垃圾回收">
+<meta property="article:tag" content="垃圾回收-引用计数">
+<meta property="article:tag" content="垃圾回收-标记清除">
+<meta property="article:tag" content="垃圾回收-分代回收">
+<meta property="article:tag" content="cpython内存管理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/LLRiaS9YfFTNKib4s5vx9pwhzponISWVqAjnMkdKvoF9wVOqpaxWHhlWWUhFqkSk88M5ibhUZHHhZAqMib0Yqtv51g/640?wx_fmt=png&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1">
+
+<link rel="canonical" href="https://xiaobinzhao.github.io/2024/05/11/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>垃圾回收 | 路漫漫其修远兮</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="路漫漫其修远兮" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">路漫漫其修远兮</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">灵自天生，用心雕琢</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiaobinzhao.github.io/2024/05/11/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my-avatar.jpg">
+      <meta itemprop="name" content="琢灵">
+      <meta itemprop="description" content="技术笔记，生活点滴">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="路漫漫其修远兮">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          垃圾回收
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-05-11 16:49:01" itemprop="dateCreated datePublished" datetime="2024-05-11T16:49:01+08:00">2024-05-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-22 11:42:16" itemprop="dateModified" datetime="2024-05-22T11:42:16+08:00">2024-05-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2024/05/11/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2024/05/11/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+            <div class="post-description">垃圾回收和python内存管理</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h1><p>Python的垃圾回收机制采用<strong>引用计数</strong>机制为主，<strong>标记-清除</strong>和<strong>分代回收</strong>机制为辅的策略。其中，标记-清除机制用来解决计数引用带来的循环引用而无法释放内存的问题，分代回收机制是为提升垃圾回收的效率。</p>
+<h2 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h2><p>Python通过引用计数来保存内存中的变量追踪，即记录该对象被其他使用的对象引用的次数。</p>
+<p>Python中有个内部跟踪变量叫做引用计数器，每个变量有多少个引用，简称引用计数。当某个对象的引用计数为0时，就列入了垃圾回收队列。</p>
+<p>具体来说,在以下几种情况下,一个对象的引用计数会变为0,从而<strong>触发内存释放</strong>:</p>
+<ol>
+<li><p><strong>变量重新赋值</strong> 当一个变量被重新赋值给一个新的对象时,原有对象的引用计数就会减1。如果该对象的引用计数减为0,则该对象的内存会被<em>立即释放</em>。</p>
+</li>
+<li><p><strong>函数返回</strong> 当一个函数返回时,该函数内创建的所有对象的引用计数都会减1。如果有对象的引用计数减为0,则会<em>立即释放</em>内存。</p>
+</li>
+<li><p><strong>代码块结束</strong> 当一个代码块如<code>for</code>循环、<code>with</code>语句等执行完毕时,该代码块内创建的所有对象的引用计数都会减1。如果有对象的引用计数减为0,则会<em>立即释放</em>内存。</p>
+<p><strong>显式调用del</strong> 使用<code>del</code>语句删除一个变量时,该变量指向的对象的引用计数会减1。如果引用计数减为0,则该对象的内存会被<em>立即释放</em>。</p>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a=[<span class="number">1</span>,<span class="number">2</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> sys</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.getrefcount(a)  <span class="comment">## 获取对象a的引用次数</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b=a</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.getrefcount(a)</span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">del</span> b  <span class="comment">## 删除b的引用</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.getrefcount(a)</span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>c=list()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>c.append(a) <span class="comment">## 加入到容器中</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.getrefcount(a)</span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">del</span> c  <span class="comment">## 删除容器，引用-1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.getrefcount(a)</span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b=a</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.getrefcount(a)</span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a=[<span class="number">3</span>,<span class="number">4</span>]  <span class="comment">## 重新赋值</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>sys.getrefcount(a)</span><br><span class="line"><span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：当把a作为参数传递给getrefcount时，会产生一个临时的引用，因此得出来的结果比真实情况+1</strong></p>
+</blockquote>
+<p>引用计数法有其明显的优点，如高效、实现逻辑简单、具备实时性，一旦一个对象的引用计数归零，内存就直接释放了。不用像其他机制等到特定时机。将垃圾回收随机分配到运行的阶段，处理回收内存的时间分摊到了平时，正常程序的运行比较平稳。引用计数也存在着一些缺点：</p>
+<ul>
+<li>逻辑简单，但实现有些麻烦。每个对象需要分配单独的空间来统计引用计数，这无形中加大的空间的负担，并且需要对引用计数进行维护，在维护的时候很容易会出错。</li>
+<li>在一些场景下，可能会比较慢。正常来说垃圾回收会比较平稳运行，但是当需要释放一个大的对象时，比如字典，需要对引用的所有对象循环嵌套调用，从而可能会花费比较长的时间。</li>
+<li>循环引用。这将是引用计数的致命伤，引用计数对此是无解的，因此必须要使用其它的垃圾回收算法对其进行补充。</li>
+</ul>
+<p>也就是说，Python 的垃圾回收机制，很<strong>大一部分是为了处理可能产生的循环引用</strong>，是对引用计数的补充。</p>
+<p>引用计数能够解决大多数垃圾回收的问题，但是遇到两个对象相互引用的情况，<code>del</code>语句可以减少引用次数，但是引用计数不会归0，对象也就不会被销毁，从而造成了内存泄漏问题。<strong>针对该情况，Python引入了标记-清除机制</strong>。</p>
+<h2 id="标记-清除"><a href="#标记-清除" class="headerlink" title="标记-清除"></a>标记-清除</h2><p>标记-清除用来解决引用计数机制产生的循环引用，进而导致内存泄漏的问题 。 循环引用只有在容器对象才会产生，比如字典，元组，列表等。</p>
+<p>顾名思义，该机制在进行垃圾回收时分成了两步，分别是：</p>
+<ul>
+<li>标记阶段，遍历所有的对象，如果是可达的（reachable），也就是还有对象引用它，那么就标记该对象为可达</li>
+<li>清除阶段，再次遍历对象，如果发现某个对象没有标记为可达（即为Unreachable），则就将其回收</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; a=[1,2]</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; b=[3,4]</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; sys.getrefcount(a)</span></span><br><span class="line">2</span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; sys.getrefcount(b)</span></span><br><span class="line">2</span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; a.append(b)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; sys.getrefcount(b)</span></span><br><span class="line">3</span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; b.append(a)</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; sys.getrefcount(a)</span></span><br><span class="line">3</span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; del a</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt;&gt; sys.getrefcount(b)</span></span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+
+<p>对象之间会通过引用（指针）连在一起，构成一个有向图，对象构成这个有向图的节点，而引用关系构成这个有向图的边。从root object出发，沿着有向边遍历对象，可达的（reachable）对象标记为活动对象，不可达（unreachable）的对象就是要被清除的非活动对象。所谓 root object，就是一些全局变量、调用栈、寄存器，这些对象是不可被删除的。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/LLRiaS9YfFTNKib4s5vx9pwhzponISWVqAjnMkdKvoF9wVOqpaxWHhlWWUhFqkSk88M5ibhUZHHhZAqMib0Yqtv51g/640?wx_fmt=png&tp=wxpic&wxfrom=5&wx_lazy=1&wx_co=1" alt="python-reachable"></p>
+<p>我们把小黑圈视为 root object，从小黑圈出发，对象 1 可达，那么它将被标记，对象 2、3可间接可达也会被标记，而 4 和 5 不可达，那么 1、2、3 就是活动对象，4 和 5 是非活动对象会被 GC 回收。</p>
+<p>上面描述的垃圾回收的阶段，会暂停整个应用程序，等待标记清除结束后才会恢复应用程序的运行。<strong>原因是GIL的存在，当GC运行的时候，会抢python解释器锁，其他线程处于阻塞状态，会降低python的工作效率。</strong></p>
+<p>标记清除的优点在于可以解决循环引用的问题，并且在整个算法执行的过程中没有额外的开销。缺点在于当执行标记清除时正常的程序将会被阻塞。另外一个缺点在于，标记清除算法在执行很多次数后，程序的堆空间会产生一些小的内存碎片。<strong>为了减少应用程序暂停的时间，Python 通过“分代回收”(Generational Collection)以空间换时间的方法提高垃圾回收效率。</strong></p>
+<h2 id="分代回收"><a href="#分代回收" class="headerlink" title="分代回收"></a>分代回收</h2><p>分代回收是基于这样的一个统计事实，对于程序，存在一定比例的内存块的生存周期比较短；而剩下的内存块，生存周期会比较长，甚至会从程序开始一直持续到程序结束。生存期较短对象的比例通常在 80%～90%之间。 因此，简单地认为：对象存在时间越长，越可能不是垃圾，应该越少去收集。这样在执行标记-清除算法时可以有效减小遍历的对象数，从而提高垃圾回收的速度，<strong>是一种以空间换时间的方法策略</strong>。</p>
+<p>Python将所有的对象分为年轻代（第0代）、中年代（第1代）、老年代（第2代）三代。所有的新建对象默认是 第0代对象。当在第0代的gc扫描中存活下来的对象将被移至第1代，在第1代的gc扫描中存活下来的对象将被移至第2代。</p>
+<blockquote>
+<p>gc扫描次数（第0代&gt;第1代&gt;第2代）</p>
+</blockquote>
+<p>当某一代中被分配的对象与被释放的对象之差达到某一阈值时，就会触发当前一代的gc扫描。当某一代被扫描时，比它年轻的一代也会被扫描，因此，第2代的gc扫描发生时，第0，1代的gc扫描也会发生，即为全代扫描。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; import gc </span><br><span class="line">&gt;&gt;&gt; gc.get_threshold() ## 分代回收机制的参数阈值设置</span><br><span class="line">(700, 10, 10)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>700=新分配的对象数量-释放的对象数量，第0代gc扫描被触发</li>
+<li>第一个10：第0代gc扫描发生10次，则第1代的gc扫描被触发</li>
+<li>第二个10：第1代的gc扫描发生10次，则第2代的gc扫描被触发</li>
+</ul>
+<h2 id="GC触发"><a href="#GC触发" class="headerlink" title="GC触发"></a>GC触发</h2><ol>
+<li><p>主动调用gc.collect()</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pip install objgraph</span></span><br><span class="line"><span class="comment"># objgraph.count(&quot;Person&quot;) # 计算垃圾收集器跟踪的具有给定类名的对象的数量。</span></span><br><span class="line"><span class="keyword">import</span> objgraph</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dog</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p = Person()</span><br><span class="line">d = Dog()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 手动制造循环引用，在这种情况下引用计数器机制无法处理释放</span></span><br><span class="line">p.pet = d</span><br><span class="line">d.master = p</span><br><span class="line"></span><br><span class="line"><span class="comment"># 垃圾回收机制默认是开启的，但是当前达不到触发条件</span></span><br><span class="line"><span class="keyword">del</span> p</span><br><span class="line"><span class="keyword">del</span> d</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印当前垃圾回收器里，由Person类、Dog类所产生的对象有多少个</span></span><br><span class="line">print(objgraph.count(<span class="string">&quot;Person&quot;</span>))  <span class="comment"># 1</span></span><br><span class="line">print(objgraph.count(<span class="string">&quot;Dog&quot;</span>))  <span class="comment"># 1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 手动触发垃圾回收</span></span><br><span class="line"><span class="keyword">import</span> gc</span><br><span class="line"></span><br><span class="line">gc.disable()  <span class="comment"># 手动触发垃圾回收是无关垃圾回收机制是否开启的</span></span><br><span class="line">gc.collect()  <span class="comment"># 无参数则代表收集0代1代和2代所有的垃圾</span></span><br><span class="line">print(objgraph.count(<span class="string">&quot;Person&quot;</span>))  <span class="comment"># 0</span></span><br><span class="line">print(objgraph.count(<span class="string">&quot;Dog&quot;</span>))  <span class="comment"># 0</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>GC达到阈值时自动触发</p>
+<ol>
+<li>开启垃圾回收机制：<code>gc.enable()</code> 开启垃圾回收机制（默认开启）<ol>
+<li><code>gc.disable()</code>：关闭垃圾回收机制</li>
+<li><code>gc.isenabled()</code>：判定是否开启</li>
+</ol>
+</li>
+<li>达到了垃圾回收的阈值，参考上一节</li>
+</ol>
+</li>
+<li><p>程序退出时（一次性全部退出）</p>
+</li>
+</ol>
+<h2 id="到底什么时候释放内存"><a href="#到底什么时候释放内存" class="headerlink" title="到底什么时候释放内存"></a>到底什么时候释放内存</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://bloomberg.github.io/memray/python_allocators.html">Python 分配器 - memray — Python allocators - memray (bloomberg.github.io)</a></li>
+<li><a target="_blank" rel="noopener" href="https://hai-shi.gitbook.io/cpython-internals/10-memory-management/10.3-the-cpython-memory-allocator">10.3 CPython 内存分配器 | CPython 实现原理 (gitbook.io)</a></li>
+<li><a target="_blank" rel="noopener" href="https://nodefe.com/implement-of-pymalloc-from-source/">pymalloc — 从源码看 Python 对象分配器的实现 | Zee’s Book (nodefe.com)</a></li>
+</ul>
+<p>上文提到<strong>引用计数为0，立即释放内存</strong>，其实是不准确的。</p>
+<p>当一个对象的引用计数变为0时，Python就会调用它的析构函数。调用析构函数并不意味着最终一定会调用free来释放内存空间，如果真是这样的话，那频繁地申请、释放内存空间会使Python的执行效率大打折扣。因此在析构时也采用了内存池机制，从内存池申请到的内存会被归还到内存池中，以避免频繁地申请和释放动作。</p>
+<p>那么内存池是什么？</p>
+<h3 id="python内存池"><a href="#python内存池" class="headerlink" title="python内存池"></a>python内存池</h3><h4 id="为什么要引入内存池（why）"><a href="#为什么要引入内存池（why）" class="headerlink" title="为什么要引入内存池（why）"></a>为什么要引入内存池（why）</h4><p>既然 CPython 的底层用 C 语言实现，那为何不直接使用标准库中的<code>malloc/realloc/free</code>等函数进行内存管理呢？这是因为，当 Python 应用频繁地创建和销毁一些小的对象，那么底层就要多次重复调用 malloc 和 free 等函数进行内存分配。这不仅会引入较大的系统开销，而且还可能产生大量的内存碎片。为了解决这个问题，Python 实现了一个类似内存池的机制—pymalloc 来满足较小对象（默认256KB以下）的内存请求。</p>
+<h4 id="内存池是如何工作的（how）"><a href="#内存池是如何工作的（how）" class="headerlink" title="内存池是如何工作的（how）"></a>内存池是如何工作的（how）</h4><p>简单地说，allocator 预先向系统申请一定数量的内存空间并格式化，每当有满足条件的内存请求时，allocator 直接从这些格式化的内存中选择一块满足条件的分配给这个需求。如果预先申请的内存已经耗尽，那么 allocator 会再向系统申请更多的内存并格式化（前提是不能超过预先设置的内存池最大容量），然后分配内存。当对象被回收时，如果所占内存之前由 allocator 从内存池分配，那么回收的内存同样被归还给内存池，以供下次内存请求使用。如果应用的内存需求大于 pymalloc 设置的阈值，那么解释器再将这个请求交给底层的 C 函数来实现。</p>
+<p>综上，Python 的内存管理是分层的，不同的层次使用不同的内存分配机制。我们先来看下 CPython 的内存架构图：</p>
+<p><img src="../images/python%E5%86%85%E5%AD%98%E5%AF%B9%E8%B1%A1%E5%9B%BE.jpg" alt="cpython内存对象图"></p>
+<p>python的对象管理主要位于Level+1~Level+3层</p>
+<ul>
+<li><p>第<code>-1</code>层，第<code>-2</code>层：由操作系统特定的虚拟内存管理器控制（OS-specific virtual memory manger(VMM)）</p>
+<ul>
+<li>（第<code> -1</code>层）：内核动态存储分配和管理</li>
+<li>（第<code>-2</code>层）：物理内存（ROM / RAM） + 二级存储<ul>
+<li>ROM（只读存储器，Read-Only Memory）：用于存储计算机或其他电子设备的固件和固定数据的存储设备。常用于存储计算机的引导程序（BIOS）。与RAM不同，ROM中的数据通常无法被修改。</li>
+<li>RAM（随机访问存储器，Random Access Memory）：用于存储正在运行的程序和数据的临时内存存储设备。常用于计算机快速读取和写入数据。RAM是易失性的，断电时数据会丢失。</li>
+<li>二级存储（交换，Secondary Storage）：指非易失性的大容量存储设备，如硬盘驱动器（HDD）或固态驱动器（SSD）。它用于长期存储数据、文件和操作系统。与RAM不同，二级存储的数据在断电时不会丢失。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>第<code>0</code>层：由C标准库中底层分配器（underlying general-purpose allocator）的malloc、free进行内存分配和内存释放；</p>
+</li>
+<li><p>第<code>+1</code>层：当申请的内存 &gt;256KB(可设置) 时，内存分配由 Python 原生的内存分配器（raw memory allocator）进行分配，本质上是调用C标准库中的malloc、realloc等函数。</p>
+</li>
+<li><p>第<code>+2</code>层：当申请的内存 &lt;256KB(可设置) 时，内存分配由 Python 对象分配器（object allocator）实施。</p>
+</li>
+<li><p>第<code>+3</code>层：用户使用对象的直接操作层。特点：对于python内置对象（如：int、dict、list、string等），每个数据类型都有独立的私有内存池，对象之间的内存池不共享。如：int释放的内存，不会被分配给float使用。</p>
+</li>
+</ul>
+<h4 id="内存池的数据结构"><a href="#内存池的数据结构" class="headerlink" title="内存池的数据结构"></a>内存池的数据结构</h4><p>pymalloc 把“内存池”主要抽象成用3种数据结构表示： arena， pool 和 block。其中一个 arena 包含若干个pool，每个 pool 又由若干个大小相等的 block 组成。每当应用申请一个对象，allocator 将一个满足对象大小的 block 从它所在的 pool 上“摘下”分配给它，并在对应的 pool 中标记该 block 已分配。当对象被销除时，该 block 将归还给相应的 pool。</p>
+<p> 3种数据结构的关系如下图所示：</p>
+<p><img src="../images/python%E5%86%85%E5%AD%98%E6%B1%A0%E7%BB%93%E6%9E%84%E5%9B%BE.jpg" alt="python内存池结构图"></p>
+<p>为了更好的解释这种情况，我们来做个类比：你可以想象有一个 CPython 足球俱乐部的主场体育场。为了帮助管理人群，CPython 足球俱乐部实现了一个系统，这个系统将体育场分为 A 至 E 区，每个区都有 1 至 40 排的座位：</p>
+<p>在体育场前端，第 1 至 10 排是较宽敞的高级座位，每排有 80 个座位。在体育场后端，第 31 至 40 排是经济舱座位，每排有 150 个座位。</p>
+<p>Python 内存分配算法也具有类似的特点：</p>
+<ul>
+<li>就像体育场有座位一样，<code>pymalloc</code> 算法中也有 <strong>block</strong>；</li>
+<li>就像座位可以是高级、普通和经济型，这些内存块也都是一系列固定大小的。你不能带上自己的躺椅；</li>
+<li>就像同样大小的座位被排成一排一样，也需要将同样大小的内存块放入 <strong>pool</strong> 中。</li>
+</ul>
+<p>核心存储单元会记录 block 存储的位置和在 pool 中可用的 block 数量，这与体育场分配座位类似。当体育场一排满员后，就将使用下一排。当一个 pool 的 block 达到最大时，就会使用下一个 pool。而 pool 被分组存储在 <strong>arena</strong> 中，就像体育场会将数排座位分配到几个片区一样。</p>
+<p>这种策略有以下几种优点：</p>
+<ol>
+<li>这种算法在 CPython 的主要应用场景（小内存且生命周期较短的对象）下有更好的性能；有助于减少频繁的内存分配和释放带来的性能开销；</li>
+<li>这种算法使用了 GIL 而不是系统的线程锁检测；</li>
+<li>算法使用内存映射（<code>mmap()</code>）而不是堆上内存分配。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>可能导致内存泄漏，因为不再使用的内存块不会立即被操作系统回收。因此，开发者应避免长期保留对不再使用的对象的引用，以避免内存泄漏。</li>
+</ol>
+<p>综上，我们做一下汇总：</p>
+<ol>
+<li>CPython是基于 C 构建的，它也受到 C 中静态内存分配、自动内存分配和动态内存分配的约束。</li>
+<li>Python 是一门动态类型的语言，CPython 十分依赖动态内存分配，同时借助垃圾回收（GC）和引用计数算法去保证分配的内存可以自动释放。Python 对象的内存是通过一个统一 API 自动分配得到的，并不需要 Python 开发者自己去分配内存。这种设计也意味着 CPython 的标准库和核心模块都要使用该 API 去分配内存。</li>
+<li>python中大的内存占用（&gt;256）内存分配由 Python 原生的内存分配器分配，本质上是调用C标准库中的malloc、realloc等函数</li>
+<li>python中小的内存占用（&lt;256）内存分配由 Python 对象分配器pymalloc分配</li>
+<li>pymalloc分配时，采用arena， pool 和 block的数据结构设计，减少内存碎片，避免频繁内存申请和销毁操作</li>
+<li>对于引用计数归为0的引用对象，内存释放是指：内存放回内存池，也就是被内存池标记为已释放</li>
+<li>对于循环引用之后被标记为不可达对象的，在分代回收阈值到达之后，被垃圾回收放回内存池，标记为已释放</li>
+<li>内存池会复用标记为已释放的内存块以减少内存分配开销。这意味着相同大小的内存块可以多次分配和释放，而不需要每次都与操作系统进行交互。</li>
+</ol>
+<h2 id="内存优化"><a href="#内存优化" class="headerlink" title="内存优化"></a>内存优化</h2><ol>
+<li>降低全局变量的使用率：全局变量会一直存在到程序结束，因此会始终占用内存。若非必要，请尽可能地使用局部变量，并在不需要时尽快将其释放。</li>
+<li>避免创建非必要的对象：在Python中，创建对象是分配内存的一种方式。因此，尽量避免创建不必要的对象，并通过复用对象的方式来减少内存分配的次数。</li>
+<li>手动释放非必要的对象：采用gc.collect()进行手动强制执行垃圾回收，用来在内存敏感时（例如：内存不足）立即释放不再需要的内存。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="琢灵 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>琢灵
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://xiaobinzhao.github.io/2024/05/11/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/" title="垃圾回收">https://xiaobinzhao.github.io/2024/05/11/垃圾回收/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+              <a href="/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/" rel="tag"><i class="fa fa-tag"></i> 垃圾回收</a>
+              <a href="/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6-%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0/" rel="tag"><i class="fa fa-tag"></i> 垃圾回收-引用计数</a>
+              <a href="/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6-%E6%A0%87%E8%AE%B0%E6%B8%85%E9%99%A4/" rel="tag"><i class="fa fa-tag"></i> 垃圾回收-标记清除</a>
+              <a href="/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6-%E5%88%86%E4%BB%A3%E5%9B%9E%E6%94%B6/" rel="tag"><i class="fa fa-tag"></i> 垃圾回收-分代回收</a>
+              <a href="/tags/cpython%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> cpython内存管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/08/21/rsync%E5%90%8C%E6%AD%A5%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6/" rel="prev" title="keepalive+inotify+rsync高可用同步节点间目录文件">
+      <i class="fa fa-chevron-left"></i> keepalive+inotify+rsync高可用同步节点间目录文件
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6"><span class="nav-number">1.</span> <span class="nav-text">垃圾回收</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0"><span class="nav-number">1.1.</span> <span class="nav-text">引用计数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%87%E8%AE%B0-%E6%B8%85%E9%99%A4"><span class="nav-number">1.2.</span> <span class="nav-text">标记-清除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E4%BB%A3%E5%9B%9E%E6%94%B6"><span class="nav-number">1.3.</span> <span class="nav-text">分代回收</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GC%E8%A7%A6%E5%8F%91"><span class="nav-number">1.4.</span> <span class="nav-text">GC触发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%B0%E5%BA%95%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E9%87%8A%E6%94%BE%E5%86%85%E5%AD%98"><span class="nav-number">1.5.</span> <span class="nav-text">到底什么时候释放内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#python%E5%86%85%E5%AD%98%E6%B1%A0"><span class="nav-number">1.5.1.</span> <span class="nav-text">python内存池</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%BC%95%E5%85%A5%E5%86%85%E5%AD%98%E6%B1%A0%EF%BC%88why%EF%BC%89"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">为什么要引入内存池（why）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B1%A0%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84%EF%BC%88how%EF%BC%89"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">内存池是如何工作的（how）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B1%A0%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.5.1.3.</span> <span class="nav-text">内存池的数据结构</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96"><span class="nav-number">1.6.</span> <span class="nav-text">内存优化</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="琢灵"
+      src="/images/my-avatar.jpg">
+  <p class="site-author-name" itemprop="name">琢灵</p>
+  <div class="site-description" itemprop="description">技术笔记，生活点滴</div>
+</div>
+
+
+   <div class="feed-link motion-element">
+     <a href="/atom.xml" rel="alternate">
+       <i class="fa fa-rss"></i>
+       RSS
+     </a>
+   </div>
+ 
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">74</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/XiaobinZhao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;XiaobinZhao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+      
+        <script type="text/javascript" charset="utf-8" src="/js/tagcloud.js"></script>
+        <script type="text/javascript" charset="utf-8" src="/js/tagcanvas.js"></script>
+        <div class="widget-wrap">
+            <div id="myCanvasContainer" class="widget tagcloud">
+                <canvas width="250" height="250" id="resCanvas" style="width:100%">
+                    <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/169-254-169-254/" rel="tag">169.254.169.254</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Charles/" rel="tag">Charles</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ConfigDrive/" rel="tag">ConfigDrive</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Coroutine/" rel="tag">Coroutine</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/FastAPI/" rel="tag">FastAPI</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GoFrame/" rel="tag">GoFrame</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/IO%E6%A8%A1%E5%9E%8B/" rel="tag">IO模型</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/KanBan/" rel="tag">KanBan</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Machine-Type/" rel="tag">Machine Type</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Next/" rel="tag">Next</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PostgreSQL/" rel="tag">PostgreSQL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RESTful/" rel="tag">RESTful</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RMM/" rel="tag">RMM</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Richardson%E6%88%90%E7%86%9F%E5%BA%A6%E6%A8%A1%E5%9E%8B/" rel="tag">Richardson成熟度模型</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ScrumBan/" rel="tag">ScrumBan</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VDI/" rel="tag">VDI</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/agile/" rel="tag">agile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android%E6%8A%93%E5%8C%85/" rel="tag">android抓包</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android%E6%A8%A1%E6%8B%9F%E5%99%A8/" rel="tag">android模拟器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cap/" rel="tag">cap</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloud-init/" rel="tag">cloud-init</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cloudbase-init/" rel="tag">cloudbase-init</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/cpython%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">cpython内存管理</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/db/" rel="tag">db</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/deb/" rel="tag">deb</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/depends/" rel="tag">depends</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etag/" rel="tag">etag</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd-lock/" rel="tag">etcd lock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fcntl/" rel="tag">fcntl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gf/" rel="tag">gf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/inotify/" rel="tag">inotify</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/keepalive/" rel="tag">keepalive</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql-%E4%B9%90%E8%A7%82%E9%94%81/" rel="tag">mysql 乐观锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql-%E6%82%B2%E8%A7%82%E9%94%81/" rel="tag">mysql 悲观锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/oslo-concurrency/" rel="tag">oslo.concurrency</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/psql/" rel="tag">psql</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/qemu/" rel="tag">qemu</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis-lock/" rel="tag">redis lock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/rsync/" rel="tag">rsync</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scrum/" rel="tag">scrum</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/spice/" rel="tag">spice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vnc/" rel="tag">vnc</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/yield/" rel="tag">yield</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/" rel="tag">云计算</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" rel="tag">分布式锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8D%8F%E7%A8%8B/" rel="tag">协程</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%90%8C%E6%AD%A5/" rel="tag">同步</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/" rel="tag">垃圾回收</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6-%E5%88%86%E4%BB%A3%E5%9B%9E%E6%94%B6/" rel="tag">垃圾回收-分代回收</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6-%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0/" rel="tag">垃圾回收-引用计数</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6-%E6%A0%87%E8%AE%B0%E6%B8%85%E9%99%A4/" rel="tag">垃圾回收-标记清除</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A7%E5%B0%8F%E5%86%99%E6%95%8F%E6%84%9F/" rel="tag">大小写敏感</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91/" rel="tag">并发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%82%E6%AD%A5/" rel="tag">异步</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/" rel="tag">异步编程</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8A%93%E5%8C%85/" rel="tag">抓包</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%8F%E6%8D%B7%E5%BC%80%E5%8F%91/" rel="tag">敏捷开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%87%E4%BB%B6%E5%90%8C%E6%AD%A5/" rel="tag">文件同步</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%87%E4%BB%B6%E9%94%81/" rel="tag">文件锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF/" rel="tag">缓存击穿</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F/" rel="tag">缓存穿透</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/" rel="tag">缓存雪崩</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E5%8C%96/" rel="tag">虚拟化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%8D%E9%81%A5%E5%A4%9A%E5%BC%80%E5%99%A8/" rel="tag">逍遥多开器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%8D%E9%81%A5%E6%A8%A1%E6%8B%9F%E5%99%A8/" rel="tag">逍遥模拟器</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%81%97%E7%95%99%E7%B3%BB%E7%BB%9F%E6%94%B9%E9%80%A0/" rel="tag">遗留系统改造</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%94%81/" rel="tag">锁</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%98%BB%E5%A1%9E/" rel="tag">阻塞</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%9D%9E%E9%98%BB%E5%A1%9E/" rel="tag">非阻塞</a><span class="tag-list-count">1</span></li></ul>
+                </canvas>
+            </div>
+        </div>
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian"><a href="http://www.beian.gov.cn/" rel="noopener" target="_blank">陕ICP备2021002750号 </a>
+      <img src="/images/beian.png" style="display: inline-block;">
+  </div>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">琢灵</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+
+  <script src='https://unpkg.com/mermaid@8.8.4/dist/mermaid.min.js'></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({});
+    }
+  </script>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+  <script defer src="//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three.min.js"></script>
+    <script defer src="//cdn.jsdelivr.net/gh/theme-next/theme-next-three@1/three-waves.min.js"></script>
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'default',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/valine@1/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'IhFe1C45bDBFTjSxcahEd1Lv-gzGzoHsz',
+      appKey     : 'Ljdc8IPrTgT76N2glnDMs90o',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
